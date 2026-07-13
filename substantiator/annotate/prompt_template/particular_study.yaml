@@ -1,0 +1,17 @@
+latest: |
+  # Task: Determine if the target claim includes a reference to the study itself. Find the reference first, if there is any, and then answer with Yes or No, in the same format as the examples.
+
+  # Instruction:
+  The task is to determine whether the target claim is explicitly portrayed as a fact that the current study conducted by the authors tells us. Such references could include, but are not limited to:
+  * the authors, e.g. "we", "our"
+  * the research findings or outcomes, e.g. "the finding", "the proposed method"
+  * experimental results, e.g. "the experiment results", "the table shows"
+  * direct reference to the study, e.g. "study 2", "(the third experiment)"
+  * elements of the paper, e.g. "Table 1", "Figure 5", "Section 3", "top 5 rows of Table 1"
+
+  # Target Claim:
+  Claim: {get_target_sent_label}
+
+  Determine if the target claim includes a reference to the study itself. Find the reference first (no more than 3 words), if there is any, and then answer with Yes or No, in the format as below.
+  Reference: <reference to the study from the target claim>
+  Answer: Yes/No

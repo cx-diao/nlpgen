@@ -1,0 +1,16 @@
+# Core dependencies
+pandas>=2.0.0
+tqdm>=4.65.0
+loguru>=0.7.3
+
+# LLM runtime. vLLM 0.10.2 is required by rag/llm/vllm.py's internal APIs.
+torch
+vllm==0.10.2
+transformers>=4.55.2,<5
+huggingface-hub
+
+# Alternate backends imported by annotate_paper_batch.py
+ollama>=0.1.0
+
+# NLP processing
+spacy>=3.0.0

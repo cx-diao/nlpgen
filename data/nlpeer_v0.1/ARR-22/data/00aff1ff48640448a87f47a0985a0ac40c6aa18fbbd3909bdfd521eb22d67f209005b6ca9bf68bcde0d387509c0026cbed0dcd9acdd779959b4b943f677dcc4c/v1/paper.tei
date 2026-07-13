@@ -1,0 +1,2738 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.com/kermitt2/grobid/master/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">What kind of company do words keep? Revisiting the distributional semantics of J.R. Firth &amp; Zellig Harris</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<title level="a" type="main">What kind of company do words keep? Revisiting the distributional semantics of J.R. Firth &amp; Zellig Harris</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date/>
+						</imprint>
+					</monogr>
+					<idno type="MD5">6CDEDDDF07FFDDD856F332AB35EE93C6</idno>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<encodingDesc>
+			<appInfo>
+				<application version="0.7.1-SNAPSHOT" ident="GROBID" when="2023-04-04T15:43+0000">
+					<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>
+					<ref target="https://github.com/kermitt2/grobid"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<profileDesc>
+			<abstract>
+<div xmlns="http://www.tei-c.org/ns/1.0"><p>The power of word embeddings is attributed to the linguistic theory that similar words will appear in similar contexts. This idea is specifically invoked by noting that "words will be known by the company they keep," a quote from British linguist J.R. Firth who, along with his American colleague Zellig Harris, is often credited with the invention of "distributional semantics." While both Firth and Harris are cited in all major NLP textbooks and many foundational papers, the content and differences between their theories is seldom discussed. Engaging in a close reading with their work, we discover two distinct and in many ways divergent theories of meaning. One is "introverted," focused on the internal workings of language, while the other is "extroverted" and invites us to consider words in new company, not just with other linguistic elements but also in a broader cultural context. Contrasting these theories from the perspective of current debates in NLP, we discover in Firth a figure who could guide the field towards a more culturally grounded notion of semantics. We consider how an expanded notion of "context" might be modeled in practice through two different strategies: comparative stratification and syntagmatic extension.</p></div>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>We are in the world and the world is in us.</p><p>Alfred North <ref type="bibr">Whitehead (1968, 165;</ref><ref type="bibr">cited in Firth 1957b, 29)</ref> If you have read any papers in computational linguistics in the past thirty years, it is likely that you have come upon the following quote from British linguist J.R.Firth: "words shall be known by the company they keep." Cited in most major textbooks <ref type="bibr" target="#b30">(Eisenstein, 2019;</ref><ref type="bibr" target="#b64">Jurafsky and Martin, 2021;</ref><ref type="bibr" target="#b102">Russell and Norvig, 2020;</ref><ref type="bibr" target="#b83">Manning and Schütze, 1999)</ref>, several foundational papers, and hundreds of other NLP articles, these words have come to index a theoretical orientation in a field that is increasingly focused on computation, often at the expense of linguistic theory (on these trends in NLP see <ref type="bibr" target="#b20">Church and Liberman, 2021;</ref><ref type="bibr" target="#b49">Halevy et al., 2009;</ref><ref type="bibr" target="#b60">Henderson, 2020;</ref><ref type="bibr" target="#b82">Manning, 2015;</ref><ref type="bibr" target="#b91">Norvig, 2012)</ref>. Together with American linguist Zellig Harris, Firth is often called upon to justify a distributional theory of semantics, where the meaning of different lexical units is conceived in terms of relative co-occurrence and shared contexts <ref type="bibr" target="#b105">(Sahlgren, 2008)</ref>.</p><p>While Harris and Firth are often invoked, their ideas are seldom closely engaged. Hailing from very disparate traditions, Harris and Firth had radically different ideas on the scope and context of linguistic analysis and probably would not have agreed even on the question of distributional semantics. Extending on the information theory of Claude <ref type="bibr" target="#b111">Shannon (1948)</ref>, Harris was determined to work out a structuralist theory of language in terms of mathematical information <ref type="bibr" target="#b80">(Léon, 2011;</ref><ref type="bibr" target="#b89">Nevin, 1993)</ref>. Firth, on the other hand, came to linguistics through anthropology and borrowed heavily from pragmatic philosophies of language. For him <ref type="bibr">(1957b)</ref>, linguistic analysis always started with the "context of situation" and necessarily accounted for non-verbal actors and objects.</p><p>Considering the definition and extent of linguistic context is important for many reasons, as a spate of recent publications suggests <ref type="bibr" target="#b7">(Bisk et al., 2020;</ref><ref type="bibr" target="#b5">Bender and Koller, 2020;</ref><ref type="bibr">Trott et al., 2020;</ref><ref type="bibr" target="#b114">Tamari et al., 2020;</ref><ref type="bibr" target="#b61">Hovy, 2018)</ref>. First of all, it touches upon the limits of current paradigms in NLP, where corpus linguistics is perfected through increasingly complex models trained on increasingly massive corpora <ref type="bibr" target="#b4">(Bender et al., 2021)</ref>. This approach may advance the identification of linguistic form, but might ultimately have little to say about the relation of meaning to the social world <ref type="bibr" target="#b5">(Bender and Koller, 2020;</ref><ref type="bibr" target="#b7">Bisk et al., 2020)</ref>. Secondly, even with more modest ambitions, several NLP applications-e.g. with spatial <ref type="bibr">(McKenzie and Adams, 2021)</ref> or historical <ref type="bibr" target="#b67">(Kutuzov et al., 2018)</ref> data-require that linguistic patterns are related to other types of structure. Thirdly, from the perspective of sociocultural research, meaning intrinsically varies as language is used in different settings and indexed to different social categories <ref type="bibr" target="#b68">(Labov, 1972;</ref><ref type="bibr" target="#b112">Silverstein, 2003;</ref><ref type="bibr" target="#b29">Eckert, 2018;</ref><ref type="bibr" target="#b11">Bourdieu, 1984;</ref><ref type="bibr" target="#b61">Hovy, 2018)</ref>. Finally, without a broader sense of context, NLP and language modeling in particular remains trapped in a paradigm where language is always treated as universal, making invisible both different speech communities (e.g. <ref type="bibr" target="#b90">Nguyen et al., 2021)</ref> and the biases of language (e.g. <ref type="bibr" target="#b76">Lu et al., 2020;</ref><ref type="bibr" target="#b9">Blodgett et al., 2020;</ref><ref type="bibr" target="#b106">Sap et al., 2020)</ref>.</p><p>After a brief history of distributional semantics, we outline work that Harris and Firth did on distribution and, more broadly, on the scope of linguistic analysis. We look at some of the ways in which NLP has tried to account for broader context within the distributional paradigm. We suggest that existing strategies can be understood in terms of either "comparative stratification" or "syntagmatic extension." We conclude with thoughts on how re-reading Harris and, in particular, Firth might aid the field of NLP with its current aporias. If words shall be known by the company they keep, then the question follows: what company do they keep? Are they found only with words and other linguistic elements, or do they mingle with other types of entities? Or, as Firth himself wrote: "Many different answers could be given to the question 'Distribution of what, where and how?"' <ref type="bibr">(Firth, 1957a, v)</ref>.</p><p>2 Background: Distributional Semantics and NLP</p><p>Distributional semantics has been an integral part of computational linguistics since the beginnings of the field, but in a discontinuous manner that encompasses at least two distinct eras. Firstly, during the 1950s and 60s, Harris was integral to the mathematization of linguistics after the Second World War <ref type="bibr" target="#b101">(Rubenstein and Goodenough, 1965;</ref><ref type="bibr" target="#b81">Léon, 2021)</ref>. Firth was skeptical of efforts to mechanize linguistics, but he nonetheless consulted for some of the early work on machine translation at Cambridge <ref type="bibr">(Léon, 2007, 410)</ref>. Secondly, when computational linguistics returned to its "empiricist" roots in probabilistic methods and information theory in the mid-80s and early 90s <ref type="bibr">(Norvig 2012, 30;</ref><ref type="bibr">Léon 2021, 141)</ref>, Firth and Harris were alongside Shannon among the authors who were evoked, in an ACL "Special Issue on Computational Linguistics Using Large Corpora," as foundational figures of a tradition that had been overshadowed for decades by the "rationalism" of characters such as Noam <ref type="bibr">Chomsky and Marvin Minsky (Church and Mercer, 1993, 15)</ref>.</p><p>During this "corpus turn," the rapid automation of linguistics was driven by a resumed connection with postwar computational linguistics and information theory <ref type="bibr">(Léon, 2021, 3)</ref>. However, important papers on non-neural lexical semantics from the era <ref type="bibr" target="#b70">(Landauer and Dumais, 1997;</ref><ref type="bibr" target="#b24">Deerwester et al., 1989</ref><ref type="bibr" target="#b25">Deerwester et al., , 1990</ref> and other vector space models or their applications <ref type="bibr" target="#b107">(Schutze, 1992;</ref><ref type="bibr" target="#b108">Schütze, 1993;</ref><ref type="bibr" target="#b109">Schütze and Pedersen, 1993;</ref><ref type="bibr" target="#b14">Burgess, 1998;</ref><ref type="bibr" target="#b8">Blei et al., 2002)</ref> generally did not cite Firth or Harris. In short, while Firth and Harris were not regularly used as stand-ins for linguistic theory during this time of "count based" models , a general revival of empiricism and distributional approaches to meaning did signal a potential resurgence of interest in their thinking.</p><p>At the turn of the millennium, computational approaches to lexical semantics shifted toward predictive neural language modeling <ref type="bibr" target="#b60">(Henderson, 2020)</ref>. During the 2000s, the application of neural networks to language modeling tasks (e.g. <ref type="bibr" target="#b6">Bengio et al., 2003)</ref> and the development of selfsupervision techniques (e.g. <ref type="bibr" target="#b97">Raina et al., 2007)</ref> set the stage for the word embedding breakthroughs of the early 2010s (e.g. <ref type="bibr" target="#b87">Mikolov et al., 2013)</ref>. By the end of the decade, the introduction of Long Short Term Memory networks (LSTMs) (e.g. <ref type="bibr" target="#b45">Graves et al., 2013)</ref> and then of the Transformer model <ref type="bibr" target="#b118">(Vaswani et al., 2017)</ref> had made way for the next breakthrough, the large-language modeling revolution (e.g. <ref type="bibr" target="#b27">Devlin et al., 2019;</ref><ref type="bibr" target="#b95">Peters et al., 2018)</ref>.</p><p>Following the introduction of the word2vec model and its powerful but "static" embeddings, Harris in particular was frequently cited <ref type="bibr" target="#b10">(Bojanowski et al., 2017;</ref><ref type="bibr" target="#b71">Le and Mikolov, 2014;</ref><ref type="bibr" target="#b72">Levy and Goldberg, 2014;</ref><ref type="bibr" target="#b73">Levy et al., 2015)</ref>, often (but not always) along with Firth <ref type="bibr" target="#b43">(Goldberg, 2017;</ref><ref type="bibr">Martin, 2009, 2021;</ref><ref type="bibr" target="#b52">Hamilton et al., 2016;</ref><ref type="bibr" target="#b30">Eisenstein, 2019;</ref><ref type="bibr" target="#b75">Lin and Dyer, 2010;</ref><ref type="bibr" target="#b12">Bruni et al., 2014)</ref>. However, despite an explosion of citations <ref type="bibr">(Bisk et al., 2020, 8719)</ref>, this interest has not been very engaged. In fact, the canonization of Firth and Harris during this time is paradoxical.</p><p>On the one hand it seems that they are invoked to lend theoretical authority to a field that struggles to lift its gaze from the latest state-of-the-art numbers <ref type="bibr" target="#b82">(Manning, 2015;</ref><ref type="bibr" target="#b5">Bender and Koller, 2020</ref>). Yet, on the other hand, the unspoken conclusion from the ascent of connectionism and the language modeling revolution in particular was that "learning from data made linguistic theories irrelevant" <ref type="bibr">(Henderson, 2020, 6295)</ref>. In other words, just as NLP seemed to lose interest with linguistic theory, it elevated two pioneering theoreticians to canonical status, but without deeply engaging with their work. Firth and Harris become figures who justify a relatively narrow conception of meaning, one that is predominantly intra-linguistic, without much to say about its uses in the world.</p><p>Though Léon discusses the contrast between Harris and Firth in the context of corpus linguistics <ref type="bibr">(2008)</ref> and their influence on the history of computational linguistics (2021), her work does not address the differences in their distributional theories and conceptions of "context," nor the renewed and paradoxical significance of the two authors for language modeling. In our contribution, we emphasize the gap between the ideas of Firth and Harris as well as the potential insights a re-reading of their work offer for expanding the scope of computational semantics.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3">Harris's distributional structuralism</head><p>Few linguists contributed more to linguistic theory <ref type="bibr">than Zellig Harris (1909</ref><ref type="bibr" target="#b107">-1992</ref>, and not just for serving as Chomsky's doctoral advisor. In fact, the two came to share little in common <ref type="bibr" target="#b44">(Goldsmith, 2005;</ref><ref type="bibr" target="#b88">Nevin, 2010)</ref>; whereas Chomsky's generative grammar repositioned linguistics as a cognitive science seeking to understand, in so few words, the idealized mental representations and structures enabling language acquisition and production (e.g. <ref type="bibr" target="#b18">Chomsky, 1972)</ref>, Harris' radically distributional approach to language saw the natural language corpus as the sole starting point from which a general linguistic theory could arise.</p><p>This theory consisted of a linguistic structure best understood as segmentable into a finite set of formal objects characterized by structured, constrained patterns of correspondence with one another <ref type="bibr" target="#b54">(Harris, 1951</ref><ref type="bibr" target="#b55">(Harris, , 1954</ref><ref type="bibr" target="#b58">(Harris, , 1991</ref>. Such patterns of correspondence can be observed only in languagein-use, that is, in natural language corpora. In his foundational paper "Distributional Structure," for example, he provides a purely distributional account of how one might induce the semantic meanings of oculist, eye-doctor, and lawyer from the partial (in the case of oculist and lawyer) or nearly complete (in the case of oculist and eye-doctor) overlap in their observed "environments" of use <ref type="bibr">(Harris, 1954, 156-157)</ref>. This general approach applies to other levels of linguistic analysis, such as morphophonemics (e.g., <ref type="bibr">Harris, 1954, 155)</ref>. Rather than producing a series of descriptive rules for the distribution of each phoneme, morpheme, or word, the goal was to achieve greater parsimony by grouping these elements into structurally equivalent classes sharing the same distributional rules, compounding elements in a hierarchical manner.</p><p>In this section we draw attention to three aspects of Harris's distributional linguistics: the relationship it posits between meaning and form; assumptions about heterogeneity among speakers of the same dialect; and the concept of sublanguages.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1">Meaning and form</head><p>A result of this vision of a linguistics-concerned above all with the structural and probabilistic constraints governing the combination of formal elements-is that the discipline would be fully autonomous, not only from biology and psychology but even from semantics, phonetics, and logic, "complete without intrusion of other features such as history or meaning" <ref type="bibr">(Harris 1954, 146;</ref><ref type="bibr">Goldsmith 2005, 725-726</ref>). Harris's reasoning drew on the particular status he gave to linguistics among all the sciences. Taking language as its object of inquiry, linguistics lacks-unlike other sciencesa metalanguage external to language, i.e., to its object of inquiry <ref type="bibr">(Nevin, 1993, 358-359)</ref>. Even if some sort of symbolic system is used, "those symbols will have to be defined ultimately in a natural language" <ref type="bibr">(Harris, 1991, 274)</ref>, as the surging demand for interpretability and explainability in NLP has made evident (see e.g. <ref type="bibr" target="#b22">Danilevsky et al., 2020)</ref>. Language is consequently not a "code" of "forms" that correlate with some meanings outside of it. It has no "one-to-one" conformity "with some independently discoverable structure of meaning" <ref type="bibr">(Harris, 1954, 152)</ref>. Instead, it is a system related to, but also independent from, thought <ref type="bibr">(Nevin, 1993, 361-363)</ref>. While all human activity is meaningful, the particular meanings of language are constituted by its form, not correlated to it <ref type="bibr">(Nevin, 1993, 394)</ref>. Meaning thus understood is about departures from equiprobability in the distribution of these constraints <ref type="bibr">(Harris, 1991, 23)</ref>. Linguistic inquiry is, in the final instance, about evaluating the efficiency of different grammars and their ability to model the statistical constraints imposed upon the distribution of different linguistic elements. Harris held that language was a "detached pattern" <ref type="bibr">(Harris, 1941, 295)</ref>-information that was socially transmissible and hence constitutive of new types of socially shared and conventional meaning (360) <ref type="bibr">(Nevin, 1993, 360, 365)</ref>-and linguistics could at best discover different incomplete grammars. Though linguistics might provide insights about meaning and discourse, or about cultural practices, such findings would not bear directly on linguistics per se. Indeed, while Harris acknowledges that our sense of word meaning is aided by "extra-linguistic situational information," words "beyond the immediate situation" are "on their own" <ref type="bibr">(Harris, 1991, 368)</ref>. However, Harris's method is not completely detached: Searching for a method to segment speech, he notes that the similarity of elements "reduces ultimately to the similarity of sound segments under repetition," implemented through "the pair test" in which native speakers are asked to discriminate between sound segments <ref type="bibr">(Harris, 1954, 158-159)</ref>, producing an observational primitive that is "more easy to control than data on meaning" (e.g. <ref type="bibr">Harris, 1951, 20)</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2">Variation, or lack thereof</head><p>Harris's view of language and linguistics, isolated from the vagaries of social interaction and variation, is obviously difficult to reconcile with a sociolinguistic perspective. As Harris writes in his Methods of Structural Linguistics <ref type="bibr">(Harris, 1951, 9)</ref>, his approach is meant to describe a homogeneous dialect, which "[i]n most cases...presents no problem, since the whole speech of the person or community shows dialectal consistency." Referencing this passage, dialectology pioneer William <ref type="bibr">Labov (2006, 5)</ref> argues that "the inconsistency found in most New York City idiolects is so great that the first alternative of Harris is impossible, and the second implausible." 1 In other words, even at the level of the speaker, Harris's idealized, unvarying idiolect does not hold up to empirical scrutiny. Rigorous consideration of factors that Harris would deem extra-linguistic (class, race, interactional roles, etc.) are indeed essential to produce a systematic description of linguistic structure. From the sociolinguistic perspective, Harris's vision of a linguistic science fully isolated from the "intrusion" of non-verbal social life would never obtain the systemicity to which it aspired.</p><p>The critique from sociolinguistics highlights more fundamental issues in Harris's structuralist perspective. Language is viewed primarily through the distributional restrictions imposed by convention, rather than "stylistic practice" and the ways in which speakers "make social-semiotic moves, reinterpreting variables and combining and recombining them in a continual process" <ref type="bibr">(Eckert, 2012, 94)</ref>. We can study changes in discourse, as Harris himself did in an impressive volume on structures in immunological theory over time , but not how people make those changes, or indeed the way in which "variation itself is systemic" <ref type="bibr">(Deleuze and Guattari, 1987, 93)</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.3">Sublanguages</head><p>Harris introduced the concept of sublanguages in his book Mathematical Structures of Language, defined as "certain proper subsets of a language [which] may be closed under some or all of the operations defined in the language, and [which] thus constitute a sublanguage of it" <ref type="bibr">(Harris, 1968, 152)</ref>. The sublanguage is a set of sentences which are a subset of the sentences of the "whole" language. However, the grammatical constraints of the sublanguage are not necessarily those of the whole language; rather, their grammars intersect <ref type="bibr">(Harris 1968, Ch 11;</ref><ref type="bibr">Kittredge and Lehrberger 1982, 1)</ref>. In application the term has come to refer primarily to the grammar and vocabulary unique to or characteristic of a particular professional or scientific field (e.g. , an influential concept for early information retrieval research <ref type="bibr" target="#b103">(Sager, 1975</ref><ref type="bibr" target="#b104">(Sager, , 1981</ref>. Harris believed that sublanguages could be neatly identified using the distributional methods of his general linguistic program.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4">Firth's contextual semantics</head><p>Something similar to the sociolinguistic critique towards Harris could be articulated from another perspective as well, namely through the work of J.R. <ref type="bibr">Firth. Firth (1890</ref><ref type="bibr">-1960</ref>-professor of General Linguistics at the University College of London and the first holder of a chair in that subject at any British university-independently formulated a distributional theory of lexical semantics. However, unlike Harris, Firth refused to treat semantics separate from pragmatics, and words apart from their broader "context of situation." <ref type="bibr">(Robins, 1997, 205-208)</ref> Firth never published a fully articulated exposition of his general theory of language <ref type="bibr">(Robins 1997, 216;</ref><ref type="bibr">Thomas 2011, 180)</ref> and today, most of his work is out of print and mostly unavailable online. Not understood by "the contemporary scientism" of American descriptivist linguistics and its pioneers like Harris, Firth was mostly ignored on the other side of the Atlantic <ref type="bibr">(Pandit 1970, 280;</ref><ref type="bibr">Palmer 1968, 2)</ref>. Unlike many of his American contemporaries, Firth did not draw mainly from cognitive psychology and logic-the latter which Firth thought had "taken the heart out of language" <ref type="bibr">(Firth, 1957a, 186)</ref>-but from the work of Polish anthropologist Bronislaw Malinowski <ref type="bibr">(Robins, 1997, 211)</ref>. Here, we focus on the evolution of his thoughts on meaning and collocation, as well as his notions of context of situation and restricted language.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.1">Meaning by collocation</head><p>To Firth, the purpose of linguistics is to "study meaning in its own terms" <ref type="bibr">(Firth 1968a, 145 ;</ref><ref type="bibr">Senis 2015, 289)</ref>. The famous phrase about the company that words keep concerned a particular "mode of meaning," "meaning by collocation". Anticipating vocabulary now ubiquitous in NLP, Firth thought that this level of meaning could be found by examining the "habitual collocations" of words and the "word material" in which they are "most characteristically embedded" <ref type="bibr">(Firth, 1957b, 11-12)</ref>. Meaning by collocation was an abstraction of syntagmatic relations <ref type="bibr">(Firth 1957b, 12;</ref><ref type="bibr">Oyelaran 1967, 444</ref>) that went beyond "mere juxtaposition," stating instead "an order of mutual expectancy" <ref type="bibr">(Firth, 1957b, 12)</ref> and "mutual prehension." While mutual expectancy could be understood similarly to <ref type="bibr" target="#b62">Joos's (1950)</ref> conditional probabilities of occurrence or the concept of PMI <ref type="bibr" target="#b31">(Fano, 1949)</ref>, the notion of "prehension" originates in the work of philosopher and mathematician Alfred North <ref type="bibr">Whitehead (1957</ref><ref type="bibr" target="#b119">Whitehead ( , 1968</ref>, see also <ref type="bibr" target="#b16">Butt 2013)</ref> and concerns the manner in which one entity grasps another and makes it part of its own experience <ref type="bibr">(Christian 1959, 12;</ref><ref type="bibr">Bryant 2011, 136)</ref>.</p><p>Drawing on Whitehead's "modes of thought" <ref type="bibr" target="#b119">(Whitehead 1968;</ref><ref type="bibr" target="#b15">Butt 2001</ref><ref type="bibr">Butt , 1812</ref><ref type="bibr">Butt 2019, 28)</ref>, Firth advocated a type of "polysystemic" linguistic analysis that was interested in different, congruent modes of meaning, whether phonetic, phonological, syntactic, or semantic, but always situated in broader social context <ref type="bibr">(Firth 1957b, 27, 30 ;</ref><ref type="bibr">Robins 1997, 214)</ref>. In stark contrast to Harris, Firth explicitly rejected any efforts to create "unity in linguistics" or one system of analysis. Citing the later <ref type="bibr" target="#b120">Wittgenstein (1953;</ref><ref type="bibr">Firth 1957b, 11)</ref>, Firth was mainly interested in the concrete use of language, reversing the Saussurian schema (De Saussure, 2011) in which language (la langue) is a system "external to and on a different plane from individual phenonema," including the concrete instances (la parole) of language use <ref type="bibr">(Firth 1950, 44-45;</ref><ref type="bibr">Firth 1949, 144)</ref>. While his final ideas matured considerably later, Firth initially articulated his ideas about semantics in two 1935 papers, one on semantics <ref type="bibr" target="#b32">(Firth, 1935a)</ref> and one on phonology <ref type="bibr" target="#b33">(Firth, 1935b)</ref>, using the term "contextual distribution" in both (see in <ref type="bibr">particular Firth 1935a, 55)</ref>. However, <ref type="bibr">Firth (1957b, 18)</ref> ultimately disavowed this distributional theory-which was not too dissimilar from Harris's-as "useful" but inadequate to act as the "main principle" in a theory "of structures involving the statement of the values of the elements of structure by reference to systems." By distinguishing between system (syntagm) and structure (paradigm), Firth wanted to highlight two operational principles necessary for meaning by collocation: (1) substitution within "the same level of abstraction," and (2) commutation across different levels <ref type="bibr">(Robins, 1953, 140)</ref>. Only substitution that does not produce commutation in a sequence, indicates similarity of value or function <ref type="bibr">(Firth 1968b, 23;</ref><ref type="bibr">Firth 1957b, 15)</ref>. I.e. two words are only substitutable-and hence similar in function and meaning-if we ensure that their values do not commute across a particular sentence. Substitution, then, does not equal synonymy. Take, for example, the following two phrases containing (a) prepositional and (b) adverbial uses of the word "by" :</p><p>(a) They go by night. (b) They go by night after night. Now, "by" could be replaced by the word "past" without commuting the meaning of the other words in (b). However, replacing "by" with "past" would commute with the rest of (a) in an impossible way <ref type="bibr">(Firth, 1968b, 23-24)</ref>. This demonstrates how substitution concerns the relationship between "by" and "past" as two elements at the same level of analysis-i.e., lexical units-but in order to account for commutation, we need to look beyond this level to other levels of abstraction. 2</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2">Context and connection</head><p>Diverging from structuralist linguistics, Firth suggested that a text should always be given a "renewal of connection with experience" <ref type="bibr">(Firth, 1957b, 29)</ref>. This notion of meaning was influenced by Malinowski, for whom Firth worked as an assistant early in his career <ref type="bibr">(Plug, 2008, 346)</ref> and from whom he borrowed the notion of "context of situation" <ref type="bibr" target="#b32">(Firth 1935a</ref><ref type="bibr" target="#b100">, Robins 1997</ref>. In Malinwoski's view, meaning was more than just a dyadic relationship between a word and its referent, "a multidimensional and functional set of relations between the word in its sentence and the context of its occurrence" <ref type="bibr">(Robins, 1971, 35)</ref>. However, while Malinowski's view on meaning was entirely functional and hyper-local, Firth employed the notion of "context of situation" as a necessary abstraction, not as a shorthand for things in themselves <ref type="bibr">(Firth 1950, 7 ;</ref><ref type="bibr">Palmer 1968, 6)</ref>. Context of situation is derived from an analytical choice, "a set of categories in ordered relations abstracted from the life of man in the flux of events, from personality in society," prehending something of importance and bracketing the rest. It is, then, not necessarily about restricting the meaning of every utterance to a specific time and place, but about defining "an abstract set of semantically relevant categories, abstracted from multitudes of actual situations, to which unique particulars could be referred." <ref type="bibr">(Robins, 1971, 41-42)</ref> Firth called for the linguist to focus on "attested language text duly recorded" <ref type="bibr">(Firth, 1957b, 29-30)</ref>, accounting for both the interior relations of the text as well as its associated context of situation and its interior relations. <ref type="bibr">(Firth, 1957b, 30)</ref> Firth was famously opaque with the exact operationalization of his concepts, including context of situation, but he did provide a detailed list of the different contextual elements that a linguist should bring into relation during analysis <ref type="bibr">(Firth, 1950, 43)</ref>:</p><p>A. The relevant features of participants: persons, personalities.</p><p>(i) The verbal action of the participants.</p><p>(ii) The non-verbal action of the participants. B. The relevant objects. C. The effect of the verbal action.</p><p>In conclusion: Firth's famous quote itself refers to collocation, while his notion of "context" implies something much broader, "the whole conceptual meaning" <ref type="bibr">(Firth, 1957b, 11)</ref>. Context is the ground against which the figure of the text must be understood, no matter (per Harris) how "detached" its pattern might be (e.g. <ref type="bibr" target="#b1">Auer, 1996)</ref>. Without context, collocation captures only one narrow "mode of meaning."</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.3">Restricted languages</head><p>Expanding upon his functional understanding of language, Firth developed his notion of "restricted languages" in the 1950s <ref type="bibr">(1957b, 10;</ref><ref type="bibr">Léon 2007, 7)</ref>. In a posthumously published essay, he (1968c, 207) describes social actors as "collect[ing] a varied repertory of interlocking roles" corresponding to a "constellation of restricted languages." As people shift between locally contextualized roles, they draw upon their "repertory" of restricted languages with specialized vocabulary and discursive styles that both reflect and constitute these contexts. Thus one might speak of a "restricted language of science, sport, defense, industry, aviation, military services, commerce, law and civil administration, politics, literature, etc." <ref type="bibr">(Léon, 2008, 261)</ref>. As such, the concept of restricted language is now generally seen as a precursor to the concept of "register," which was taken up by subsequent sociolinguists and linguistic anthropologists (e.g. <ref type="bibr" target="#b50">Halliday, 1968;</ref><ref type="bibr">Gumperz and Hymes, 1972;</ref><ref type="bibr" target="#b0">Agha, 2005)</ref>.</p><p>In proposing restricted languages as the proper object of descriptive linguistic analysis, Firth was making a broader theoretical point against, on the one hand, "the monosystemic view of language" of neo-Bloomfieldians like Harris and "pointless discussions on metalanguage" on the other, for metalanguage could be reanalyzed as a "restricted language of linguistics" itself <ref type="bibr">(Léon, 2007, 9)</ref>. Simply put, a descriptive linguistics which privileges restricted languages also necessarily privileges contexts of situation as an essential dimension of variation that allows social meaning to inhere in language.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">Discussion: Words in new company</head><p>Often cited, together or separately, with the same purpose of justifying a distributional view on se-mantics, Firth and Harris nonetheless present vastly different views on language and meaning. In Harris we find a rigorous formalism that treats language as a "detached pattern." Language is not a "code", but functions instead as a particular system of meaning. Firth, by comparison, left a much more scattered legacy and many of his insights were only systematized and formalized by his students. Firth and Harris shared a concern about the dependence between the languages of and under description, but drew different conclusions regarding the tension between form and meaning in language. If Harris responded to this conundrum by creating one system without intrusion from extra-linguistic factors, Firth called for an investigation of language as a "spectrum" with different modes of meaning that had to be addressed through multiple levels of analysis, without a "unity of linguistics." Analysis should start by stating the context of situation and proceed from there to decide which other levels of analysis are relevant. Firth's distributional theory has been contrasted unfavourably as "frequency based" to the "recursive dependencies" developed by Harris <ref type="bibr">(Habert and Zweigenbaum, 2002, 205)</ref>. For Harris, the meaning of a word depends on its set <ref type="bibr">(Harris, 1991, 17</ref>) such that, for example, the words "divide" and "multiply" operate on the word "cell" (and vice versa) in the same way, producing essentially the same meaning <ref type="bibr">(Harris 1988, 62</ref>; see also <ref type="bibr">Harris 1991, 5-6)</ref>. However, Firth's final method of substitution and commutation establishes complex, multidimensional criteria for distributional contrast as well as a framework for understanding polysemy. Though less formalized than Harris, Firth's approach ultimatelly also treats linguistic elements as operators with specific sets of elements in a complex hierarchy, including the extra-linguistic context of situation.</p><p>Nonetheless, from the perspective of empirical work, especially decades after their time, Firth and Harris also share similarities. Both rejected the mentalism that was so prevalent during their time. They were both revived as empiricist originators during the rise of statistical learning in the 1990s and their respective work on restricted languages and sublanguages was important for the rise of corpus linguistics and largely conflated in service of practical concerns . They both included in their theories what we might call a "reality principle," a final arbiter of meaning outside of form: the pair test for Harris, the context of sit-uation for Firth. However, as NLP tries to move beyond the written corpus, we might reassess the details and differences between Firth and Harris in order to understand the practical limits and possibilities of the distributional view on language.</p><p>In light of recent calls to extend the "world scope" <ref type="bibr" target="#b7">(Bisk et al., 2020)</ref> of NLP and to move towards pragmatic notions of meaning, we might find Harris's rigorous but rigid system somewhat limiting and Firth's appeals to different contexts helpful. Though Firth warned us against overextending linguistics, he was generous with the company that words could keep. They mingled with each other, but also with events, objects, people, and indexical features such as time and space. And if NLP is ready to move beyond the corpus, then even Harris might acknowledge that when modeling language in "the immediate situation"-whether in online interactions or face-to-face communication-words are not on their own, that to judge the meaning of a combination of words, we can summon "the aid of some of the extra-linguistic situational information" <ref type="bibr">(Harris, 1991, 368)</ref>. In the next two subsections, we consider the ways in which NLP is already doing this, in order to highlight some existing strategies for broader contextualization.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.1">Comparative stratification</head><p>Corpus linguistics emerges from the question of what kind of company words keep, depending on their context. The issue of context was motivated the introduction of corpus linguistics both for students of Firth-who considered restricted languages as a way of handling context-and for Harris's sublanguages, "concrete discourse structures, which could be applied to real scientific texts, contextually situated and suitable for being processed automatically" <ref type="bibr">(Léon, 2021, 149-150)</ref>. However, beyond just studying the restricted corpus, we might also consider the ways in which large datasets can be "stratified"-a type of implicit factorization, if you will-systematically dividing them into sub-corpora that are rigorously and statistically studied in relation to each other. Here, the company that words keep among each other is limited for analytical purposes, but in a manner that implicitly tell us what kind of context different kinds of words keep as company.</p><p>Diachronic embeddings are especially representative of this approach. By stratifying timestamped data into a number of intervals, training a separate model for each interval and then aligning the embeddings using either "second-order embeddings" or methods such as linear transformations <ref type="bibr" target="#b67">(Kutuzov et al., 2018)</ref>, the analyst can effectively give words a temporal "context of situation." This general approach works with both static <ref type="bibr" target="#b52">(Hamilton et al., 2016)</ref> and contextual embeddings <ref type="bibr" target="#b84">(Martinc et al., 2020)</ref>. While most commonly used in the literature on semantic shifts (e.g., <ref type="bibr" target="#b41">Garg et al., 2018;</ref><ref type="bibr" target="#b66">Kozlowski et al., 2019;</ref><ref type="bibr" target="#b86">Mendelsohn et al., 2020)</ref>, it could plausibly be used to stratify a dataset using other variables such as space (e.g. <ref type="bibr" target="#b121">Yan et al., 2017)</ref>, online communities <ref type="bibr" target="#b77">(Lucy and Bamman, 2021)</ref>, persons <ref type="bibr" target="#b122">(Yao et al., 2020)</ref>, or domains <ref type="bibr" target="#b113">(Spinde et al., 2021)</ref>. Words still only keep the company of other words, but by limiting their company we can implicitly introduce other participants in the analysis. 3</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.2">Syntagmatic extension</head><p>Recall that for Firth, meaning by collocation and considerations of a "typical context of situation" were exercises in abstraction, with collocation being an abstraction at the syntagmatic level. Instead of restricting the company words keep, we might follow Firth's recommendation to consider them in wider company "of the same abstract nature" <ref type="bibr">(Firth, 1950, 7)</ref>. In vector semantics, this would imply that we explicitly introduce different contextual factors in the same vector space with our words, giving all participants in the company ontological equality.</p><p>The paragraph vectors introduced by <ref type="bibr" target="#b71">Le and Mikolov (2014)</ref> as an extension of their skipgram algorithm <ref type="bibr" target="#b87">(Mikolov et al., 2013)</ref> are representative for this approach. In practice, this method extends the syntagmatic chain of words by introducing a vector for the document as a new paradigmatic element. This type of "global context" <ref type="bibr" target="#b46">(Grbovic and Cheng, 2018)</ref> could in principle be anything and include several paradigmatic elements, as we can see in the research on multi-modal embeddings (e.g. <ref type="bibr" target="#b2">Baroni, 2016)</ref>. <ref type="bibr">4</ref> For example, models have been developed that include demographic <ref type="bibr" target="#b42">(Garimella et al., 2017)</ref> or persona <ref type="bibr" target="#b74">(Li et al., 2016)</ref> vectors in the embedding space, such that intra-textual relations are accompanied by information about speakers' so-cial categories. However, implemented with static embeddings and without some additional grammar restrictions, these context vectors essentially add only a "bag of contexts." For static embeddings, additional grammar constraints could be introduced, as had been done in research on Pointof-Interest (POI) data in the the domain of geosemantics, where researchers constrained contextual vectors using spatial variograms <ref type="bibr" target="#b121">(Yan et al., 2017)</ref>. Beyond static embeddings, large-language models and their dynamic embeddings could either be pretrained (with the appropriate dataset) or at least finetuned on data with text associated to different contextual variables. This would realize the proposal that Halliday made in the early 1990s when he suggested an extension of the language modeling schema from the early work of Shannon, to a model with "global probabilities, those of the grammar of English, and the locally conditioned probabilities, those of this or that particular register" <ref type="bibr">(Halliday, 1991, 37)</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6">Conclusions</head><p>This paper revisited the theories of the two most well-known progenitors of distributional semantics. Recognizing the ongoing debate on how to bring NLP in general and language modeling in particular beyond the corpus, we provide a thorough account of the distributional theories that are most frequently evoked in order to justify the modeling of meaning through departures from equiprobability in the company that words keep. Comparing the work of Harris and Firth-who both published their major work before the rise of the internet and its corpora-we find two distinct theories of distribution: one formal and mathematical, treating language as a particular type of detached information, another more schematic and anthropological, treating language as a functional spectrum which always emanates from a particular context of situation. The legacies of both Firth and Harris can be seen in the current paradigm of corpus linguistics, but in the domain of distributional semantics, it is Harris's ethos that dominates, despite Firth providing its most famous tagline. Moving forward, we suggest that semantic modeling take more cues from Firth, and consider the context of situation and the wide variety of company that words can keep as crucial challenges with which the field must grapple.</p></div>			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="1">New York City is not unique in this regard; it was merely the location of his early pathbreaking work.</note>
+			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="2">A useful analogy might be the way in which BERT handles different aspects of language at different layers of the model(Tenney et al., 2019, e.g.). However, no matter how large, a language model like BERT does not account for the context of situation.</note>
+			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="3">In a very broad sense, the trend of pretraining large language models and then finetuning them on specific datasets is of course also an admission of the importance of "context of situation."4 Firth himself (1957b, 26)  recommended accompanying word definitions and collocational information with pictures.</note>
+		</body>
+		<back>
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<monogr>
+		<title level="m" type="main">Journal of linguistic anthropology</title>
+		<author>
+			<persName><forename type="first">Asif</forename><surname>Agha</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2005" />
+			<biblScope unit="volume">15</biblScope>
+			<biblScope unit="page" from="38" to="59" />
+		</imprint>
+	</monogr>
+	<note>Voice, footing, enregisterment</note>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">From context to contextualization</title>
+		<author>
+			<persName><forename type="first">Peter</forename><surname>Auer</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Links &amp; Letters</title>
+		<imprint>
+			<biblScope unit="page" from="11" to="28" />
+			<date type="published" when="1996" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<analytic>
+		<title level="a" type="main">Grounding Distributional Semantics in the Visual World</title>
+		<author>
+			<persName><forename type="first">Marco</forename><surname>Baroni</surname></persName>
+		</author>
+		<idno type="DOI">10.1111/lnc3.12170</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Language and Linguistics Compass</title>
+		<imprint>
+			<biblScope unit="volume">10</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="3" to="13" />
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<analytic>
+		<title level="a" type="main">Don&apos;t count, predict! A systematic comparison of context-counting vs. context-predicting semantic vectors</title>
+		<author>
+			<persName><forename type="first">Marco</forename><surname>Baroni</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Georgiana</forename><surname>Dinu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Germán</forename><surname>Kruszewski</surname></persName>
+		</author>
+		<idno type="DOI">10.3115/v1/P14-1023</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 52nd Annual Meeting of the Association for Computational Linguistics<address><addrLine>Baltimore, Maryland</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2014" />
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="page" from="238" to="247" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<analytic>
+		<title level="a" type="main">On the Dangers of Stochastic Parrots: Can Language Models Be Too Big? &amp;#x1f99c</title>
+		<author>
+			<persName><forename type="first">Emily</forename><forename type="middle">M</forename><surname>Bender</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Timnit</forename><surname>Gebru</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Angelina</forename><surname>Mcmillan-Major</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shmargaret</forename><surname>Shmitchell</surname></persName>
+		</author>
+		<idno type="DOI">10.1145/3442188.3445922</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2021 ACM Conference on Fairness, Accountability, and Transparency, FAccT &apos;21</title>
+				<meeting>the 2021 ACM Conference on Fairness, Accountability, and Transparency, FAccT &apos;21<address><addrLine>New York, NY, USA</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computing Machinery</publisher>
+			<date type="published" when="2021" />
+			<biblScope unit="page" from="610" to="623" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<title level="a" type="main">Climbing towards NLU: On Meaning, Form, and Understanding in the Age of Data</title>
+		<author>
+			<persName><forename type="first">Emily</forename><forename type="middle">M</forename><surname>Bender</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Alexander</forename><surname>Koller</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2020.acl-main.463</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 58th Annual Meeting of the Association for Computational Linguistics</meeting>
+		<imprint>
+			<publisher>Online. Association for Computational Linguistics</publisher>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="5185" to="5198" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<analytic>
+		<title level="a" type="main">A neural probabilistic language model</title>
+		<author>
+			<persName><forename type="first">Yoshua</forename><surname>Bengio</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Réjean</forename><surname>Ducharme</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Pascal</forename><surname>Vincent</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Christian</forename><surname>Janvin</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">The Journal of Machine Learning Research</title>
+		<imprint>
+			<biblScope unit="volume">3</biblScope>
+			<biblScope unit="page" from="1137" to="1155" />
+			<date type="published" when="2003" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<analytic>
+		<title level="a" type="main">Experience Grounds Language</title>
+		<author>
+			<persName><forename type="first">Yonatan</forename><surname>Bisk</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ari</forename><surname>Holtzman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jesse</forename><surname>Thomason</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jacob</forename><surname>Andreas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yoshua</forename><surname>Bengio</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Joyce</forename><surname>Chai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mirella</forename><surname>Lapata</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Angeliki</forename><surname>Lazaridou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jonathan</forename><surname>May</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Aleksandr</forename><surname>Nisnevich</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nicolas</forename><surname>Pinto</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Joseph</forename><surname>Turian</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2020.emnlp-main.703</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</title>
+				<meeting>the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</meeting>
+		<imprint>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="8718" to="8735" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<analytic>
+		<title level="a" type="main">Latent Dirichlet Allocation</title>
+		<author>
+			<persName><forename type="first">David</forename><forename type="middle">M</forename><surname>Blei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Andrew</forename><forename type="middle">Y</forename><surname>Ng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Michael</forename><forename type="middle">I</forename><surname>Jordan</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Advances in Neural Information Processing Systems</title>
+				<editor>
+			<persName><forename type="first">T</forename><forename type="middle">G</forename><surname>Dietterich</surname></persName>
+			<persName><forename type="first">S</forename><surname>Becker</surname></persName>
+			<persName><forename type="first">Z</forename><surname>Ghahramani</surname></persName>
+		</editor>
+		<imprint>
+			<publisher>MIT Press</publisher>
+			<date type="published" when="2002" />
+			<biblScope unit="volume">14</biblScope>
+			<biblScope unit="page" from="601" to="608" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<analytic>
+		<title level="a" type="main">Language (Technology) is Power: A Critical Survey of &quot;Bias</title>
+		<author>
+			<persName><surname>Su Lin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Solon</forename><surname>Blodgett</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hal</forename><surname>Barocas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Iii</forename><surname>Daumé</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hanna</forename><surname>Wallach</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2005.14050[cs].ArXiv:2005.14050</idno>
+	</analytic>
+	<monogr>
+		<title level="j">NLP</title>
+		<imprint>
+			<date type="published" when="2020" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<analytic>
+		<title level="a" type="main">Enriching Word Vectors with Subword Information</title>
+		<author>
+			<persName><forename type="first">Piotr</forename><surname>Bojanowski</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Edouard</forename><surname>Grave</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Armand</forename><surname>Joulin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tomas</forename><surname>Mikolov</surname></persName>
+		</author>
+		<idno type="DOI">10.1162/tacl_a_00051</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Transactions of the Association for Computational Linguistics</title>
+		<imprint>
+			<biblScope unit="volume">5</biblScope>
+			<biblScope unit="page" from="135" to="146" />
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<monogr>
+		<title level="m" type="main">Distinction: A social critique of the judgement of taste</title>
+		<author>
+			<persName><forename type="first">Pierre</forename><surname>Bourdieu</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1984" />
+			<publisher>Harvard University Press</publisher>
+			<pubPlace>Cambridge, MA</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<analytic>
+		<title/>
+		<author>
+			<persName><forename type="first">E</forename><surname>Bruni</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">N</forename><forename type="middle">K</forename><surname>Tran</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Baroni</surname></persName>
+		</author>
+		<idno type="DOI">10.1613/jair.4135</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Multimodal Distributional Semantics. Journal of Artificial Intelligence Research</title>
+		<imprint>
+			<biblScope unit="volume">49</biblScope>
+			<biblScope unit="page" from="1" to="47" />
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<monogr>
+		<title level="m" type="main">The Democracy of Objects</title>
+		<author>
+			<persName><forename type="first">Levi</forename><forename type="middle">R</forename><surname>Bryant</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2011" />
+			<publisher>Open Humanities Press</publisher>
+			<pubPlace>Ann Arbor, MI</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<analytic>
+		<title level="a" type="main">From simple associations to the building blocks of language: Modeling meaning in memory with the HAL model</title>
+		<author>
+			<persName><forename type="first">Curt</forename><surname>Burgess</surname></persName>
+		</author>
+		<idno type="DOI">10.3758/BF03200643</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Behavior Research Methods, Instruments, &amp; Computers</title>
+		<imprint>
+			<biblScope unit="volume">30</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="188" to="198" />
+			<date type="published" when="1998" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<analytic>
+		<title level="a" type="main">Firth, Halliday and the development of systemic functional theory</title>
+		<author>
+			<persName><forename type="first">David</forename><forename type="middle">G</forename><surname>Butt</surname></persName>
+		</author>
+		<idno type="DOI">10.1515/9783110167351.2.31.1806</idno>
+	</analytic>
+	<monogr>
+		<title level="m">of Handbücher zur Sprach-und Kommunikationswissenschaft / Handbooks of Linguistics and Communication Science (HSK)</title>
+				<editor>
+			<persName><forename type="first">E</forename><forename type="middle">F K</forename><surname>Sylvain Auroux</surname></persName>
+			<persName><forename type="first">Hans-Josef</forename><surname>Koerner</surname></persName>
+			<persName><forename type="first">Kees</forename><surname>Niederehe</surname></persName>
+			<persName><surname>Versteegh</surname></persName>
+		</editor>
+		<imprint>
+			<publisher>De Gruyter</publisher>
+			<date type="published" when="2001" />
+			<biblScope unit="volume">2</biblScope>
+			<biblScope unit="page" from="1806" to="1838" />
+		</imprint>
+	</monogr>
+	<note>History of the language sciences</note>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<analytic>
+		<title level="a" type="main">Whiteheadian and Functional Linguistics</title>
+		<author>
+			<persName><forename type="first">David</forename><forename type="middle">G</forename><surname>Butt</surname></persName>
+		</author>
+		<idno type="DOI">10.1515/9783110333299.2.21</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Whiteheadian and Functional Linguistics</title>
+				<imprint>
+			<publisher>De Gruyter</publisher>
+			<date type="published" when="2013" />
+			<biblScope unit="page" from="21" to="32" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<analytic>
+		<title level="a" type="main">Firth and the Origins of Systemic Functional Linguistics: Process, Pragma, and Polysystem</title>
+		<author>
+			<persName><forename type="first">David</forename><forename type="middle">G</forename><surname>Butt</surname></persName>
+		</author>
+		<idno type="DOI">10.1017/9781316337936.003</idno>
+	</analytic>
+	<monogr>
+		<title level="m">The Cambridge Handbook of Systemic Functional Linguistics, Cambridge Handbooks in Language and Linguistics</title>
+				<editor>
+			<persName><forename type="first">David</forename><surname>Schönthal</surname></persName>
+			<persName><forename type="first">Geoff</forename><surname>Thompson</surname></persName>
+			<persName><forename type="first">Lise</forename><surname>Fontaine</surname></persName>
+			<persName><forename type="first">Wendy</forename><forename type="middle">L</forename><surname>Bowcher</surname></persName>
+		</editor>
+		<meeting><address><addrLine>Cambridge</addrLine></address></meeting>
+		<imprint>
+			<publisher>Cambridge University Press</publisher>
+			<date type="published" when="2019" />
+			<biblScope unit="page" from="11" to="34" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b18">
+	<monogr>
+		<title level="m" type="main">Language and Mind</title>
+		<author>
+			<persName><forename type="first">Noam</forename><surname>Chomsky</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1972" />
+			<publisher>Harcourt Brace Jovanovich</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b19">
+	<monogr>
+		<title level="m" type="main">An Interpretation of Whitehead&apos;s Metaphysics</title>
+		<author>
+			<persName><forename type="first">William</forename><forename type="middle">A</forename><surname>Christian</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1959" />
+			<publisher>Yale University Press</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b20">
+	<analytic>
+		<title level="a" type="main">The Future of Computational Linguistics: On Beyond Alchemy</title>
+		<author>
+			<persName><forename type="first">W</forename><surname>Kenneth</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mark</forename><surname>Church</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Liberman</surname></persName>
+		</author>
+		<idno type="DOI">10.3389/frai.2021.625341</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Frontiers in Artificial Intelligence</title>
+		<imprint>
+			<biblScope unit="volume">4</biblScope>
+			<biblScope unit="page">10</biblScope>
+			<date type="published" when="2021" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b21">
+	<analytic>
+		<title level="a" type="main">Introduction to the Special Issue on Computational Linguistics Using Large Corpora</title>
+		<author>
+			<persName><forename type="first">W</forename><surname>Kenneth</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Robert</forename><forename type="middle">L</forename><surname>Church</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Mercer</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Computational Linguistics</title>
+		<imprint>
+			<biblScope unit="volume">19</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="1" to="24" />
+			<date type="published" when="1993" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b22">
+	<analytic>
+		<title level="a" type="main">A Survey of the State of Explainable AI for Natural Language Processing</title>
+		<author>
+			<persName><forename type="first">Marina</forename><surname>Danilevsky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ranit</forename><surname>Kun Qian</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yannis</forename><surname>Aharonov</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ban</forename><surname>Katsis</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Prithviraj</forename><surname>Kawas</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Sen</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 1st Conference of the Asia-Pacific Chapter of the Association for Computational Linguistics and the 10th International Joint Conference on Natural Language Processing</title>
+				<meeting>the 1st Conference of the Asia-Pacific Chapter of the Association for Computational Linguistics and the 10th International Joint Conference on Natural Language Processing<address><addrLine>Suzhou, China</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="447" to="459" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b23">
+	<monogr>
+		<title level="m" type="main">Course in General Linguistics</title>
+		<author>
+			<persName><forename type="first">Ferdinand</forename><surname>De Saussure</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2011" />
+			<publisher>Columbia University Press</publisher>
+			<pubPlace>New York, NY. Translated by Wade Baskin</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b24">
+	<monogr>
+		<title level="m" type="main">Computer information retrieval using latent semantic structure</title>
+		<author>
+			<persName><forename type="first">C</forename><surname>Scott</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Susan</forename><forename type="middle">T</forename><surname>Deerwester</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">George</forename><forename type="middle">W</forename><surname>Dumais</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Richard</forename><forename type="middle">A</forename><surname>Furnas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Thomas</forename><forename type="middle">K</forename><surname>Harshman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Karen</forename><forename type="middle">E</forename><surname>Landauer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lynn</forename><forename type="middle">A</forename><surname>Lochbaum</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Streeter</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1989" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b25">
+	<analytic>
+		<title level="a" type="main">Indexing by latent semantic analysis</title>
+		<author>
+			<persName><forename type="first">C</forename><surname>Scott</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Susan</forename><forename type="middle">T</forename><surname>Deerwester</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">George</forename><forename type="middle">W</forename><surname>Dumais</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Thomas</forename><forename type="middle">K</forename><surname>Furnas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Richard</forename><forename type="middle">A</forename><surname>Landauer</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Harshman</surname></persName>
+		</author>
+		<idno type="DOI">10.1002/(SICI)1097-4571(199009)41:6&lt;391::AID-ASI1&gt;3.0.CO;2-9</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Journal of the American Society for Information Science</title>
+		<imprint>
+			<biblScope unit="volume">41</biblScope>
+			<biblScope unit="issue">6</biblScope>
+			<biblScope unit="page" from="391" to="407" />
+			<date type="published" when="1990" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b26">
+	<monogr>
+		<title level="m" type="main">A Thousand Plateaus: Capitalism and Schizophrenia</title>
+		<author>
+			<persName><forename type="first">Gilles</forename><surname>Deleuze</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Félix</forename><surname>Guattari</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1987" />
+			<publisher>University of Minnesota Press</publisher>
+			<pubPlace>Minneapolis, MN</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b27">
+	<analytic>
+		<title level="a" type="main">BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</title>
+		<author>
+			<persName><forename type="first">Jacob</forename><surname>Devlin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ming-Wei</forename><surname>Chang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kenton</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kristina</forename><surname>Toutanova</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/N19-1423</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</title>
+				<meeting>the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies<address><addrLine>Minneapolis, Minnesota</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2019" />
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="page" from="4171" to="4186" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b28">
+	<analytic>
+		<title level="a" type="main">Three Waves of Variation Study: The Emergence of Meaning in the Study of Sociolinguistic Variation</title>
+		<author>
+			<persName><forename type="first">Penelope</forename><surname>Eckert</surname></persName>
+		</author>
+		<idno type="DOI">10.1146/annurev-anthro-092611-145828</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Annual Review of Anthropology</title>
+		<imprint>
+			<biblScope unit="volume">41</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="87" to="100" />
+			<date type="published" when="2012" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b29">
+	<monogr>
+		<title level="m" type="main">Meaning and Linguistic Variation: The Third Wave in Sociolinguistics</title>
+		<author>
+			<persName><forename type="first">Penelope</forename><surname>Eckert</surname></persName>
+		</author>
+		<idno type="DOI">10.1017/9781316403242</idno>
+		<imprint>
+			<date type="published" when="2018" />
+			<publisher>Cambridge University Press</publisher>
+			<pubPlace>Cambridge</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b30">
+	<monogr>
+		<title level="m" type="main">Introduction to Natural Language Processing</title>
+		<author>
+			<persName><forename type="first">Jacob</forename><surname>Eisenstein</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2019" />
+			<publisher>MIT Press</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b31">
+	<monogr>
+		<title level="m" type="main">The Transmission of Information</title>
+		<author>
+			<persName><forename type="first">M</forename><surname>Robert</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Fano</surname></persName>
+		</author>
+		<idno>65</idno>
+		<imprint>
+			<date type="published" when="1949" />
+		</imprint>
+		<respStmt>
+			<orgName>Research Laboratory of Electronics, MIT</orgName>
+		</respStmt>
+	</monogr>
+	<note type="report_type">Technical Report</note>
+</biblStruct>
+
+<biblStruct xml:id="b32">
+	<analytic>
+		<title level="a" type="main">The Technique of Semantics</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</author>
+		<idno type="DOI">10.1111/j.1467-968X.1935.tb01254.x</idno>
+		<ptr target="https://onlinelibrary.wiley.com/doi/pdf/10.1111/j.1467-968X.1935.tb01254.x" />
+	</analytic>
+	<monogr>
+		<title level="j">Transactions of the Philological Society</title>
+		<imprint>
+			<biblScope unit="volume">34</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="36" to="73" />
+			<date type="published" when="1935" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b33">
+	<analytic>
+		<title level="a" type="main">The use and distribution of certain English sounds</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</author>
+		<idno type="DOI">10.1080/00138383508596629</idno>
+	</analytic>
+	<monogr>
+		<title level="j">English Studies</title>
+		<imprint>
+			<biblScope unit="volume">17</biblScope>
+			<biblScope unit="issue">1-6</biblScope>
+			<biblScope unit="page" from="8" to="18" />
+			<date type="published" when="1935" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b34">
+	<analytic>
+		<title level="a" type="main">The semantics of linguistic science</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</author>
+		<idno type="DOI">10.1016/0024-3841(49)90085-6</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Lingua</title>
+		<imprint>
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="page" from="393" to="404" />
+			<date type="published" when="1949" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b35">
+	<analytic>
+		<title level="a" type="main">Personality and Language in Society</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</author>
+		<idno type="DOI">10.1111/j.1467-954X.1950.tb02460.x</idno>
+	</analytic>
+	<monogr>
+		<title level="j">The Sociological Review</title>
+		<imprint>
+			<biblScope unit="volume">42</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="37" to="52" />
+			<date type="published" when="1950" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b36">
+	<analytic>
+		<title level="a" type="main">Introduction</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Studies in Linguistic Analysis. Publisher: Basil Blackwell</title>
+				<editor>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</editor>
+		<imprint>
+			<date type="published" when="1957" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b37">
+	<analytic>
+		<title level="a" type="main">A synopsis of linguistic theory, 1930-1955</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Studies in Linguistic Analysis</title>
+				<editor>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</editor>
+		<meeting><address><addrLine>Basil Blackwell</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="1957" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b38">
+	<monogr>
+		<title level="m" type="main">Ethnographic analysis and language with reference to Malinowski&apos;s views</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</author>
+		<editor>Frank R. Palmer</editor>
+		<imprint>
+			<date type="published" when="1968" />
+			<publisher>Longman and Indiana University Press</publisher>
+			<biblScope unit="page" from="84" to="95" />
+			<pubPlace>London and Bloomington</pubPlace>
+		</imprint>
+	</monogr>
+	<note>Selected papers of J.R. Firth (1952-59</note>
+</biblStruct>
+
+<biblStruct xml:id="b39">
+	<monogr>
+		<title level="m" type="main">Linguistic analysis as a study of meaning</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</author>
+		<editor>J.R. Firth</editor>
+		<imprint>
+			<date type="published" when="1968" />
+			<publisher>Longman and Indiana University Press</publisher>
+			<biblScope unit="page" from="84" to="95" />
+			<pubPlace>London and Bloomington</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b40">
+	<monogr>
+		<title level="m" type="main">The treatment of language in general linguistics</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</author>
+		<editor>J.R. Firth</editor>
+		<imprint>
+			<date type="published" when="1968" />
+			<publisher>Longman and Indiana University Press</publisher>
+			<biblScope unit="page" from="206" to="209" />
+			<pubPlace>London and Bloomington</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b41">
+	<analytic>
+		<title level="a" type="main">Word embeddings quantify 100 years of gender and ethnic stereotypes</title>
+		<author>
+			<persName><forename type="first">Nikhil</forename><surname>Garg</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Londa</forename><surname>Schiebinger</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dan</forename><surname>Jurafsky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James</forename><surname>Zou</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Proceedings of the National Academy of Sciences</title>
+		<imprint>
+			<biblScope unit="volume">115</biblScope>
+			<biblScope unit="issue">16</biblScope>
+			<biblScope unit="page" from="E3635" to="E3644" />
+			<date type="published" when="2018" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b42">
+	<analytic>
+		<title level="a" type="main">Demographic-aware word associations</title>
+		<author>
+			<persName><forename type="first">Aparna</forename><surname>Garimella</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Carmen</forename><surname>Banea</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Rada</forename><surname>Mihalcea</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2017 conference on empirical methods in natural language processing</title>
+				<meeting>the 2017 conference on empirical methods in natural language processing</meeting>
+		<imprint>
+			<date type="published" when="2017" />
+			<biblScope unit="page" from="2285" to="2295" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b43">
+	<analytic>
+		<title level="a" type="main">Neural Network Methods for Natural Language Processing</title>
+		<author>
+			<persName><forename type="first">Yoav</forename><surname>Goldberg</surname></persName>
+		</author>
+		<idno type="DOI">10.2200/S00762ED1V01Y201703HLT037</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Synthesis Lectures on Human Language Technologies</title>
+		<imprint>
+			<biblScope unit="volume">10</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="1" to="309" />
+			<date type="published" when="2017" />
+			<publisher>Morgan &amp; Claypool Publishers</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b44">
+	<monogr>
+		<author>
+			<persName><forename type="first">John</forename><forename type="middle">A</forename><surname>Goldsmith</surname></persName>
+		</author>
+		<idno type="DOI">10.1353/lan.2005.0127</idno>
+		<title level="m">The Legacy of Zellig Harris: Language and Information into the 21st Century</title>
+				<imprint>
+			<publisher>Publisher: Linguistic Society of America</publisher>
+			<date type="published" when="2005" />
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="page" from="719" to="736" />
+		</imprint>
+	</monogr>
+	<note>Philosophy of Science, Syntax and Semantics (review). Language</note>
+</biblStruct>
+
+<biblStruct xml:id="b45">
+	<analytic>
+		<title level="a" type="main">Speech recognition with deep recurrent neural networks</title>
+		<author>
+			<persName><forename type="first">Alex</forename><surname>Graves</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mohamed</forename><surname>Abdel-Rahman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Geoffrey</forename><surname>Hinton</surname></persName>
+		</author>
+		<idno type="DOI">10.1109/ICASSP.2013.6638947</idno>
+	</analytic>
+	<monogr>
+		<title level="m">2013 IEEE International Conference on Acoustics, Speech and Signal Processing</title>
+				<imprint>
+			<date type="published" when="2013" />
+			<biblScope unit="page" from="6645" to="6649" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b46">
+	<analytic>
+		<title level="a" type="main">Real-time Personalization using Embeddings for Search Ranking at Airbnb</title>
+		<author>
+			<persName><forename type="first">Mihajlo</forename><surname>Grbovic</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Haibin</forename><surname>Cheng</surname></persName>
+		</author>
+		<idno type="DOI">10.1145/3219819.3219885</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining -KDD &apos;18</title>
+				<meeting>the 24th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining -KDD &apos;18<address><addrLine>London, United Kingdom</addrLine></address></meeting>
+		<imprint>
+			<publisher>ACM Press</publisher>
+			<date type="published" when="2018" />
+			<biblScope unit="page" from="311" to="320" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b47">
+	<monogr>
+		<title level="m" type="main">Directions in sociolinguistics: The ethnography of communication</title>
+		<editor>John Joseph Gumperz and Dell Hymes</editor>
+		<imprint>
+			<date type="published" when="1972" />
+			<pubPlace>Holt, Rinehart and Winston</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b48">
+	<analytic>
+		<title level="a" type="main">Contextual acquisition of information categories -What has been done and what can be done automatically</title>
+		<author>
+			<persName><forename type="first">Benoît</forename><surname>Habert</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Pierre</forename><surname>Zweigenbaum</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Mathematics and computability of language. John Benjamins Publishing Company</title>
+				<editor>
+			<persName><forename type="first">Bruce</forename><forename type="middle">E</forename><surname>Nevin</surname></persName>
+			<persName><forename type="first">Stephen</forename><forename type="middle">B</forename><surname>Johnson</surname></persName>
+		</editor>
+		<imprint>
+			<date type="published" when="2002" />
+			<biblScope unit="volume">2</biblScope>
+		</imprint>
+	</monogr>
+	<note>The Legacy of Zellig Harris -Language and information into the 21st century. Publication Title: cilt.228</note>
+</biblStruct>
+
+<biblStruct xml:id="b49">
+	<analytic>
+		<title level="a" type="main">The Unreasonable Effectiveness of Data</title>
+		<author>
+			<persName><forename type="first">A</forename><surname>Halevy</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Norvig</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">F</forename><surname>Pereira</surname></persName>
+		</author>
+		<idno type="DOI">10.1109/MIS.2009.36</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Conference Name: IEEE Intelligent Systems</title>
+				<imprint>
+			<date type="published" when="2009" />
+			<biblScope unit="volume">24</biblScope>
+			<biblScope unit="page" from="8" to="12" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b50">
+	<analytic>
+		<title level="a" type="main">The users and uses of language</title>
+		<author>
+			<persName><forename type="first">M</forename><forename type="middle">A K</forename><surname>Halliday</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Readings in the sociology of language</title>
+				<editor>
+			<persName><forename type="first">Joshua</forename><forename type="middle">A</forename><surname>Fishman</surname></persName>
+		</editor>
+		<meeting><address><addrLine>New York, NY</addrLine></address></meeting>
+		<imprint>
+			<publisher>De Gruyter Mouton</publisher>
+			<date type="published" when="1968" />
+			<biblScope unit="page" from="139" to="169" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b51">
+	<analytic>
+		<title level="a" type="main">Corpus studies and probabilistic grammar</title>
+		<author>
+			<persName><forename type="first">M</forename><forename type="middle">A K</forename><surname>Halliday</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">English Corpus Linguistics. Routledge. Num Pages</title>
+				<editor>
+			<persName><forename type="first">Karin</forename><surname>Aijmer</surname></persName>
+			<persName><forename type="first">Bengt</forename><surname>Altenberg</surname></persName>
+		</editor>
+		<imprint>
+			<date type="published" when="1991" />
+			<biblScope unit="page">14</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b52">
+	<analytic>
+		<title level="a" type="main">Diachronic Word Embeddings Reveal Statistical Laws of Semantic Change</title>
+		<author>
+			<persName><forename type="first">William</forename><forename type="middle">L</forename><surname>Hamilton</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jure</forename><surname>Leskovec</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dan</forename><surname>Jurafsky</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/P16-1141</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 54th Annual Meeting of the Association for Computational Linguistics<address><addrLine>Berlin, Germany</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2016" />
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="page" from="1489" to="1501" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b53">
+	<analytic>
+		<title/>
+		<author>
+			<persName><forename type="first">S</forename><surname>Zellig</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Harris</surname></persName>
+		</author>
+		<idno type="DOI">10.2307/409287</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Review of Grundzüge der Phonologie. Language</title>
+		<imprint>
+			<biblScope unit="volume">17</biblScope>
+			<biblScope unit="issue">4</biblScope>
+			<biblScope unit="page" from="345" to="349" />
+			<date type="published" when="1941" />
+			<publisher>Publisher: Linguistic Society of America</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b54">
+	<analytic>
+		<title level="a" type="main">Methods in Structural Linguistics</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Zellig</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Harris</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Pages: xv</title>
+		<imprint>
+			<biblScope unit="page">384</biblScope>
+			<date type="published" when="1951" />
+			<publisher>University of Chicago Press</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b55">
+	<analytic>
+		<title/>
+		<author>
+			<persName><forename type="first">S</forename><surname>Zellig</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Harris</surname></persName>
+		</author>
+		<idno type="DOI">10.1080/00437956.1954.11659520</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Distributional Structure. WORD</title>
+		<imprint>
+			<biblScope unit="volume">10</biblScope>
+			<biblScope unit="issue">2-3</biblScope>
+			<biblScope unit="page" from="146" to="162" />
+			<date type="published" when="1954" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b56">
+	<monogr>
+		<title level="m" type="main">Mathematical Structures of Languages</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Zellig</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Harris</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1968" />
+			<publisher>John Wiley &amp; Sons</publisher>
+			<pubPlace>New York, NY</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b57">
+	<monogr>
+		<title level="m" type="main">Language and information. Number no. 28 in Bampton lectures in America</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Zellig</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Harris</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1988" />
+			<publisher>Columbia University Press</publisher>
+			<pubPlace>New York, NY</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b58">
+	<monogr>
+		<title level="m" type="main">A Theory of Language and Information: A Mathematical Approach</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Zellig</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Harris</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1991" />
+			<publisher>Clarendon Press</publisher>
+			<pubPlace>Oxford, UK</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b59">
+	<monogr>
+		<title level="m" type="main">The Form of Information in Science: Analysis of an Immunology Sublanguage</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Zellig</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Michael</forename><surname>Harris</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Thomas</forename><surname>Gottfried</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Anne</forename><surname>Ryckman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Paul</forename><surname>Daladier</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Mattick</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1988" />
+			<publisher>Kluwer Academic Publishers</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b60">
+	<analytic>
+		<title level="a" type="main">The Unstoppable Rise of Computational Linguistics in Deep Learning</title>
+		<author>
+			<persName><forename type="first">James</forename><surname>Henderson</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2020.acl-main.561</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 58th Annual Meeting of the Association for Computational Linguistics</meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="6294" to="6306" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b61">
+	<analytic>
+		<title level="a" type="main">The Social and the Neural Network: How to Make Natural Language Processing about People again</title>
+		<author>
+			<persName><forename type="first">Dirk</forename><surname>Hovy</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/W18-1106</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the Second Workshop on Computational Modeling of People&apos;s Opinions, Personality, and Emotions in Social Media</title>
+				<meeting>the Second Workshop on Computational Modeling of People&apos;s Opinions, Personality, and Emotions in Social Media<address><addrLine>New Orleans, Louisiana, USA</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2018" />
+			<biblScope unit="page" from="42" to="49" />
+		</imprint>
+	</monogr>
+	<note>Association for Computational Linguistics</note>
+</biblStruct>
+
+<biblStruct xml:id="b62">
+	<analytic>
+		<title level="a" type="main">Description of Language Design</title>
+		<author>
+			<persName><forename type="first">Martin</forename><surname>Joos</surname></persName>
+		</author>
+		<idno type="DOI">10.1121/1.1906674</idno>
+	</analytic>
+	<monogr>
+		<title level="j">The Journal of the Acoustical Society of America</title>
+		<imprint>
+			<biblScope unit="volume">22</biblScope>
+			<biblScope unit="issue">6</biblScope>
+			<biblScope unit="page" from="701" to="707" />
+			<date type="published" when="1950" />
+			<publisher>Acoustical Society of America</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b63">
+	<monogr>
+		<title level="m" type="main">Speech and Language Processing: An Introduction to Natural Language Processing, Computational Linguistics, and Speech Recognition</title>
+		<author>
+			<persName><forename type="first">Dan</forename><surname>Jurafsky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James</forename><forename type="middle">H</forename><surname>Martin</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2009" />
+			<publisher>Prentice Hall</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b64">
+	<monogr>
+		<author>
+			<persName><forename type="first">Dan</forename><surname>Jurafsky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James</forename><forename type="middle">H</forename><surname>Martin</surname></persName>
+		</author>
+		<title level="m">Speech and Language Processing</title>
+				<imprint>
+			<date type="published" when="2021" />
+		</imprint>
+	</monogr>
+	<note>3rd edition draft of september 21 edition</note>
+</biblStruct>
+
+<biblStruct xml:id="b65">
+	<monogr>
+		<title level="m" type="main">Sublanguage: Studies of language in restricted semantic domains</title>
+		<author>
+			<persName><forename type="first">Richard</forename><surname>Kittredge</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">John</forename><surname>Lehrberger</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1982" />
+			<publisher>de Gruyter</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b66">
+	<analytic>
+		<title level="a" type="main">The geometry of culture: Analyzing the meanings of class through word embeddings</title>
+		<author>
+			<persName><forename type="first">C</forename><surname>Austin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Matt</forename><surname>Kozlowski</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James A</forename><surname>Taddy</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Evans</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">American Sociological Review</title>
+		<imprint>
+			<biblScope unit="volume">84</biblScope>
+			<biblScope unit="issue">5</biblScope>
+			<biblScope unit="page" from="905" to="949" />
+			<date type="published" when="2019" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b67">
+	<analytic>
+		<title level="a" type="main">Diachronic word embeddings and semantic shifts: a survey</title>
+		<author>
+			<persName><forename type="first">Andrey</forename><surname>Kutuzov</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lilja</forename><surname>Øvrelid</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Terrence</forename><surname>Szymanski</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Erik</forename><surname>Velldal</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 27th International Conference on Computational Linguistics</title>
+				<meeting>the 27th International Conference on Computational Linguistics<address><addrLine>Santa Fe, New Mexico, USA</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2018" />
+			<biblScope unit="page" from="1384" to="1397" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b68">
+	<monogr>
+		<title level="m" type="main">Sociolinguistic Patterns. University of Pennsylvania press</title>
+		<author>
+			<persName><forename type="first">William</forename><surname>Labov</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1972" />
+			<pubPlace>Philadelphia, PA</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b69">
+	<monogr>
+		<title level="m" type="main">The Social Stratification of English in New York City</title>
+		<author>
+			<persName><forename type="first">William</forename><surname>Labov</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2006" />
+			<publisher>Cambridge University Press</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b70">
+	<analytic>
+		<title level="a" type="main">A solution to Plato&apos;s problem: The latent semantic analysis theory of acquisition, induction, and representation of knowledge</title>
+		<author>
+			<persName><forename type="first">K</forename><surname>Thomas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Susan</forename><forename type="middle">T</forename><surname>Landauer</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Dumais</surname></persName>
+		</author>
+		<idno type="DOI">10.1037/0033-295X.104.2.211</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Psychological Review</title>
+		<imprint>
+			<biblScope unit="volume">104</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="211" to="240" />
+			<date type="published" when="1997" />
+			<publisher>American Psychological Association</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b71">
+	<analytic>
+		<title level="a" type="main">Distributed Representations of Sentences and Documents</title>
+		<author>
+			<persName><forename type="first">Quoc</forename><surname>Le</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tomas</forename><surname>Mikolov</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 31st International Conference on Machine Learning</title>
+				<meeting>the 31st International Conference on Machine Learning</meeting>
+		<imprint>
+			<date type="published" when="2014" />
+			<biblScope unit="page" from="1188" to="1196" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b72">
+	<analytic>
+		<title level="a" type="main">Dependency-Based Word Embeddings</title>
+		<author>
+			<persName><forename type="first">Omer</forename><surname>Levy</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yoav</forename><surname>Goldberg</surname></persName>
+		</author>
+		<idno type="DOI">10.3115/v1/P14-2050</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 52nd Annual Meeting of the Association for Computational Linguistics<address><addrLine>Baltimore, Maryland</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2014" />
+			<biblScope unit="volume">2</biblScope>
+			<biblScope unit="page" from="302" to="308" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b73">
+	<analytic>
+		<title level="a" type="main">Improving Distributional Similarity with Lessons Learned from Word Embeddings</title>
+		<author>
+			<persName><forename type="first">Omer</forename><surname>Levy</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yoav</forename><surname>Goldberg</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ido</forename><surname>Dagan</surname></persName>
+		</author>
+		<idno type="DOI">10.1162/tacl_a_00134</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Transactions of the Association for Computational Linguistics</title>
+		<imprint>
+			<biblScope unit="volume">3</biblScope>
+			<biblScope unit="page" from="211" to="225" />
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b74">
+	<monogr>
+		<author>
+			<persName><forename type="first">Jiwei</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Michel</forename><surname>Galley</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Chris</forename><surname>Brockett</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Georgios</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jianfeng</forename><surname>Spithourakis</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Bill</forename><surname>Gao</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Dolan</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1603.06155</idno>
+		<title level="m">A persona-based neural conversation model</title>
+				<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b75">
+	<analytic>
+		<title level="a" type="main">Data-Intensive Text Processing with MapReduce</title>
+		<author>
+			<persName><forename type="first">Jimmy</forename><surname>Lin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Chris</forename><surname>Dyer</surname></persName>
+		</author>
+		<idno type="DOI">10.2200/S00274ED1V01Y201006HLT007</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Synthesis Lectures on Human Language Technologies</title>
+		<imprint>
+			<biblScope unit="volume">3</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="1" to="177" />
+			<date type="published" when="2010" />
+			<publisher>Morgan &amp; Claypool Publishers</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b76">
+	<analytic>
+		<title level="a" type="main">Gender Bias in Neural Natural Language Processing</title>
+		<author>
+			<persName><forename type="first">Kaiji</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Piotr</forename><surname>Mardziel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Fangjing</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Preetam</forename><surname>Amancharla</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Anupam</forename><surname>Datta</surname></persName>
+		</author>
+		<idno type="DOI">10.1007/978-3-030-62077-6_14</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Logic, Language, and Security: Essays Dedicated to Andre Scedrov on the Occasion of His 65th Birthday</title>
+		<title level="s">Lecture Notes in Computer Science</title>
+		<editor>
+			<persName><forename type="first">Vivek</forename><surname>Nigam</surname></persName>
+			<persName><forename type="first">Carolyn</forename><surname>Tajana Ban Kirigin</surname></persName>
+			<persName><forename type="first">Joshua</forename><surname>Talcott</surname></persName>
+			<persName><forename type="first">Stepan</forename><surname>Guttman</surname></persName>
+			<persName><surname>Kuznetsov</surname></persName>
+			<persName><forename type="first">Thau</forename><surname>Boon</surname></persName>
+			<persName><forename type="first">Mitsuhiro</forename><surname>Loo</surname></persName>
+			<persName><surname>Okada</surname></persName>
+		</editor>
+		<meeting><address><addrLine>Cham</addrLine></address></meeting>
+		<imprint>
+			<publisher>Springer International Publishing</publisher>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="189" to="202" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b77">
+	<analytic>
+		<title level="a" type="main">Characterizing english variation across social media communities with bert</title>
+		<author>
+			<persName><forename type="first">Li</forename><surname>Lucy</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">David</forename><surname>Bamman</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Transactions of the Association for Computational Linguistics</title>
+		<imprint>
+			<biblScope unit="volume">9</biblScope>
+			<biblScope unit="page" from="538" to="556" />
+			<date type="published" when="2021" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b78">
+	<analytic>
+		<title level="a" type="main">From Linguistic Events and Restricted Languages to Registers. Firthian legacy and Corpus Linguistics</title>
+		<author>
+			<persName><forename type="first">Jacqueline</forename><surname>Léon</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">The Henry Sweet Society Bulletin</title>
+		<imprint>
+			<biblScope unit="volume">49</biblScope>
+			<biblScope unit="page">5</biblScope>
+			<date type="published" when="2007" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b79">
+	<analytic>
+		<title level="a" type="main">Empirical Traditions of Computer-Based Methods. Firth&apos;s Restricted Languages and Harris&apos; Sublanguages</title>
+		<author>
+			<persName><forename type="first">Jacqueline</forename><surname>Léon</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Beiträge zur Geschichte der Sprachwissenschaft</title>
+		<imprint>
+			<biblScope unit="volume">18</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page">259</biblScope>
+			<date type="published" when="2008" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b80">
+	<analytic>
+		<title level="a" type="main">Harris and the semantic turn of mathematical information theory</title>
+		<author>
+			<persName><forename type="first">Jacqueline</forename><surname>Léon</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">History of Linguistics</title>
+				<imprint>
+			<publisher>John Benjamins</publisher>
+			<date type="published" when="2008" />
+			<biblScope unit="page" from="449" to="458" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b81">
+	<monogr>
+		<title level="m" type="main">Automating Linguistics</title>
+		<author>
+			<persName><forename type="first">Jacqueline</forename><surname>Léon</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2021" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b82">
+	<analytic>
+		<title level="a" type="main">Computational linguistics and deep learning</title>
+		<author>
+			<persName><forename type="first">Christopher</forename><forename type="middle">D</forename><surname>Manning</surname></persName>
+		</author>
+		<idno type="DOI">10.1162/COLI_a_00239</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Computational Linguistics</title>
+		<imprint>
+			<biblScope unit="volume">41</biblScope>
+			<biblScope unit="issue">4</biblScope>
+			<biblScope unit="page" from="701" to="707" />
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b83">
+	<monogr>
+		<title level="m" type="main">Foundations of Statistical Natural Language Processing</title>
+		<author>
+			<persName><forename type="first">D</forename><surname>Christopher</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hinrich</forename><surname>Manning</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Schütze</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1999" />
+			<publisher>MIT Press</publisher>
+			<pubPlace>Cambridge, MA, USA</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b84">
+	<analytic>
+		<title level="a" type="main">Leveraging Contextual Embeddings for Detecting Diachronic Semantic Shift</title>
+		<author>
+			<persName><forename type="first">Matej</forename><surname>Martinc</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Petra</forename><forename type="middle">Kralj</forename><surname>Novak</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Senja</forename><surname>Pollak</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 12th Language Resources and Evaluation Conference</title>
+				<meeting>the 12th Language Resources and Evaluation Conference<address><addrLine>Marseille, France</addrLine></address></meeting>
+		<imprint>
+			<publisher>European Language Resources Association</publisher>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="4811" to="4819" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b85">
+	<analytic>
+		<title level="a" type="main">2021. Natural Language Processing in GIScience Applications</title>
+		<author>
+			<persName><forename type="first">Grant</forename><surname>Mckenzie</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Benjamin</forename><surname>Adams</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Geographic Information Science &amp; Technology Body of Knowledge</title>
+				<editor>
+			<persName><forename type="first">John</forename><forename type="middle">P</forename><surname>Wilson</surname></persName>
+		</editor>
+		<imprint>
+			<biblScope unit="volume">2021</biblScope>
+		</imprint>
+	</monogr>
+	<note>4th quarter 2021 edition edition</note>
+</biblStruct>
+
+<biblStruct xml:id="b86">
+	<analytic>
+		<title level="a" type="main">A framework for the computational linguistic analysis of dehumanization</title>
+		<author>
+			<persName><forename type="first">Julia</forename><surname>Mendelsohn</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yulia</forename><surname>Tsvetkov</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dan</forename><surname>Jurafsky</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Frontiers in artificial intelligence</title>
+		<imprint>
+			<biblScope unit="volume">3</biblScope>
+			<biblScope unit="page">55</biblScope>
+			<date type="published" when="2020" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b87">
+	<analytic>
+		<title level="a" type="main">Distributed Representations of Words and Phrases and their Compositionality</title>
+		<author>
+			<persName><forename type="first">Tomas</forename><surname>Mikolov</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ilya</forename><surname>Sutskever</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kai</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Greg</forename><forename type="middle">S</forename><surname>Corrado</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jeff</forename><surname>Dean</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Advances in Neural Information Processing Systems</title>
+				<imprint>
+			<publisher>Curran Associates, Inc</publisher>
+			<date type="published" when="2013" />
+			<biblScope unit="volume">26</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b88">
+	<monogr>
+		<title level="m" type="main">Noam and Zellig</title>
+		<author>
+			<persName><forename type="first">Bruce</forename><surname>Nevin</surname></persName>
+		</author>
+		<editor>D. A. Kibbee</editor>
+		<imprint>
+			<date type="published" when="2010" />
+			<publisher>John Benjamins</publisher>
+			<biblScope unit="page" from="103" to="168" />
+			<pubPlace>Philadelphia</pubPlace>
+		</imprint>
+	</monogr>
+	<note>R)evolutions</note>
+</biblStruct>
+
+<biblStruct xml:id="b89">
+	<analytic>
+		<title level="a" type="main">A Minimalist Program for Linguistics: The Work of Zellig Harris on Meaning and Information</title>
+		<author>
+			<persName><forename type="first">Bruce</forename><forename type="middle">E</forename><surname>Nevin</surname></persName>
+		</author>
+		<idno type="DOI">10.1075/hl.20.2-3.06nev</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Historiographia Linguistica</title>
+		<imprint>
+			<biblScope unit="volume">20</biblScope>
+			<biblScope unit="issue">2-3</biblScope>
+			<biblScope unit="page" from="355" to="398" />
+			<date type="published" when="1993" />
+			<publisher>John Benjamins</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b90">
+	<analytic>
+		<title level="a" type="main">On learning and representing social meaning in NLP: a sociolinguistic perspective</title>
+		<author>
+			<persName><forename type="first">Dong</forename><surname>Nguyen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Laura</forename><surname>Rosseel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jack</forename><surname>Grieve</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2021.naacl-main.50</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</title>
+				<meeting>the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</meeting>
+		<imprint>
+			<publisher>Online. Association for Computational Linguistics</publisher>
+			<date type="published" when="2021" />
+			<biblScope unit="page" from="603" to="612" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b91">
+	<analytic>
+		<title level="a" type="main">Colorless green ideas learn furiously: Chomsky and the two cultures of statistical learning</title>
+		<author>
+			<persName><forename type="first">Peter</forename><surname>Norvig</surname></persName>
+		</author>
+		<idno type="DOI">10.1111/j.1740-9713.2012.00590.x</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Significance</title>
+		<imprint>
+			<biblScope unit="volume">9</biblScope>
+			<biblScope unit="issue">4</biblScope>
+			<biblScope unit="page" from="30" to="33" />
+			<date type="published" when="2012" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b92">
+	<monogr>
+		<title level="m" type="main">Aspects of Linguistic Theory in Firthian Linguistics</title>
+		<author>
+			<persName><forename type="first">O</forename><surname>Olasope</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Oyelaran</surname></persName>
+		</author>
+		<idno type="DOI">10.1080/00437956.1967.11435497</idno>
+		<imprint>
+			<date type="published" when="1967" />
+			<publisher>WORD</publisher>
+			<biblScope unit="volume">23</biblScope>
+			<biblScope unit="page" from="428" to="452" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b93">
+	<analytic>
+		<title level="a" type="main">Introduction</title>
+		<author>
+			<persName><forename type="first">F</forename><forename type="middle">R</forename><surname>Palmer</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Indiana University studies in the history and theory of linguistics. Longmans</title>
+				<editor>
+			<persName><forename type="first">J</forename><forename type="middle">R</forename><surname>Firth</surname></persName>
+		</editor>
+		<imprint>
+			<date type="published" when="1968" />
+			<biblScope unit="page" from="1952" to="1959" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b94">
+	<analytic>
+		<title level="a" type="main">Review of Selected Papers of J. R. Firth 1952-59</title>
+		<author>
+			<persName><forename type="first">P</forename><forename type="middle">B</forename><surname>Pandit</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Journal of Linguistics</title>
+		<imprint>
+			<biblScope unit="volume">6</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page" from="280" to="284" />
+			<date type="published" when="1970" />
+			<publisher>Cambridge University Press</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b95">
+	<analytic>
+		<title level="a" type="main">Deep Contextualized Word Representations</title>
+		<author>
+			<persName><forename type="first">Matthew</forename><surname>Peters</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mark</forename><surname>Neumann</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mohit</forename><surname>Iyyer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Matt</forename><surname>Gardner</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Christopher</forename><surname>Clark</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kenton</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Luke</forename><surname>Zettlemoyer</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/N18-1202</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</title>
+				<meeting>the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies<address><addrLine>New Orleans, Louisiana</addrLine></address></meeting>
+		<imprint>
+			<publisher>Long Papers</publisher>
+			<date type="published" when="2018" />
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="page" from="2227" to="2237" />
+		</imprint>
+	</monogr>
+	<note>Association for Computational Linguistics</note>
+</biblStruct>
+
+<biblStruct xml:id="b96">
+	<analytic>
+		<title level="a" type="main">Firth: a new biography</title>
+		<idno type="DOI">10.1111/j.1467-968X.2008.00203.x</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Transactions of the Philological Society</title>
+		<imprint>
+			<biblScope unit="volume">106</biblScope>
+			<biblScope unit="issue">3</biblScope>
+			<biblScope unit="page" from="337" to="374" />
+			<date type="published" when="2008" />
+		</imprint>
+	</monogr>
+	<note>J. R</note>
+</biblStruct>
+
+<biblStruct xml:id="b97">
+	<analytic>
+		<title level="a" type="main">Self-taught learning: transfer learning from unlabeled data</title>
+		<author>
+			<persName><forename type="first">Rajat</forename><surname>Raina</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Alexis</forename><surname>Battle</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Honglak</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Benjamin</forename><surname>Packer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Andrew</forename><forename type="middle">Y</forename><surname>Ng</surname></persName>
+		</author>
+		<idno type="DOI">10.1145/1273496.1273592</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 24th international conference on Machine learning, ICML &apos;07</title>
+				<meeting>the 24th international conference on Machine learning, ICML &apos;07<address><addrLine>New York, NY, USA</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computing Machinery</publisher>
+			<date type="published" when="2007" />
+			<biblScope unit="page" from="759" to="766" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b98">
+	<analytic>
+		<title level="a" type="main">The Phonology of the Nasalized Verbal Forms in Sundanese</title>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">H</forename><surname>Robins</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Bulletin of the School of Oriental and African Studies</title>
+		<imprint>
+			<biblScope unit="volume">15</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="138" to="145" />
+			<date type="published" when="1953" />
+			<publisher>Cambridge University Press</publisher>
+		</imprint>
+		<respStmt>
+			<orgName>University of London</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b99">
+	<analytic>
+		<title level="a" type="main">Malinowski, Firth, and the &apos;Context of Situation</title>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">H</forename><surname>Robins</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Social Anthropology and Language</title>
+				<editor>
+			<persName><forename type="first">Edwin</forename><surname>Ardener</surname></persName>
+		</editor>
+		<imprint>
+			<date type="published" when="1971" />
+		</imprint>
+	</monogr>
+	<note>Routledge</note>
+</biblStruct>
+
+<biblStruct xml:id="b100">
+	<analytic>
+		<title level="a" type="main">The contribution of John Rupert Firth to linguistics in the first fifty years of Lingua</title>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">H</forename><surname>Robins</surname></persName>
+		</author>
+		<idno type="DOI">10.1016/S0024-3841(96)00042-3</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Lingua</title>
+		<imprint>
+			<biblScope unit="volume">100</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="205" to="222" />
+			<date type="published" when="1997" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b101">
+	<analytic>
+		<title level="a" type="main">Contextual correlates of synonymy</title>
+		<author>
+			<persName><forename type="first">Herbert</forename><surname>Rubenstein</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">John</forename><forename type="middle">B</forename><surname>Goodenough</surname></persName>
+		</author>
+		<idno type="DOI">10.1145/365628.365657</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Communications of the ACM</title>
+		<imprint>
+			<biblScope unit="volume">8</biblScope>
+			<biblScope unit="issue">10</biblScope>
+			<biblScope unit="page" from="627" to="633" />
+			<date type="published" when="1965" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b102">
+	<monogr>
+		<author>
+			<persName><forename type="first">J</forename><surname>Stuart</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Peter</forename><surname>Russell</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Norvig</surname></persName>
+		</author>
+		<title level="m">Artificial Intelligence: A Modern Approach</title>
+				<imprint>
+			<publisher>Pearson</publisher>
+			<date type="published" when="2020" />
+		</imprint>
+	</monogr>
+	<note>4th edition</note>
+</biblStruct>
+
+<biblStruct xml:id="b103">
+	<analytic>
+		<title level="a" type="main">Sublanguage grammers in science information processing</title>
+		<author>
+			<persName><forename type="first">Naomi</forename><surname>Sager</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Journal of the American Society for Information Science</title>
+		<imprint>
+			<biblScope unit="volume">26</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="10" to="16" />
+			<date type="published" when="1975" />
+			<publisher>Wiley Online Library</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b104">
+	<monogr>
+		<title level="m" type="main">Natural Language Information Processing: A Computer Grammar of English and Its Applications</title>
+		<author>
+			<persName><forename type="first">Naomi</forename><surname>Sager</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1981" />
+			<publisher>Advanced Book Program</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b105">
+	<analytic>
+		<title level="a" type="main">The distributional hypothesis</title>
+		<author>
+			<persName><forename type="first">Magnus</forename><surname>Sahlgren</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Rivista di Linguistica</title>
+		<imprint>
+			<biblScope unit="volume">20</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="33" to="53" />
+			<date type="published" when="2008" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b106">
+	<analytic>
+		<title level="a" type="main">Social Bias Frames: Reasoning about Social and Power Implications of Language</title>
+		<author>
+			<persName><forename type="first">Maarten</forename><surname>Sap</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Saadia</forename><surname>Gabriel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lianhui</forename><surname>Qin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dan</forename><surname>Jurafsky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Noah</forename><forename type="middle">A</forename><surname>Smith</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yejin</forename><surname>Choi</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2020.acl-main.486</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 58th Annual Meeting of the Association for Computational Linguistics</meeting>
+		<imprint>
+			<publisher>Online. Association for Computational Linguistics</publisher>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="5477" to="5490" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b107">
+	<monogr>
+		<title level="m" type="main">Dimensions of meaning</title>
+		<author>
+			<persName><forename type="first">Hinrich</forename><surname>Schutze</surname></persName>
+		</author>
+		<idno type="DOI">10.1109/SUPERC.1992.236684</idno>
+		<imprint>
+			<date type="published" when="1992" />
+			<publisher>IEEE Computer Society</publisher>
+			<biblScope unit="page" from="787" to="796" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b108">
+	<analytic>
+		<title level="a" type="main">Word Space</title>
+		<author>
+			<persName><forename type="first">Hinrich</forename><surname>Schütze</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Advances in Neural Information Processing Systems</title>
+				<imprint>
+			<publisher>Morgan-Kaufmann</publisher>
+			<date type="published" when="1993" />
+			<biblScope unit="volume">5</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b109">
+	<monogr>
+		<title level="m" type="main">A Vector Model for Syntagmatic and Paradigmatic Relatedness</title>
+		<author>
+			<persName><forename type="first">Hinrich</forename><surname>Schütze</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jan</forename><surname>Pedersen</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1993" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b110">
+	<analytic>
+		<title level="a" type="main">The contribution of John Rupert Firth to the history of linguistics and the rejection of the phoneme theory</title>
+		<author>
+			<persName><forename type="first">Angela</forename><surname>Senis</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">ConSOLE XXIII: Proceedings of the 23rd Conference of the Student Organization of Linguistics in Europe</title>
+				<meeting><address><addrLine>Paris, France</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2015" />
+			<biblScope unit="page">23</biblScope>
+		</imprint>
+		<respStmt>
+			<orgName>Leiden University Centre for Linguistics</orgName>
+		</respStmt>
+	</monogr>
+	<note>ConSOLE XXIII</note>
+</biblStruct>
+
+<biblStruct xml:id="b111">
+	<analytic>
+		<title level="a" type="main">A Mathematical Theory of Communication</title>
+		<author>
+			<persName><forename type="first">C</forename><forename type="middle">E</forename><surname>Shannon</surname></persName>
+		</author>
+		<idno type="DOI">10.1002/j.1538-7305.1948.tb01338.x</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Conference Name: The Bell System Technical Journal</title>
+				<imprint>
+			<date type="published" when="1948" />
+			<biblScope unit="volume">27</biblScope>
+			<biblScope unit="page" from="379" to="423" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b112">
+	<analytic>
+		<title level="a" type="main">Indexical order and the dialectics of sociolinguistic life</title>
+		<author>
+			<persName><forename type="first">Michael</forename><surname>Silverstein</surname></persName>
+		</author>
+		<idno type="DOI">10.1016/S0271-5309(03)00013-2</idno>
+	</analytic>
+	<monogr>
+		<title level="j">Language &amp; Communication</title>
+		<imprint>
+			<biblScope unit="volume">23</biblScope>
+			<biblScope unit="issue">3-4</biblScope>
+			<biblScope unit="page" from="193" to="229" />
+			<date type="published" when="2003" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b113">
+	<analytic>
+		<title level="a" type="main">Identification of biased terms in news articles by comparison of outlet-specific word embeddings</title>
+		<author>
+			<persName><forename type="first">Timo</forename><surname>Spinde</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lada</forename><surname>Rudnitckaia</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Felix</forename><surname>Hamborg</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Bela</forename><surname>Gipp</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">International Conference on Information</title>
+				<imprint>
+			<publisher>Springer</publisher>
+			<date type="published" when="2021" />
+			<biblScope unit="page" from="215" to="224" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b114">
+	<analytic>
+		<title level="a" type="main">Language (Re)modelling: Towards Embodied Language Understanding</title>
+		<author>
+			<persName><forename type="first">Ronen</forename><surname>Tamari</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Chen</forename><surname>Shani</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tom</forename><surname>Hope</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R L</forename><surname>Miriam</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Omri</forename><surname>Petruck</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dafna</forename><surname>Abend</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Shahaf</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2020.acl-main.559</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 58th Annual Meeting of the Association for Computational Linguistics</meeting>
+		<imprint>
+			<publisher>Online. Association for Computational Linguistics</publisher>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="6268" to="6281" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b115">
+	<analytic>
+		<title level="a" type="main">What do you learn from context? Probing for sentence structure in contextualized word representations</title>
+		<author>
+			<persName><forename type="first">Ian</forename><surname>Tenney</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Patrick</forename><surname>Xia</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Berlin</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Alex</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Adam</forename><surname>Poliak</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Thomas</forename><surname>Mccoy</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Najoung</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Benjamin</forename><surname>Van Durme</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><surname>Samuel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dipanjan</forename><surname>Bowman</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Das</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2019 international conference on learning representations</title>
+				<meeting>the 2019 international conference on learning representations<address><addrLine>New Orleans, LA</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2019" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b116">
+	<monogr>
+		<author>
+			<persName><forename type="first">Margaret</forename><surname>Thomas</surname></persName>
+		</author>
+		<idno type="DOI">10.4324/9780203814482</idno>
+		<title level="m">Fifty Key Thinkers on Language and Linguistics. Routledge</title>
+				<meeting><address><addrLine>London</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2011" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b117">
+	<analytic>
+		<title level="a" type="main">2020. (Re)construing Meaning in NLP</title>
+		<author>
+			<persName><forename type="first">Sean</forename><surname>Trott</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nancy</forename><surname>Tiago Timponi Torrent</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nathan</forename><surname>Chang</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Schneider</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2020.acl-main.462</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 58th Annual Meeting of the Association for Computational Linguistics</meeting>
+		<imprint>
+			<publisher>Online. Association for Computational Linguistics</publisher>
+			<biblScope unit="page" from="5170" to="5184" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b118">
+	<analytic>
+		<title level="a" type="main">Attention is All you Need</title>
+		<author>
+			<persName><forename type="first">Ashish</forename><surname>Vaswani</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Noam</forename><surname>Shazeer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Niki</forename><surname>Parmar</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jakob</forename><surname>Uszkoreit</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Llion</forename><surname>Jones</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Aidan</forename><forename type="middle">N</forename><surname>Gomez</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Łukasz</forename><surname>Kaiser</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Illia</forename><surname>Polosukhin</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Advances in Neural Information Processing Systems</title>
+				<imprint>
+			<date type="published" when="2017" />
+			<biblScope unit="page">30</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b119">
+	<monogr>
+		<author>
+			<persName><forename type="first">Alfred North</forename><surname>Whitehead</surname></persName>
+		</author>
+		<title level="m">Modes of Thought. Simon and Schuster</title>
+				<imprint>
+			<date type="published" when="1968" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b120">
+	<monogr>
+		<title level="m" type="main">Philosophical investigations</title>
+		<author>
+			<persName><forename type="first">Ludwig</forename><surname>Wittgenstein</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1953" />
+			<publisher>Macmillan</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b121">
+	<analytic>
+		<title level="a" type="main">From ITDL to Place2Vec: Reasoning About Place Type Similarity and Relatedness by Learning Embeddings From Augmented Spatial Contexts</title>
+		<author>
+			<persName><forename type="first">Bo</forename><surname>Yan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Krzysztof</forename><surname>Janowicz</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Gengchen</forename><surname>Mai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Song</forename><surname>Gao</surname></persName>
+		</author>
+		<idno type="DOI">10.1145/3139958.3140054</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 25th ACM SIGSPATIAL International Conference on Advances in Geographic Information Systems -SIGSPATIAL&apos;17</title>
+				<meeting>the 25th ACM SIGSPATIAL International Conference on Advances in Geographic Information Systems -SIGSPATIAL&apos;17<address><addrLine>Redondo Beach, CA, USA</addrLine></address></meeting>
+		<imprint>
+			<publisher>ACM Press. Tex.ids= Yan2017ITDLPlace2VecReasoninga</publisher>
+			<date type="published" when="2017" />
+			<biblScope unit="page" from="1" to="10" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b122">
+	<analytic>
+		<title level="a" type="main">Employing personal word embeddings for personalized search</title>
+		<author>
+			<persName><forename type="first">Jing</forename><surname>Yao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhicheng</forename><surname>Dou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ji-Rong</forename><surname>Wen</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 43rd International ACM SIGIR Conference on Research and Development in Information Retrieval</title>
+				<meeting>the 43rd International ACM SIGIR Conference on Research and Development in Information Retrieval</meeting>
+		<imprint>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="1359" to="1368" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

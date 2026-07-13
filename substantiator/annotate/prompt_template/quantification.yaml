@@ -1,0 +1,49 @@
+latest: |
+  # Task: Determine whether the target claim includes non-numeric quantifiers.
+
+  # Definition of Quantifiers:
+  Quantifiers are words that limit how broadly a claim applies. This includes words that specify the extent, frequency, or proportion of the claim.
+
+  # Examples of Quantifiers:
+  * Universal / distributive: all, both, each, every
+  * Existential / indefinite: some, any, several, a few, few, many, much, little, a little, a lot of, lots of, plenty of
+  * Negative: no, none, neither, hardly any
+  * Proportional: most, half (of), the majority of, the minority of
+  * Comparative / superlative before **nouns**: more (than), most, fewer (than), fewest, less (than), least
+  * Partitives (of-phrases): some of, most of, all of, none of, many of, much of, a lot of, plenty of
+
+  # Not Quantifiers:
+  * Anything that is not before a noun is not a quantifier.
+  * Specific numerals are not quantifiers, e.g. "0.9", "70%".
+
+  # More Examples:
+  Claim: Most reasons do not adequately justify violating a sacred value.
+  Reasoning: In this case, "most" is before a noun, hence it is a quantifier.
+  Answer: Yes
+
+  Claim: The algorithm is the most effective one.
+  Reasoning: "most" here is before an adjective, not a noun, hence it is not a quantifier.
+  Answer: No
+
+  Claim: Children generally score high on measures of academic achievement.
+  Reasoning: "generally" is not before a noun, it is not a quantifier.
+  Answer: No
+
+  Claim: While single-head attention is 0.9 BLEU worse than the best setting, quality also drops off.
+  Reasoning: Specific numerals are not quantifiers.
+  Answer: No
+
+  Claim: Children score highest on measures of academic achievement.
+  Reasoning: "highest" here is not before a noun, hence it is not a quantifier.
+  Answer: No
+
+  Claim: The algorithm achieves more than 95% accuracy.
+  Reasoning: Although specific numerals "95%" is not a quantifier, "more than" here is before a noun, hence it is a quantifier.
+  Answer: Yes
+
+  # Target Claim:
+  {get_target_sent_label}
+
+  Determine whether the target claim includes non-numeric quantifiers. Give your reasoning first, then answer with Yes or No. Use the format below.
+  Reasoning: <your reasoning>
+  Answer: Yes/No

@@ -1,0 +1,1007 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.com/kermitt2/grobid/master/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Learning to Decouple Relations: Few-Shot Relation Classification with Entity-Guided Attention and Confusion-Aware Training</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName><forename type="first">Yingyao</forename><surname>Wang</surname></persName>
+							<email>yywang@hit-mtlab.net</email>
+							<affiliation key="aff0">
+								<orgName type="institution">Harbin Institute of Technology</orgName>
+								<address>
+									<settlement>Harbin</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Junwei</forename><surname>Bao</surname></persName>
+							<email>baojunwei@jd.com</email>
+							<affiliation key="aff1">
+								<orgName type="department">JD AI Research</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Guangyi</forename><surname>Liu</surname></persName>
+							<email>gy-liu@foxmail.com</email>
+							<affiliation key="aff2">
+								<orgName type="institution">The Chinese University of Hong Kong</orgName>
+								<address>
+									<settlement>Shenzhen</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Youzheng</forename><surname>Wu</surname></persName>
+							<email>wuyouzheng1@jd.com</email>
+							<affiliation key="aff1">
+								<orgName type="department">JD AI Research</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Xiaodong</forename><surname>He</surname></persName>
+							<email>xiaodong.he@jd.com</email>
+						</author>
+						<author>
+							<persName><forename type="first">Bowen</forename><surname>Zhou</surname></persName>
+							<email>bowen.zhou@jd.com</email>
+							<affiliation key="aff1">
+								<orgName type="department">JD AI Research</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Tiejun</forename><surname>Zhao</surname></persName>
+							<email>tjzhao@hit.edu.cn</email>
+							<affiliation key="aff0">
+								<orgName type="institution">Harbin Institute of Technology</orgName>
+								<address>
+									<settlement>Harbin</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+							<affiliation key="aff1">
+								<orgName type="department">JD AI Research</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Learning to Decouple Relations: Few-Shot Relation Classification with Entity-Guided Attention and Confusion-Aware Training</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date/>
+						</imprint>
+					</monogr>
+					<idno type="MD5">0E86F69DC334F51E19D3794622EA7884</idno>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<encodingDesc>
+			<appInfo>
+				<application version="0.7.1-SNAPSHOT" ident="GROBID" when="2023-04-04T10:18+0000">
+					<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>
+					<ref target="https://github.com/kermitt2/grobid"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<profileDesc>
+			<abstract>
+<div xmlns="http://www.tei-c.org/ns/1.0"><p>This paper aims to enhance the few-shot relation classification especially for sentences that jointly describe multiple relations. Due to the fact that some relations usually keep high cooccurrence in the same context, previous few-shot relation classifiers struggle to distinguish them with few annotated instances. To alleviate the above relation confusion problem, we propose CTEG, a model equipped with two mechanisms to learn to decouple these easily-confused relations. On the one hand, an Entity-Guided Attention (EGA) mechanism, which leverages the syntactic relations and relative positions between each word and the specified entity pair, is introduced to guide the attention to filter out information causing confusion. On the other hand, a Confusion-Aware Training (CAT) method is proposed to explicitly learn to distinguish relations by playing a pushing-away game between classifying a sentence into a true relation and its confusing relation. Extensive experiments are conducted on the FewRel dataset, and the results show that our proposed model achieves comparable and even much better results to strong baselines in terms of accuracy. Furthermore, the ablation test and case study verify the effectiveness of our proposed EGA and CAT, especially in addressing the relation confusion problem.</p></div>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>Relation classification (RC) aims to identify the relation between two specified entities in a sentence. Previous supervised approaches on this task heavily depend on human-annotated data, which limit their performance on classifying the relations with insufficient instances. Therefore, making the RC models capable of identifying relations with few training instances becomes a crucial challenge. Inspired by the success of few-shot learning methods in the computer vision community <ref type="bibr" target="#b22">(Vinyals et al., 2016;</ref><ref type="bibr" target="#b20">Sung et al., 2017;</ref><ref type="bibr" target="#b16">Santoro et al., 2016)</ref> and some other natural language processing tasks <ref type="bibr" target="#b1">(Chen et al., 2016;</ref><ref type="bibr" target="#b15">Qin et al., 2020;</ref>, <ref type="bibr" target="#b10">Han et al. (2018)</ref> first introduce the few-shot learning to RC task and propose the FewRel dataset. Recently, many works focus on this task and achieve remarkable performance <ref type="bibr" target="#b7">(Gao et al., 2019a;</ref><ref type="bibr" target="#b18">Snell et al., 2017;</ref><ref type="bibr" target="#b26">Ye and Ling, 2019)</ref>.</p><p>Previous few-shot relation classifiers perform well on sentences with only one relation of a single entity pair. However, in real natural language, a sentence usually jointly describes multiple relations of different entity pairs. Since these relations usually keep high co-occurrence in the same context, previous few-shot RC models struggle to distinguish them with few annotated instances. For example, Table <ref type="table">1</ref> shows three instances from the FewRel dataset, where each sentence describes multiple relations with corresponding keyphrases highlighted (colored) as evidence. When specified two entities (bold black) in the sentence, there is a great opportunity for the instance to be incorrectly categorized as a confusing relation (red) instead of the true relation (blue). Specifically, the first instance should be categorized as the true relation 'parents-child' based on the given entity pair and natural language (NL) expression 'a daughter of '. However, since it also includes the NL expression 'his wife', it is probably misclassified into this confusing relation 'husband-wife'. In this paper, we name it as a relation confusion problem.</p><p>True Relation Confusing Relation Instance parents-child husband-wife She was a daughter of prince Wilhelm of Baden and his wife princess Maria of Lichtenberg, as well as an elder sister of prince Maximilian.</p><p>husband-wife uncle-nephew He was the youngest son of Prescott Sheldon Bush and his wife Dorothy Walker Bush, and the uncle of former president George W Bush.</p><p>uncle-nephew parents-child Snowdon is the son of princess Margaret, countess of Snowdon, and the 1st earl of Snowdon, thus he is the nephew of queen Elizabeth ii.</p><p>Table <ref type="table">1</ref>: Example sentences containing confusing relations. Their specified entities are marked as italics in bold. The blue and red words respectively correspond to true and confusing relations.</p><p>To address the relation confusion problem, it is crucial for a model to be aware of which NL expressions cause confusion and learn to avoid mapping the instance into its easily-confused relation. From these perspectives, we propose two assumptions. Firstly, in a sentence, words that keep high relevance to the given entities are more important in expressing the true relation. Secondly, explicitly learning of mapping an instance into its confusing relation with augmented data in turn boosts a few-shot RC model on identifying the true relation. Based on these assumptions, we propose CTEG, a few-shot RC model with two novel mechanisms: (1) An Entity-Guided Attention (EGA) encoder, which leverages the syntactic relations and relative positions between each word and the specified entity pair to softly select important information of words expressing the true relation and filter out the information causing confusion. (2) A Confusion-Aware Training (CAT) method, which explicitly learns to distinguish relations by playing a pushing-away game between classifying a sentence into a true relation and its confusing relation. In addition, inspired by the success of pre-trained language models, our approaches are based on BERT <ref type="bibr" target="#b4">(Devlin et al., 2018)</ref>, which has been proved effective especially for few-shot learning tasks.</p><p>Specifically, the backbone of the encoder of our model is a transformer equipped with the proposed EGA which guides the calculation of self-attention distributions by weighting the attention logits with entity-guided gates. The gates are used to measure the relevance between each word and the given two entities. Two types of information for each word are used to calculate its gate. One is the relative position <ref type="bibr" target="#b28">(Zeng et al., 2015a)</ref> information, which is the relative distance between a word and an entity in the input sequence. The other is syntactic relation which is proposed in this paper, defined as the dependency relations between each word and the entities. Based on these information, the entity-guided gates in EGA are able to select those important words and control the contribution of each word in self-attention.</p><p>We also propose CAT to explicitly force the model to asynchronously learn the classification from an instance to its true relation and its confusing relation. After each training step, the CAT first selects those misclassified sentences, and regards the relations they are misclassified into as the confusing relations. After that, The CAT uses these misclassified instances and their confusing relations as augmented data to conduct an additional training process, which aims to learn the mapping between these instances into the confusing relations. Afterwards, the CAT adopts the KL divergence <ref type="bibr" target="#b12">(Kullback and Leibler, 1951)</ref> to teach the model to distinguish the difference between the true and confusing relations, which benefits the true relation classification from the confusing relation identification.</p><p>The contributions of this paper are summarized as follows:</p><p>(1) We propose an Entity-Guided Attention encoder, which can select crucial words and filter out NL expressions causing confusion based on their relevance to the specified entities. (2) We propose a Confusion-Aware Training process to enhance the model with the ability of distinguishing true and confusing relations. (3) We conduct extensive experiments on few-shot RC dataset FewRel, ans the results show that our model achieves comparable and even much better results to strong baselines. Furthermore, ablation and case studies verify the effectiveness of the proposed EGA and CAT, especially in addressing the relation confusion problem.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">Methodology</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.1">EGA: Entity-Guided Attention Encoder</head><p>The inputs of our model include a sentence S = w 1 , ..., w n with n words, and two pairs of integers s 1 = (l 1 , r 1 ) and s 2 = (l 2 , r 2 ) representing the start and end positions of the two specified entities. Figure <ref type="figure">2</ref>: The dependency tree of a sentence and the paths used as syntactic relations in EGA.</p><p>Firstly, we convert the words into a sequence of vectors e w 1 , ..., e w n , using an embedding layer initialized by BERT. We then use two types of relevance information, i.e., relative position and syntactic relation, between each word and the specified entity pair to construct entity-guided gates for information selection.</p><p>Relative Position. Relative position information is typically used in relation classification task <ref type="bibr" target="#b28">(Zeng et al., 2015a)</ref>, which is defined as the relative distances pos 1 and pos 2 from the current word to the two specified entities in the sentence. The relative position information of the i-th word is represented as</p><formula xml:id="formula_0">e pos i = [e pos1 i , e pos2 i ]</formula><p>, where e pos1 i , e pos2 i ∈ R dpos are the embeddings of pos 1 and pos 2 .</p><p>Syntactic Relation Except for the relative position, we further introduce the syntactic relations to measure the relevance between each word and the specified entities. The syntactic relations are derived based on dependency parse trees, which are obtained from the Standford Parser 1 . For example, Figure <ref type="figure">2(a)</ref> shows the original dependency tree of the sentence "Chen-chun-chang is a mathematician who works in model-theory", where "Chen-chun-chang" and "model-theory" are entities. In this paper, we assume that words that directly connect to the given entities are more important in expressing the true relations. Therefore, dependency relations that connect the specified entities and other words are remained and the others are discarded, which derives a pruned dependency tree, as one shown in Figure <ref type="figure">2(b)</ref>. Based on the pruned dependency tree, each word in the sentence is assigned two tags t i = (t i,1 , t i,2 ) as the proposed syntactic relations. Taking the tag t i,1 of word w i which corresponds to the first entity as an example, if w i is part of the first entity, the tag t i,1 is assigned the value 'self ', and if w i is directly connected to the first entity in the dependency tree, t i,1 is assigned the dependency relation, e.g., 'nmod'. In addition, if w i is neither connected to nor part of the first entity, t i,1 is assigned 'other'. Based on the above strategy, the syntactic relations of the sentence in Figure <ref type="figure">2</ref>   Entity-Guided Gate The proposed EGA learns entity-guided gates G = (g 1 , ..., g n ) for all words in a given sentence based on the above two types of information. Intuitively, if a word w i is directly connected to the given entities in the dependency tree, the corresponding information tends to be more important. Specifically, the relative position embedding and the syntactic relation embedding are first concatenated into e p i = [e pos i , e syn i ], where e p i ∈ R 2dpos+2dsyn . We then adopt a transformer encoder <ref type="bibr" target="#b21">(Vaswani et al., 2017)</ref> followed by a single layer feed-forward neural network (FNN) with sigmoid(•) activation to derive a sequence of entity-guided gates as follows:</p><formula xml:id="formula_1">(h p 1 , ..., h p i , ..., h p n ) = TransEnc(e p 1 , ..., e p i , ..., e p n )<label>(1)</label></formula><formula xml:id="formula_2">g i = sigmoid(W g h p i + b g ) (2)</formula><p>Gated Self-Attention A pre-trained transformer encoder with M layers equipped with the proposed EGA is used to learn the representation for a sentence. The backbone of each layer is a self-attention layer, which calculates attention weights for word pairs in the sentence. We define self-attention weights of the tth-layer as Att t , and the corresponding hidden states of the sentence is represented as H t .</p><p>To obtain the attention weights Att t , the scaled attention scores</p><formula xml:id="formula_3">Q t K t √ d k</formula><p>is multiplied by the entityguided gate G with broadcasting followed by a softmax(•) operation. The gated self-attention and the calculation of H t are formalized as follows, where W k ,W q ,W v are trainable parameters.</p><formula xml:id="formula_4">(Q t , K t , V t ) = (W q , W k , W v )H t−1</formula><p>(3)</p><formula xml:id="formula_5">Att t = softmax( Q t K t ⊗ G √ d k )<label>(4)</label></formula><formula xml:id="formula_6">H t = Att t V t (5)</formula><p>Finally, vector s as the representation of the sentence is obtained based on Equation <ref type="formula">6</ref>, where H M represents the output of the M -th layer of the encoder.</p><formula xml:id="formula_7">s = maxpooling(H M ) (6)</formula></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.2">Classification</head><p>The classifier performs N -way-K-shot classification following few-shot learning paradigm and the prototypical network <ref type="bibr" target="#b18">(Snell et al., 2017)</ref>. Specifically, for a relation r j where j ∈ [1, N ], K sentences are sampled from its instances firstly, and then these sentences are used to calculate the representation named prototype c j of the relation. We define the representations of the K sentences as s c j,1 , ..., s j,K c , and prototype c j is calculated as follows:</p><formula xml:id="formula_8">c j = 1 K K k=1 s c j,k<label>(7)</label></formula><p>Given the representation s q of a sentence as query and the prototypes (c 1 , ..., c N ) of N relations, the model aims to classify s q into one of the N candidate relations. We first obtain the distance distribution δ = (δ 1 , ..., δ N ) by calculating the Euclidean Distance between s q and each prototype. Then, according to δ, the sentence will be classified into the nearest relation r.</p><formula xml:id="formula_9">δ = ( s q − c 1 2 , ..., s q − c N 2 ) (8) r = arg min j (δ)<label>(9)</label></formula><p>To enable the classifier to learn confusing relations, we further project the distance distrubution δ into δ via a FFN with a tanh(•) activation function defined as follows. The δ is used to predict the confusing relation defined as r during a confusion-aware training (CAT) stage which is introduced in Section 2.3.</p><formula xml:id="formula_10">δ = tanh(W c δ + b c ) (10)</formula></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.3">CAT: Confusion-Aware Training</head><p>The confusion-aware training is based on two asynchronous processes: true relation identification and confusing relation identification. During classifying a sentence, the former uses its true relation as the target, and the latter uses its confusing relation as the target. Specifically, given a sentence with its true relation as r, the training objective of the true relation identification is defined as:</p><formula xml:id="formula_11">L = CrossEntropy(OneHot(r), Softmax(δ))<label>(11)</label></formula><p>For the confusing relation identification, we first pick up those misclassified sentences after each training step of true relation identification, and use their prediction results as the targets. In formulation, assuming the sentence is misclassified into an incorrect r, the objective function of the confusing relation identification L is defined as:</p><formula xml:id="formula_12">L = CrossEntropy(OneHot(r), Softmax( δ))<label>(12)</label></formula><p>Besides, the KL divergence is adopted as another objective function, which allows the model to learn to perform confusion decoupling. The KL divergence has the ability to push away the distance distribution δ and δ, and the formula is defined as follows:</p><formula xml:id="formula_13">L kl = −KL(Softmax(δ), Softmax( δ))<label>(13)</label></formula><p>Through minimizing L kl , the model is able to explicitly learn to distinguish relations by playing a pushing-away game between classifying a sentence into a true relation and its confusing relation. In other words, our model learns to explicitly decouple r and r for classification based on specified entities in a given sentence. It is worth noting that, only those misclassified sentences are used for updating the objective L kl . The final objective function of our model L all is defined as L all = L + L + L kl .</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3">Experiments</head><p>In this section, we report our experiment results from the following four aspects. We first show the comparison results of our model CTEG and baselines on FewRel dataset in Section 3.3. We then demonstrate the effectiveness of the proposed entity-gated attention (EGA) and confusion-aware training (CAT) through the ablation studies in Section 3.4. In order to more intuitively and clearly show the role of EGA and CAT, we show their visualized examples in case study in Section 3.5. Furthermore, we verify that our model is capable of addressing the relation confusion problem to some extent in Section 3.6.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1">Implementation Details</head><p>Dataset The FewRel dataset <ref type="bibr" target="#b10">(Han et al., 2018)</ref> contains 100 relations, which are split up into 64 for training, 16 for validation and 20 for testing. Each relation has 700 instances generated by distant supervision <ref type="bibr" target="#b14">(Mintz et al., 2009)</ref>. All the instances are annotated with a specified entity pair.</p><p>Settings The dimension of word embedding is set to 768 for consistency with the base model of BERT <ref type="bibr" target="#b4">(Devlin et al., 2018)</ref>. The max length of the input is set to 100. Following BERT, the layer number M of the transformer encoder with EGA is 12, and all parameters in it is initialized with the pretrained BERT model. The relative position and syntactic relation embedding dimensions are both set to 50, and the transformer encoder for obtaining entity-guided gates is set up with hidden size as 230, head number of self-attention as 2. In addition, the model is optimized by Adam algorithm with the learning rate and the weight decay as 1 × 10 −5 and 1 × 10 −6 , respectively.</p><p>Model 5-way-1-shot 5-way-5-shot 10-way-1-shot 10-way-5-shot</p><p>Proto <ref type="bibr">(Han et</ref>   </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2">Baselines</head><p>We implement four baselines on FewRel dataset: Proto, Proto-HATT <ref type="bibr" target="#b7">(Gao et al., 2019a)</ref>, MLMAN (Ye and Ling, 2019) and BERT-PAIR <ref type="bibr" target="#b8">(Gao et al., 2019b)</ref>. All the baselines are based on the few-shot learning framework. Specifically, for each training step, N relations are first sampled from the training set. For each of the above relation, K out of 700 instances are sampled to construct a supporting set, based on which a relation representation named prototype is calculated. Given an instance of the N relations to be classified, the models classify it by calculating the distances from it to N prototypes.</p><p>Proto &amp; Proto-HATT Both of the two models adopt the convolutional neural network (CNN) as encoders. Proto calculates the prototype by averaging the representations of the K-instances in the supporting set, and classify the query using the Euclidean Distance. Differently, Proto-HATT further proposes a hybrid attention scheme which includes an instance-level attention and a feature-level attention, where the former is used to highlight the crucial support sentences in calculating the prototype, and the latter is to select more efficient features when calculating distances.</p><p>MLMAN Different from the Proto and Proto-HATT, MLMAN encodes each query and the supporting set in an interactive way by considering their matching information on multiple levels. At local level, the representations of an instance and a supporting set are matched following the sentence matching framework <ref type="bibr" target="#b3">(Chen et al., 2017b)</ref> and aggregated by max and average pooling. At instance level, the matching degree is first calculated via a multi-layer perception (MLP). Then, taking the matching degrees as weights, the instances in a supporting set are aggregated to obtain the class prototype for final classification.</p><p>BERT-PAIR This model is based on the sentence classification model in BERT. The sentence to be classified is first paired with all the supporting instances, and then each pair is concatenated to a sequence. BERT takes this sequence as input and returns a relevance score, which is used to measure whether the given sentence expresses the same relation with the corresponding supporting instance.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.3">Comparison with Baselines</head><p>Same as Proto, we set N = 5, 10 and K = 1, 5 for N vK few-shot learning. Average accuracy is used as the evaluation metric to evaluate the relation classification performance. The results in Table <ref type="table" target="#tab_3">3</ref> show that our model EGA with CAT, named CTEG, outperforms the three strong baselines including Proto, Proto-HATT and MLMAN by a significant margin on all the settings. These improvements are mainly brought by our EGA and CAT, which help the model to classify those easily-confused instances into correct ones.</p><p>In addition, applying pre-trained BERT also contributes to improving the performance. Compared with BERT-Pair, our CTEG achieves better result on 5v5, 10v1 and 10v5 settings and comparable results on 5v1 settings on the test set, while on the dev set our CTEG is slight lower than BERT-pair on 5v1 and 10v1 settings. We think that the lower performance on the dev set on 5v1 and 10v1 is due to the fact that BERT-Pair encodes two sentences together which benefits for information fusion, while models based on prototypical network rely on larger K supporting facts to get a better prototype.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.4">Ablation Study</head><p>We conduct ablation study and show the results in Table <ref type="table" target="#tab_3">3</ref>. Firstly, we turn off the CAT of our full model, which is represented as "w/o CAT". In this case, the average results drops 0.43-1.76 point on the four settings. These drops indicate that the CAT has the ability to improve the classification performance. We then report three groups of results to verify the effectiveness of EGA. Specially, our model without EGA which only adopts the BERT as the encoder is denoted as "w/o EGA". It is worth noting that in this case, the model can not identify which words in a given sentence are entities. When the EGA is removed, the performance decreases obviously by 5.81-14.13 point. It is proved that the entity information is crucial for relation classification. Furthermore, "w/ Pos" means the entity-guided gates in EGA are calculated only using the relative position information, and "w/ Syn" only using the syntactic relation information. Compared with "w/o EGA", the results of these two groups are significantly improved.</p><p>It shows that the syntactic relation information is more powerful than the relative position information, which means considering the dependency relations between each word and the specified entity pair boosts the performance of simply adopting traditional relative position information. In addition, it can be seen that the smaller size of the supporting set (1-shot v.s. 5-shot), the more absolute gain our CAT and EGA modules achieve. This phenomenon shows that our method performs well with fewer available supporting instances. How to Gate The self-attention mechanism is used to update the representation of each query word by fusing the information of all key words in a given sentence. In this process, an attention score is calculated to leverage the contribution of each key word. In this paper, we propose to use gates to further adjust these attention scores. In our proposed EGA, each entity-guided gate reflects the relation between the key word and the specified entity pair, which is different for all key words. We also implement a baseline QGG with query-guided gates, where each gate reflects the relation between the key word and the query word. Specifically, the relation is modeled based on their syntactic relation if the key word is a specified entity, otherwise a 'other' relation. The results of using these two kinds of gates in Table <ref type="table" target="#tab_4">4</ref> shows that our model CTEG w/ Syn only modeling syntactic relations outperforms the QGG baseline, which further verifies that our EGA with entity-guided gates has the ability of effectively leveraging specified entity information to select input information.</p><p>What and When to Gate In our EGA, the entity-guided gates are used since the beginning of the encoding process by multiplying them with the self-attention scores in each transformer layer. It means that the information of the words is selected during learning the representation of them. Another baseline is to multiply gates with the Final transformer Hidden states of the words as Gating mechanism, which is defined as FHG. In this case, the information of all words has been fully fused before adopting gating mechanism for selection. As the results shown in Table <ref type="table" target="#tab_4">4</ref>, compared with our model CTEG, the accuracy of the FHG drops 1.95 point. The results indicate that earlier to gate the attention score during encoding as our EGA is more reasonable than only to adopt gating at the final hidden states.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.5">Case Study</head><p>EGA visualized example The entity-guided gates in EGA are expected to emphasize the words which are more related to the true relation. To verify the effectiveness of EGA intuitively, we show the entityguided gates heat map of a given instance in Figure <ref type="figure" target="#fig_1">3</ref>. This instance is sampled from 'parent-children' relation in the validation set of FewRel. As shown in the map, the words 'his mother is' are given higher scores. Obviously, the three words are important for expressing the 'parent-children' relation.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>CAT visualized example</head><p>In Figure <ref type="figure" target="#fig_2">4</ref>, we visualize the distance distributions between the given sentence and its candidate relations. The four subfigures respectively show the distance distributions calcu-  </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.6">Relation Confusion Problem</head><p>In this section, we discuss the effectiveness of our model on confusion decoupling and use the confusion matrices as our evaluation metric.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Confusing Relations Selection</head><p>We first analyze the classification results of the baseline models Proto and Proto-HATT. Based on our statistics, we find three of the 16 relations in the FewRel validation set that are most easily confused with each other. Their relation indexes are P25, P26 and P40, and the corresponding true relations are "Parents-Child","Husband-Wife" and "Uncle-Nephew". We test our model and the baseline models under the 5-way-5-shot configuration. For the three easily-confused relations, we respectively record the number of their sentences which are correctly classified and misclassified into the other two relations, and use the results to conduct the confusing matrices.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Improvement of Relation Confusion Problem</head><p>As shown in Figure <ref type="figure" target="#fig_3">5</ref>, we report the classification results of different models on the three confusing relations P25, P26 and P40. In the confusion matrices, the horizontal axis represent the true relation of the sentences, and the vertical axis represent the classification results of these sentences by different models. For each matrix, supposing a given relation such as P25 has X sentences to participate in the test, and the numbers of the sentences classified into P25, P26 and P40 are respectively a,b and c, than the elements in the first row of the matrix are calculated as (a, b, c/X). Given a relation, we expect the models classify more its sentences into the true relation, and fewer its sentences into confusing relations. From this perspective, through comparing the confusion matrices of "CTEG" and the baseline models, it can be seen that our full model CTEG achieves  the best performance in identifying these easily confused relations. "w/o EGA" has the weakest ability to decouple the confusing relations, because it is not provided with any entity information to identify the true relation. Based on results of "w/o EGA", "w/ Pos" and "w/ Syn" we can see that both of the relative position and the syntax position bring significant improvements. In addition, compared with our full model, the performance of "w/o CAT" proves that the CAT help to decouple the confusing relations.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4">Related Work</head><p>Few-shot Relation Classification Relation classification (RC) aims to identify the semantic relation between two entities in a sentence, which is the basis of many natural language processing task, such as question answering <ref type="bibr" target="#b27">(Yu et al., 2017)</ref> and knowledge graph completion <ref type="bibr" target="#b17">(Shang et al., 2019)</ref>. It has attracted more and more attention over past few years <ref type="bibr" target="#b11">(Jia et al., 2019;</ref><ref type="bibr" target="#b6">Feng et al., 2018;</ref><ref type="bibr" target="#b23">Vinyals et al., 2018;</ref><ref type="bibr" target="#b0">Adel and Schütze, 2017;</ref><ref type="bibr" target="#b24">Yang et al., 2016a)</ref>. Previous supervised approaches on this task heavily rely on labeled data for training, that limits their ability to classify the relations with insufficient instances. To address this problem, <ref type="bibr" target="#b10">Han et al. (2018)</ref> first introduce few-shot learning to RC task, which has been proved effective in the computer vision community and has many applications <ref type="bibr" target="#b22">(Vinyals et al., 2016;</ref><ref type="bibr" target="#b20">Sung et al., 2017;</ref><ref type="bibr" target="#b16">Santoro et al., 2016)</ref>. Earlier works on few-shot RC are based on the widely used model prototypical network <ref type="bibr" target="#b18">(Snell et al., 2017;</ref><ref type="bibr" target="#b26">Ye and Ling, 2019)</ref>. Recently, the pre-trained language models (LM) has shown significant power in many natural language processing tasks. To this end, <ref type="bibr" target="#b9">Gao et al. (2019c)</ref> adopt the most representative pre-trained LM BERT <ref type="bibr" target="#b4">(Devlin et al., 2018)</ref> to few-shot RC, and their work shows that BERT brings significant improvements on classification performance. Furthermore, the approach proposed by Soares et al. ( <ref type="formula">2019</ref>) are also based on BERT and achieve the state-of-art result on the few-shot RC task.</p><p>Syntactic Relation Previous RC models usually use the relative position information to identify which words are the entities in a sentence, e.g., <ref type="bibr" target="#b29">Zeng et al. (2015b)</ref>. In addition, the syntax information of the sentences is proved useful in many natural language processing tasks <ref type="bibr" target="#b5">(Faleńska and Kuhn, 2019;</ref><ref type="bibr" target="#b13">Ma et al., 2020;</ref><ref type="bibr" target="#b2">Chen et al., 2017a)</ref>. Inspired by <ref type="bibr" target="#b25">Yang et al. (2016b)</ref>, which adopt the dependency parse tree for RC <ref type="bibr" target="#b13">(Ma et al., 2020)</ref>, we also introduce the dependency relation as another type of position to emphasize the specific entities, and propose a novel application of the syntax positions.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">Conclusions</head><p>In this paper, we propose CTEG equipped with two novel mechanisms, namely the Entity-Guided Attention (EGA) and the Confusion-Aware Training (CAT), to address the relation confusion problem in few-shot relation classification (RC). We conduct extensive experiments on benchmark dataset FewRel, and experiment results shows that our model achieves significant improvements on few-shot RC. Ablation studies verify the effectiveness of the proposed EGA and CAT mechanisms. Case study and further analysis demonstrate that our model has the ability of decoupling easily-confused relations.</p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head>Figure 1 :</head><label>1</label><figDesc>Figure 1: The framework of our model CTEG including Entity-Guided Attention (EGA) and Confusion Aware Training (CAT) mechanisms.</figDesc><graphic coords="3,79.09,62.82,439.33,255.52" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head>Figure 3 :</head><label>3</label><figDesc>Figure 3: An example of the entity-guided gates of a given sentence. lated by different models including our true relation identification and confusing relation identification. Among the five candidate relations, R2 in green is the true relation of the sentence, and R 1 in red is the confusing relation that the sentence is usually misclassified into. Each edge in the subfigures represents the distance from the sentence to the corresponding relation, and the solid edge indicates the nearest one. Specifically, (a) is the distances calculated by a randomly initialized network. (b) is the classification result of Proto, in this case, the query is misclassified into R 1 . (c) and (d) are the final classification results of our CAT. The distance distribution between the query and the confusing relation calculated by our CAT is shown in (d), and it can be seen that the model succeeds in making the query closer to the confusing relation R 2 as we expected. After that, the distance distribution information is propagated to the true relation training by KL divergence, this operation is used to push the distance distribution of the true relation prediction away from the distribution of the confusing relation. As (c) shows, the sentence is pushed away from R 1 and get closer to the true relation R 2 . This example validates our assumption that explicit learning of confusing relations facilitates the identification of true relations.</figDesc><graphic coords="8,128.69,336.76,340.16,92.19" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head>Figure 4 :</head><label>4</label><figDesc>Figure 4: Distances between a given sentence and five candidate relations calculated by different models. where (a) is from a random initialized network, (b) is from the Proto network, (c) and (d) are respectively from our true relation training and confusing relation training.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3"><head>Figure 5 :</head><label>5</label><figDesc>Figure 5: Confusion matrices of the three easily confused relations, where different colors represent the classification results of different models.the best performance in identifying these easily confused relations. "w/o EGA" has the weakest ability to decouple the confusing relations, because it is not provided with any entity information to identify the true relation. Based on results of "w/o EGA", "w/ Pos" and "w/ Syn" we can see that both of the relative position and the syntax position bring significant improvements. In addition, compared with our full model, the performance of "w/o CAT" proves that the CAT help to decouple the confusing relations.</figDesc><graphic coords="9,85.05,209.83,438.01,89.92" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_0"><head></head><label></label><figDesc>are shown in Table2. Finally, the two dependency</figDesc><table><row><cell cols="2">Words chen chun chang</cell><cell>is</cell><cell>a</cell><cell>mathematician</cell><cell>who</cell><cell>works</cell><cell>in</cell><cell>model theory</cell></row><row><cell>ti,1</cell><cell>self</cell><cell cols="2">other other</cell><cell>nsubj</cell><cell cols="2">other other</cell><cell>other</cell><cell>other</cell></row><row><cell>ti,2</cell><cell>other</cell><cell cols="2">other other</cell><cell>other</cell><cell cols="2">other nmod</cell><cell>case</cell><cell>self</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_1"><head>Table 2 :</head><label>2</label><figDesc>The syntactic relations corresponding to each word of the given sentence. tags of each word t i = (t i,1 , t i,2 ) are converted into continuous vectors based on an embedding lookup operation, and then concatenated into a vector e syn</figDesc><table><row><cell>i</cell><cell>= [e syn1 i</cell><cell>, e syn2 i</cell><cell>], where e syn1 i</cell><cell>, e syn2</cell></row></table><note>i ∈ R dsyn .</note></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_3"><head>Table 3 :</head><label>3</label><figDesc>The main classification accuracy of baselines and our model are shown in Validation / Test format, where the test results are from FewRel public leaderboard 3 . All ablation results reported in this section are on the validation set.</figDesc><table /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_4"><head>Table 4 :</head><label>4</label><figDesc>Ablation Results on How, What, and When to Gate.</figDesc><table><row><cell>Model</cell><cell>CTEG w/ Syn</cell><cell>QGG</cell><cell>CTEG</cell><cell>FHG</cell></row><row><cell cols="5">5-way-5-shot 91.78 ± 0.22 90.64 ± 0.28 92.52 ± 0.31 90.57 ± 0.11</cell></row></table></figure>
+			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="1">https://nlp.stanford.edu/software/lex-parser.shtml</note>
+			<note xmlns="http://www.tei-c.org/ns/1.0" place="margin" n="12">75 13 12 75 13 17 71 12 9 82 9 11 80 9 13 73 14 10 78 12 11 77 12 P40 11 11 78 10 11 79 14 7 79 9 8 83 9 8 83 14 11 75 9 6 85 8 8 84</note>
+		</body>
+		<back>
+
+			<div type="acknowledgement">
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Acknowledgments</head><p>We are grateful to the anonymous reviewers. </p></div>
+			</div>
+
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<monogr>
+		<author>
+			<persName><forename type="first">Heike</forename><surname>Adel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hinrich</forename><surname>Schütze</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1707.07719</idno>
+		<title level="m">Global normalization of convolutional neural networks for joint entity and relation classification</title>
+				<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">Zero-shot learning of intent embeddings for expansion by convolutional deep structured semantic models</title>
+		<author>
+			<persName><forename type="first">Yun-Nung</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dilek</forename><surname>Hakkani-Tür</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xiaodong</forename><surname>He</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">2016 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)</title>
+				<imprint>
+			<publisher>IEEE</publisher>
+			<date type="published" when="2016" />
+			<biblScope unit="page" from="6045" to="6049" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<analytic>
+		<title level="a" type="main">Translation prediction with source dependencybased context representation</title>
+		<author>
+			<persName><forename type="first">Kehai</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tiejun</forename><surname>Zhao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Muyun</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lemao</forename><surname>Liu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">AAAI</title>
+				<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<analytic>
+		<title level="a" type="main">Enhanced LSTM for natural language inference</title>
+		<author>
+			<persName><forename type="first">Qian</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xiaodan</forename><surname>Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhen-Hua</forename><surname>Ling</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Si</forename><surname>Wei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hui</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Diana</forename><surname>Inkpen</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 55th Annual Meeting of the Association for Computational Linguistics<address><addrLine>Vancouver, Canada</addrLine></address></meeting>
+		<imprint>
+			<publisher>Long Papers</publisher>
+			<date type="published" when="2017-07" />
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="page" from="1657" to="1668" />
+		</imprint>
+	</monogr>
+	<note>Association for Computational Linguistics</note>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<monogr>
+		<author>
+			<persName><forename type="first">Jacob</forename><surname>Devlin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ming-Wei</forename><surname>Chang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kenton</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kristina</forename><surname>Toutanova</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1810.04805</idno>
+		<title level="m">Bert: Pre-training of deep bidirectional transformers for language understanding</title>
+				<imprint>
+			<date type="published" when="2018" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<monogr>
+		<title level="m" type="main">The (non-)utility of structural features in bilstm-based dependency parsers</title>
+		<author>
+			<persName><forename type="first">Agnieszka</forename><surname>Faleńska</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jonas</forename><surname>Kuhn</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2019" />
+			<biblScope unit="page">1</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<analytic>
+		<title level="a" type="main">Reinforcement learning for relation classification from noisy data</title>
+		<author>
+			<persName><forename type="first">Jun</forename><surname>Feng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Minlie</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Li</forename><surname>Zhao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yang</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xiaoyan</forename><surname>Zhu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Thirty-Second AAAI Conference on Artificial Intelligence</title>
+				<imprint>
+			<date type="published" when="2018" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<analytic>
+		<title level="a" type="main">Hybrid attention-based prototypical networks for noisy few-shot relation classification</title>
+		<author>
+			<persName><forename type="first">Tianyu</forename><surname>Gao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xu</forename><surname>Han</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhiyuan</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Maosong</forename><surname>Sun</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the Thirty-Second AAAI Conference on Artificial Intelligence,(AAAI-19)</title>
+				<meeting>the Thirty-Second AAAI Conference on Artificial Intelligence,(AAAI-19)<address><addrLine>New York, USA</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2019" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<analytic>
+		<title level="a" type="main">FewRel 2.0: Towards more challenging few-shot relation classification</title>
+		<author>
+			<persName><forename type="first">Tianyu</forename><surname>Gao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xu</forename><surname>Han</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hao</forename><surname>Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhiyuan</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Peng</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Maosong</forename><surname>Sun</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jie</forename><surname>Zhou</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)</title>
+				<meeting>the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)<address><addrLine>Hong Kong, China</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2019-11" />
+			<biblScope unit="page" from="6250" to="6255" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<monogr>
+		<title level="m" type="main">Fewrel 2.0: Towards more challenging few-shot relation classification</title>
+		<author>
+			<persName><forename type="first">Tianyu</forename><surname>Gao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xu</forename><surname>Han</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hao</forename><surname>Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhiyuan</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Peng</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Maosong</forename><surname>Sun</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jie</forename><surname>Zhou</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1910.07124</idno>
+		<imprint>
+			<date type="published" when="2019" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<analytic>
+		<title level="a" type="main">Fewrel: A largescale supervised few-shot relation classification dataset with state-of-the-art evaluation</title>
+		<author>
+			<persName><forename type="first">Xu</forename><surname>Han</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hao</forename><surname>Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Pengfei</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ziyun</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yuan</forename><surname>Yao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhiyuan</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Maosong</forename><surname>Sun</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing</title>
+				<editor>
+			<persName><forename type="first">Ellen</forename><surname>Riloff</surname></persName>
+			<persName><forename type="first">David</forename><surname>Chiang</surname></persName>
+			<persName><forename type="first">Julia</forename><surname>Hockenmaier</surname></persName>
+			<persName><forename type="first">Jun'ichi</forename><surname>Tsujii</surname></persName>
+		</editor>
+		<meeting>the 2018 Conference on Empirical Methods in Natural Language Processing<address><addrLine>Brussels, Belgium</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2018-10-31" />
+			<biblScope unit="page" from="4803" to="4809" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<analytic>
+		<title level="a" type="main">ARNOR: Attention regularization based noise reduction for distant supervision relation classification</title>
+		<author>
+			<persName><forename type="first">Wei</forename><surname>Jia</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dai</forename><surname>Dai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xinyan</forename><surname>Xiao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hua</forename><surname>Wu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 57th Annual Meeting of the Association for Computational Linguistics<address><addrLine>Florence, Italy</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2019-07" />
+			<biblScope unit="page" from="1399" to="1408" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<analytic>
+		<title level="a" type="main">On information and sufficiency</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Kullback</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">A</forename><surname>Leibler</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">The Annals of Mathematical Statistics</title>
+		<imprint>
+			<biblScope unit="volume">22</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="79" to="86" />
+			<date type="published" when="1951" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<analytic>
+		<title level="a" type="main">Entity-aware dependency-based deep graph attention network for comparative preference classification</title>
+		<author>
+			<persName><forename type="first">Nianzu</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sahisnu</forename><surname>Mazumder</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hao</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Bing</forename><surname>Liu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 58th Annual Meeting of the Association for Computational Linguistics</meeting>
+		<imprint>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="5782" to="5788" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<analytic>
+		<title level="a" type="main">Distant supervision for relation extraction without labeled data</title>
+		<author>
+			<persName><forename type="first">Mike</forename><surname>Mintz</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Steven</forename><surname>Bills</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Rion</forename><surname>Snow</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dan</forename><surname>Jurafsky</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the Joint Conference of the 47th Annual Meeting of the ACL and the 4th International Joint Conference on Natural Language Processing of the AFNLP</title>
+				<meeting>the Joint Conference of the 47th Annual Meeting of the ACL and the 4th International Joint Conference on Natural Language Processing of the AFNLP</meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2009" />
+			<biblScope unit="volume">2</biblScope>
+			<biblScope unit="page" from="1003" to="1011" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<monogr>
+		<title level="m" type="main">Generative adversarial zero-shot relational learning for knowledge graphs</title>
+		<author>
+			<persName><forename type="first">Pengda</forename><surname>Qin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xin</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Wenhu</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Chunyun</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Weiran</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">William</forename><forename type="middle">Yang</forename><surname>Wang</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2001.02332</idno>
+		<imprint>
+			<date type="published" when="2020" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<analytic>
+		<title level="a" type="main">Metalearning with memory-augmented neural networks</title>
+		<author>
+			<persName><forename type="first">Adam</forename><surname>Santoro</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sergey</forename><surname>Bartunov</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Matthew</forename><surname>Botvinick</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Daan</forename><surname>Wierstra</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Timothy</forename><forename type="middle">P</forename><surname>Lillicrap</surname></persName>
+		</author>
+		<ptr target="JMLR.org" />
+	</analytic>
+	<monogr>
+		<title level="m">Workshop and Conference Proceedings</title>
+				<editor>
+			<persName><forename type="first">Maria-Florina</forename><surname>Balcan</surname></persName>
+			<persName><forename type="first">Kilian</forename><forename type="middle">Q</forename><surname>Weinberger</surname></persName>
+		</editor>
+		<imprint>
+			<date type="published" when="2016" />
+			<biblScope unit="volume">48</biblScope>
+			<biblScope unit="page" from="1842" to="1850" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<analytic>
+		<title level="a" type="main">End-to-end structure-aware convolutional networks for knowledge base completion</title>
+		<author>
+			<persName><forename type="first">Chao</forename><surname>Shang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yun</forename><surname>Tang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jing</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jinbo</forename><surname>Bi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xiaodong</forename><surname>He</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Bowen</forename><surname>Zhou</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the AAAI Conference on Artificial Intelligence</title>
+				<meeting>the AAAI Conference on Artificial Intelligence</meeting>
+		<imprint>
+			<date type="published" when="2019" />
+			<biblScope unit="volume">33</biblScope>
+			<biblScope unit="page" from="3060" to="3067" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b18">
+	<analytic>
+		<title level="a" type="main">Prototypical networks for few-shot learning</title>
+		<author>
+			<persName><forename type="first">Jake</forename><surname>Snell</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kevin</forename><surname>Swersky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Richard</forename><surname>Zemel</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Advances in neural information processing systems</title>
+				<imprint>
+			<date type="published" when="2017" />
+			<biblScope unit="page" from="4077" to="4087" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b19">
+	<analytic>
+		<title level="a" type="main">Matching the blanks: Distributional similarity for relation learning</title>
+		<author>
+			<persName><surname>Livio Baldini</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nicholas</forename><surname>Soares</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jeffrey</forename><surname>Fitzgerald</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tom</forename><surname>Ling</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Kwiatkowski</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 57th Annual Meeting of the Association for Computational Linguistics</meeting>
+		<imprint>
+			<date type="published" when="2019" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b20">
+	<monogr>
+		<title level="m" type="main">Learning to compare: Relation network for few-shot learning</title>
+		<author>
+			<persName><forename type="first">Flood</forename><surname>Sung</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yongxin</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Li</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tao</forename><surname>Xiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><forename type="middle">S</forename><surname>Philip</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Timothy</forename><forename type="middle">M</forename><surname>Torr</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Hospedales</surname></persName>
+		</author>
+		<idno>abs/1711.06025</idno>
+		<imprint>
+			<date type="published" when="2017" />
+			<publisher>CoRR</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b21">
+	<monogr>
+		<title/>
+		<author>
+			<persName><forename type="first">Ashish</forename><surname>Vaswani</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Noam</forename><surname>Shazeer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Niki</forename><surname>Parmar</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jakob</forename><surname>Uszkoreit</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Llion</forename><surname>Jones</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Aidan</forename><forename type="middle">N</forename><surname>Gomez</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lukasz</forename><surname>Kaiser</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Illia</forename><surname>Polosukhin</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+	<note>Attention is all you need</note>
+</biblStruct>
+
+<biblStruct xml:id="b22">
+	<monogr>
+		<title level="m" type="main">Matching networks for one shot learning</title>
+		<author>
+			<persName><forename type="first">Oriol</forename><surname>Vinyals</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Charles</forename><surname>Blundell</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Timothy</forename><surname>Lillicrap</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Koray</forename><surname>Kavukcuoglu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Daan</forename><surname>Wierstra</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b23">
+	<analytic>
+		<title level="a" type="main">Large-scale exploration of neural relation classification architectures</title>
+		<author>
+			<persName><forename type="first">Oriol</forename><surname>Vinyals</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Charles</forename><surname>Blundell</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Timothy</forename><surname>Lillicrap</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Koray</forename><surname>Kavukcuoglu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Daan</forename><surname>Wierstra</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing</title>
+				<meeting>the 2018 Conference on Empirical Methods in Natural Language Processing</meeting>
+		<imprint>
+			<date type="published" when="2018" />
+			<biblScope unit="page" from="2266" to="2277" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b24">
+	<analytic>
+		<title level="a" type="main">A position encoding convolutional neural network based on dependency tree for relation classification</title>
+		<author>
+			<persName><forename type="first">Yunlun</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yunhai</forename><surname>Tong</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shulei</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhi-Hong</forename><surname>Deng</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing</title>
+				<meeting>the 2016 Conference on Empirical Methods in Natural Language Processing</meeting>
+		<imprint>
+			<date type="published" when="2016" />
+			<biblScope unit="page" from="65" to="74" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b25">
+	<analytic>
+		<title level="a" type="main">A position encoding convolutional neural network based on dependency tree for relation classification</title>
+		<author>
+			<persName><forename type="first">Yunlun</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yunhai</forename><surname>Tong</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shulei</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhi-Hong</forename><surname>Deng</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing</title>
+				<meeting>the 2016 Conference on Empirical Methods in Natural Language Processing<address><addrLine>Austin, Texas</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2016-11" />
+			<biblScope unit="page" from="65" to="74" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b26">
+	<analytic>
+		<title level="a" type="main">Multi-level matching and aggregation network for few-shot relation classification</title>
+		<author>
+			<persName><forename type="first">Zhen-Hua</forename><surname>Zhi-Xiu Ye</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Ling</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 57th Annual Meeting of the Association for Computational Linguistics<address><addrLine>Florence, Italy</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2019-07" />
+			<biblScope unit="page" from="2872" to="2881" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b27">
+	<monogr>
+		<title level="m" type="main">Improved neural relation detection for knowledge base question answering</title>
+		<author>
+			<persName><forename type="first">Mo</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Wenpeng</forename><surname>Yin</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Kazi Saidul Hasan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Bing</forename><surname>Cicero Dos Santos</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Bowen</forename><surname>Xiang</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Zhou</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1704.06194</idno>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b28">
+	<monogr>
+		<title level="m" type="main">Distant supervision for relation extraction via piecewise convolutional neural networks</title>
+		<author>
+			<persName><forename type="first">Daojian</forename><surname>Zeng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kang</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yubo</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jun</forename><surname>Zhao</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+	<note>In EMNLP</note>
+</biblStruct>
+
+<biblStruct xml:id="b29">
+	<analytic>
+		<title level="a" type="main">Distant supervision for relation extraction via piecewise convolutional neural networks</title>
+		<author>
+			<persName><forename type="first">Daojian</forename><surname>Zeng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kang</forename><surname>Liu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing</title>
+				<meeting>the 2015 Conference on Empirical Methods in Natural Language Processing</meeting>
+		<imprint>
+			<date type="published" when="2015" />
+			<biblScope unit="page" from="1753" to="1762" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b30">
+	<analytic>
+		<title level="a" type="main">Meta-gnn: On few-shot node classification in graph meta-learning</title>
+		<author>
+			<persName><forename type="first">Fan</forename><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Chengtai</forename><surname>Cao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kunpeng</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Goce</forename><surname>Trajcevski</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ting</forename><surname>Zhong</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ji</forename><surname>Geng</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 28th ACM International Conference on Information and Knowledge Management</title>
+				<meeting>the 28th ACM International Conference on Information and Knowledge Management</meeting>
+		<imprint>
+			<date type="published" when="2019" />
+			<biblScope unit="page" from="2357" to="2360" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

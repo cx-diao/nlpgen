@@ -1,0 +1,48 @@
+latest: | # merge example and instructions
+  # Task:
+  Determine if the target claim is an outcome, given the previous two sentences as context. When you are not sure, answer with Yes.
+
+  # Outcome:
+  * Introduction, e.g.
+    * "we introduce", "we propose", "we present"
+  * Results: observations of the experimental results, e.g.
+    * "Our model achieved significant improvements over the baselines."
+  * Discussion: interpretation or analysis of the results, e.g.
+    * "The results show that our approach significantly outperforms baseline methods."
+  * Contribution: how the research will contribute to knowledge in the field, e.g.
+    * "This work contributes to the field by introducing a novel architecture."
+  * Conclusion
+  * Limitations
+
+  # Not Outcome:
+  * Background: statements about knowledge in the domain or previous related work, e.g.
+    * "Deep learning models achieve high accuracy in most tasks."
+  * Experimental setup details, e.g.
+    * "We used a BM25 retriever with a top $k$ of $4$ and a width penalty $\beta=0.6$."
+  * Methodology/Approach, including actions done by the authors, e.g.
+    * "We evaluate the performance of our method on various benchmarks."
+    * "GEAR takes both prediction and evaluation metrics as input."
+    * "We believe that GEAR is able to take both prediction and evaluation metrics as input."
+  * Navigational sentences: referring to text, figures, tables, etc., e.g.
+    * "Table 1 shows the results of the experiments."
+  * Incomplete claims or parsing errors, e.g.
+    * "in both the pre-training and the fine-tuning stages."
+    * "2 3 5 5 1 ] ] ] "
+  * Future work
+
+  # More instructions:
+  * Outcome should be mainly about the author's own work. It should not be fully about others' work.
+  * It can be an outcome if others' work is only mentioned to elaborate on the findings of the authors, e.g.
+    * "Unlike previous works, GEAR nails single-stage summarisation, aligning with the finding of Gu et al. (2024)."
+  * Modal verbs or hedging (e.g., "can", "may", "tend to") do not change the classification. Classify by the content.
+  * Being an opinion (e.g., "we believe") does not change the classification.
+  * If both outcome and non-outcome are present, choose outcome, e.g.
+    * "We propose the method to address the limitations by introducing a novel architecture."
+
+  # Target Claim:
+  Context: {two_sent_context}
+  Claim: {claim}
+
+  Is the target claim an outcome, given the previous two sentences as context? When you are not sure, answer with Yes. Give your reasoning first and then answer with Yes or No. The output should be in the format below.
+  Reasoning: <your reasoning>
+  Answer: Yes/No

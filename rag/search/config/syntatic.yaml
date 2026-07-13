@@ -1,0 +1,6 @@
+index_path: "temp/splitting_rag_index.pkl"
+lsh_threshold: 0.0
+ngram: 2
+spacy_model: "en_core_web_sm"
+num_perm: 512  # sketch length
+progress_every: 5000  # status print cadence

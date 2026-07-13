@@ -1,0 +1,17 @@
+latest: |
+  # Task:
+  Determine whether the target claim, based on the context, identifies the population that the experiments are carried out on. If it does, state the population.
+
+  # Instructions:
+  Consider the question: "What are the experiments carried out on?" A valid answer may include, but is not limited to:
+  * datasets, e.g. "the MuSE dataset", "SemEval-2016 Task 10", "the top 5 rows"
+  * models, e.g. "the language models we evaluate", "all auto-regressive models we tested", "we testedGPT-4-128k"
+  * participants, e.g. "participants", "annotators", "markers", "students"
+
+  # Target Claim:
+  Context: {two_sent_context}
+  Claim: "{get_target_sent_label}"
+
+  Determine whether the target claim, based on the context, could answer the question "What are the experiments carried out on?" State any population you find, or "none", then answer with "Yes" or "No". Use the format below:
+  Population: <population identified in the claim, or "none">
+  Answer: Yes/No

@@ -1,0 +1,530 @@
+[
+  {
+    "rid": "rfX6ne8ne4",
+    "reviewer": null,
+    "report": {
+      "paper_topic_and_main_contributions": "The paper investigates the effect of co-occurrence statistics on the ability of large language models to correctly answer simple factual questions (of the subject-relation-object form). The paper specifically checks whether simple co-occurrences between the subject and the object in the pretraining data, can lead the models to incorrectly answer factual questions where the co-occurrence diverges from the correct answer. As it is difficult to check this causal relation by direct manipulation (given the enormous costs of pretraining large language models), a correlation study was conducted. Results show correlation between the co-occurrence statistics of a triplet and the ability of the model to answer correctly questions on it. \nThe paper further explores mitigation strategies to combat this bias. Two approaches are explored: debiased finetuning and knowledge editing. The former approach presents limited gains. Knowledge editing does show promise, but may be restricted as it requires weeding out the incorrect facts one by one (if I understand correctly). It may also cause unintended changes to unrelated facts. ",
+      "reasons_to_accept": "-- The paper addresses an important and timely topic, namely the ability of LLMs to act as knowledge bases.\n-- The related work section is very elaborate and provides insight into the field at hand.\n-- The arguments of the paper are well-presented, and the writing is generally clear. ",
+      "reasons_to_reject": "-- I am somewhat confused as to the exact claim the paper is making. While the results clearly show a correlation between the co-occurrence statistics of a triplet and the performance of the model on it, it is not clear to me whether this in fact proves that there is a bias where such simple surface statistics push the language model astray from making the right prediction. What it does show is that questions where the degree of co-occurrence is smaller are more difficult for the model. The introduction reads \u201cin which frequently co-occurred words are preferred over the correct answer.\u201d I could not see how the experiments directly make this point. Simple correlation seems to me insufficient in this case, since making mistakes with little co-occurrence doesn\u2019t mean that there is a different option with higher co-occurrence.\nIn order to show that the behavior is biased, I would expect the paper to shows that the surface statistics interfere in some sense with the prediction of the model, in a way that would make it predict such answer even when it is not true. For example, I would have expected the paper to examine questions which we would expect (based on their prevalence in the training data) the model to answer correctly, and show that in these cases it tends to make more errors where there is a strong collocation and that the mistakes is towards the collocating words. If the paper indeed makes this kind of more subtle claim and I have missed it, I would welcome a response from the authors on this matter. Thank you. \nFollowing rebuttal: the results you have posted are helpful and address this comment. Please include them in the next version.\n-- The results of the attempts to mitigate the bias are not very strong. I should say that I do not see it in itself as grounds for rejection.\n-- Some important presentational details are not sufficiently clear (see below). ",
+      "questions_for_the_authors": "-- I would appreciate your response to my first point above.\n-- Was there any attempt to look at stronger, proprietary models? I'm asking because they are much stronger and may exhibit diff behavior.\n-- The point about memorization is unclear to me. Why does co-occurrence imply memorization? on the contrary, if the model \"saw\" the correct answer and was overridden by co-occurrence this is the opposite of memorization.\n-- Why is knowledge editing a mitigation strategy. Obviously wrong knowledge should be corrected, but this is independent of the cause of the mistake, which is the subject of this paper, isn't it? ",
+      "missing_references": "-- ",
+      "typos_grammar_style_and_presentation_improvements": "Local comments: -- What was claimed exactly in previous work with respect to the discussed bias and how does that differ from the work here?\n-- l. 136: you write \"Our work is the 136 first to investigate the effects of finetuning on the 137 correlation between term frequency statistics and 138 factual knowledge of LLMs.\" This was not sufficiently clear to me:  I thought your main claim is about the relation between these stats in pretraining and in model behavior. This should be made clearer. Otherwise, a well written previous work section.\n-- Section 4.2: Why not use the more standard names then like marginal probability, joint probability and PMI?  -- Figures 2b, 3: The graphs do not show much in my opinion. Could they be explained in a sentence in the text? what does the figure here contribute?\n-- Figure 5 (and in other places in the paper): can you also compute correlation w/o binning? what does that turn out to be?\n-- Section 6.1: a more formal definition of the filtering method should be given.\nGrammar: -- l. 442: performances s.b. performance -- l. 501: changes s.b. change ",
+      "ethical_concerns": "No "
+    },
+    "scores": {
+      "soundness": "3: Good: This study provides sufficient support for its major claims/arguments, some minor points may need extra support or details.",
+      "excitement": "3: Ambivalent: It has merits (e.g., it reports state-of-the-art results, the idea is nice), but there are key weaknesses (e.g., it describes incremental work), and it can significantly benefit from another round of revision. However, I won't object to accepting it if my co-reviewers champion it.",
+      "reproducibility": "5: Could easily reproduce the results."
+    },
+    "meta": {
+      "license": "CC BY 4.0",
+      "reviewer_confidence": "4: Quite sure. I tried to check the important points carefully. It's unlikely, though conceivable, that I missed something that should affect my ratings.",
+      "sentences": {
+        "paper_topic_and_main_contributions": [
+          [
+            0,
+            186
+          ],
+          [
+            186,
+            424
+          ],
+          [
+            424,
+            596
+          ],
+          [
+            596,
+            737
+          ],
+          [
+            737,
+            808
+          ],
+          [
+            808,
+            880
+          ],
+          [
+            880,
+            924
+          ],
+          [
+            924,
+            1070
+          ],
+          [
+            1070,
+            1127
+          ]
+        ],
+        "reasons_to_accept": [
+          [
+            0,
+            108
+          ],
+          [
+            108,
+            199
+          ],
+          [
+            199,
+            285
+          ]
+        ],
+        "reasons_to_reject": [
+          [
+            0,
+            69
+          ],
+          [
+            69,
+            377
+          ],
+          [
+            377,
+            492
+          ],
+          [
+            492,
+            594
+          ],
+          [
+            594,
+            656
+          ],
+          [
+            656,
+            835
+          ],
+          [
+            835,
+            1075
+          ],
+          [
+            1075,
+            1393
+          ],
+          [
+            1393,
+            1532
+          ],
+          [
+            1532,
+            1543
+          ],
+          [
+            1543,
+            1630
+          ],
+          [
+            1630,
+            1671
+          ],
+          [
+            1671,
+            1744
+          ],
+          [
+            1744,
+            1814
+          ],
+          [
+            1814,
+            1895
+          ]
+        ],
+        "questions_for_the_authors": [
+          [
+            0,
+            61
+          ],
+          [
+            61,
+            127
+          ],
+          [
+            127,
+            200
+          ],
+          [
+            200,
+            250
+          ],
+          [
+            250,
+            293
+          ],
+          [
+            293,
+            422
+          ],
+          [
+            422,
+            473
+          ],
+          [
+            473,
+            619
+          ]
+        ],
+        "missing_references": [
+          [
+            0,
+            3
+          ]
+        ],
+        "typos_grammar_style_and_presentation_improvements": [
+          [
+            0,
+            141
+          ],
+          [
+            141,
+            323
+          ],
+          [
+            323,
+            469
+          ],
+          [
+            469,
+            498
+          ],
+          [
+            498,
+            547
+          ],
+          [
+            547,
+            658
+          ],
+          [
+            658,
+            659
+          ],
+          [
+            659,
+            720
+          ],
+          [
+            720,
+            771
+          ],
+          [
+            771,
+            809
+          ],
+          [
+            809,
+            903
+          ],
+          [
+            903,
+            934
+          ],
+          [
+            934,
+            1016
+          ],
+          [
+            1016,
+            1025
+          ],
+          [
+            1025,
+            1054
+          ],
+          [
+            1054,
+            1066
+          ],
+          [
+            1066,
+            1090
+          ],
+          [
+            1090,
+            1097
+          ]
+        ],
+        "ethical_concerns": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "rid": "EIKFZmuV6r",
+    "reviewer": null,
+    "report": {
+      "paper_topic_and_main_contributions": "The paper argues that large language models suffer from the so-called 'co-occurrence bias', i.e. when asked a factual question they tend to assign higher probabilities to words that have higher co-occurrence statistics with the query instead of the correct answer. The authors show that this bias persists in models of different sizes and cannot be effectively removed using fine-tuning, but can be partially remedied with knowledge editing. In order to prove their point, the authors introduce a series of term-frequency baselines, two of which are co-occurrence statistics. They show that these statistics can be used as a shortcut feature (in some settings, selecting the most frequently co-occurrent word results in 60% accuracy on the test set) and explain the actual behaviour of the models to a large extent. The paper explores two mitigation strategies: fine-tuning on a debiased version of the training dataset and rank-one model editing (ROME). While fine-tuning is not particularly effective, ROME shows promising results on frequent relation-like facts but does not really help with rarer ones. ",
+      "reasons_to_accept": "In my opinion, the most interesting aspect of the paper are the frequency baselines introduced to analyse the structure of the training dataset and to explain the behaviour of the models. They bring the co-occurrence/frequency bias influencing the behaviour of the models to fore, and the analysis is convincing. ",
+      "reasons_to_reject": "The main point of the paper -- that LLMs suffer from co-occurrency bias -- is not particularly new. Other papers investigating this issue are mentioned in the Related Work section. The authors claim that their work is the fist \"to investigate the effects of finetuning on the correlation between term frequency statistics and factual knowledge of LLMs\" (ll. 136--139), but there is no discussion of why fine-tuning should help at all, and in the end it does not, which amounts to a weak negative result. The section on mitigating occupies less than 1.5 pages and does not contain any methodological insights. ",
+      "questions_for_the_authors": "In the discussion of fine-tuning in lines 347--348, it is said that \"the models may learn appropriate cadidate sets during finetuning.\" Does this mean that there is some amount of knowledge leakage in fine-tuning and that the testing set-up is slightly different from the zero-shot setting?\nIn Figure 6, we see that the accuracy of the models' outputs _improves_ when the conditional probability of the object given the subject goes down from around 1/64 to 0. This goes against the general trend of the positive association between conditional probability and accuracy. Is there any interpretation for this? ",
+      "typos_grammar_style_and_presentation_improvements": "Some of the statements in the paper look confusing. In lines 87--89, the authors point out that \"relying heavily on co-occurrence is not appropriate for understanding the accurate meaning behind words.\" This is probably true, but this is all we have when training LLMs, and the paper does not propose a way out. Similarly, in lines 173--174, the authors state that \"relying on co-occurrence implies simple memorization.\" Again, the relationship between co-occurrence and memorization is more complicated, and equating one with the other seems erroneous. ",
+      "ethical_concerns": "No "
+    },
+    "scores": {
+      "soundness": "3: Good: This study provides sufficient support for its major claims/arguments, some minor points may need extra support or details.",
+      "excitement": "2: Mediocre: This paper makes marginal contributions (vs non-contemporaneous work), so I would rather not see it in the conference.",
+      "reproducibility": "3: Could reproduce the results with some difficulty. The settings of parameters are underspecified or subjectively determined; the training/evaluation data are not widely available."
+    },
+    "meta": {
+      "license": "CC BY 4.0",
+      "reviewer_confidence": "4: Quite sure. I tried to check the important points carefully. It's unlikely, though conceivable, that I missed something that should affect my ratings.",
+      "sentences": {
+        "paper_topic_and_main_contributions": [
+          [
+            0,
+            265
+          ],
+          [
+            265,
+            442
+          ],
+          [
+            442,
+            576
+          ],
+          [
+            576,
+            816
+          ],
+          [
+            816,
+            955
+          ],
+          [
+            955,
+            1107
+          ]
+        ],
+        "reasons_to_accept": [
+          [
+            0,
+            188
+          ],
+          [
+            188,
+            313
+          ]
+        ],
+        "reasons_to_reject": [
+          [
+            0,
+            100
+          ],
+          [
+            100,
+            181
+          ],
+          [
+            181,
+            358
+          ],
+          [
+            358,
+            504
+          ],
+          [
+            504,
+            609
+          ]
+        ],
+        "questions_for_the_authors": [
+          [
+            0,
+            136
+          ],
+          [
+            136,
+            291
+          ],
+          [
+            291,
+            461
+          ],
+          [
+            461,
+            571
+          ],
+          [
+            571,
+            609
+          ]
+        ],
+        "typos_grammar_style_and_presentation_improvements": [
+          [
+            0,
+            52
+          ],
+          [
+            52,
+            203
+          ],
+          [
+            203,
+            312
+          ],
+          [
+            312,
+            421
+          ],
+          [
+            421,
+            554
+          ]
+        ],
+        "ethical_concerns": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "rid": "6J9oy63MjV",
+    "reviewer": null,
+    "report": {
+      "paper_topic_and_main_contributions": "The paper proposes a framework to probe the shortcuts in LLMs. The framework firsts test the accuracy of LLM on factual knowledge dataset like LAMA. Then the framework computes the correlation of the subject and the object in the pretraining corpus. Results on GPT models (from 125M to 6B) show that, as the co-occurrence of subject and object decreases, the accuracy also decreases. Larger models (GPT-3.5 of 175B) also suffer from the problem. The authors also find that simple baseline based on co-occurrence is sufficient to surpass the performance of GPT-J 6B. Finally, the authors also give solution to mitigate the shortcut problem. ",
+      "reasons_to_accept": "-\tThe paper contains detailed analysis of shortcut problem regarding token co-occurrence. \n-\tThe paper investigates an important area of verifying the factual knowledge of LLMs. \n-\tThe paper is well-written, and is free of significant presentation issues. \n-\tAlong with the identification of the problem, the paper also proposes to mitigate the problem. ",
+      "reasons_to_reject": "-\tOne more experiment should be done to verify the claim that \"answers with higher co-occurrence are more likely to be generated\": The authors should count in each question, whether the model's generated answer has a high count in the pretraining corpus. Currently there is only a table (Table 1) showing similar results, i.e., the wrong answers have a relatively lower count in the pretraining corpus. However, quantitative results over the whole dataset should be given. \n-\tThere are existing work probing the shortcut learning problem of language models. The authors should elaborate more on the work to claim that they are the first to investigate the effects of finetuning on the correlation between term frequency statistics and factual knowledge of LLMs. For example: [2]. ",
+      "questions_for_the_authors": "-\tThe paper focuses only on token-level shortcuts. Can the findings be generalized to other kinds of shortcuts, such as word-overlap (Right for the wrong reasons: Diagnosing syntactic heuris- tics in natural language inference) or length (Annotation artifacts in natural language inference data) shortcuts? \n-\tThe proposed mitigation methods include balancing the data and knowledge editing. However, I am curious about whether demonstrations or Chain-of-Thoughts [1] can also solve the issue. \n-\tFig. 3 shows that smaller model cannot memorize the data. Then why it also has the shortcut problem like other larger models who memorize the biases in the pretraining data? ",
+      "missing_references": "[1] Chain-of-Thought Prompting Elicits Reasoning in Large Language Models [2] Identifying and Mitigating Spurious Correlations for Improving Robustness in NLP Models (NAACL Findings 2022) ",
+      "ethical_concerns": "No "
+    },
+    "scores": {
+      "soundness": "4: Strong: This study provides sufficient support for all of its claims/arguments. ",
+      "excitement": "3: Ambivalent: It has merits (e.g., it reports state-of-the-art results, the idea is nice), but there are key weaknesses (e.g., it describes incremental work), and it can significantly benefit from another round of revision. However, I won't object to accepting it if my co-reviewers champion it.",
+      "reproducibility": "4: Could mostly reproduce the results, but there may be some variation because of sample variance or minor variations in their interpretation of the protocol or method."
+    },
+    "meta": {
+      "license": "CC BY 4.0",
+      "reviewer_confidence": "4: Quite sure. I tried to check the important points carefully. It's unlikely, though conceivable, that I missed something that should affect my ratings.",
+      "sentences": {
+        "paper_topic_and_main_contributions": [
+          [
+            0,
+            63
+          ],
+          [
+            63,
+            149
+          ],
+          [
+            149,
+            250
+          ],
+          [
+            250,
+            384
+          ],
+          [
+            384,
+            446
+          ],
+          [
+            446,
+            566
+          ],
+          [
+            566,
+            640
+          ]
+        ],
+        "reasons_to_accept": [
+          [
+            0,
+            90
+          ],
+          [
+            90,
+            178
+          ],
+          [
+            178,
+            256
+          ],
+          [
+            256,
+            354
+          ]
+        ],
+        "reasons_to_reject": [
+          [
+            0,
+            255
+          ],
+          [
+            255,
+            403
+          ],
+          [
+            403,
+            473
+          ],
+          [
+            473,
+            558
+          ],
+          [
+            558,
+            762
+          ],
+          [
+            762,
+            780
+          ]
+        ],
+        "questions_for_the_authors": [
+          [
+            0,
+            51
+          ],
+          [
+            51,
+            307
+          ],
+          [
+            307,
+            392
+          ],
+          [
+            392,
+            494
+          ],
+          [
+            494,
+            555
+          ],
+          [
+            555,
+            671
+          ]
+        ],
+        "missing_references": [
+          [
+            0,
+            74
+          ],
+          [
+            74,
+            188
+          ]
+        ],
+        "ethical_concerns": [
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    }
+  }
+]

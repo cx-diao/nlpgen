@@ -1,0 +1,875 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.com/kermitt2/grobid/master/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Time Expression Analysis and Recognition Using Syntactic Token Types and General Heuristic Rules</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName><forename type="first">Xiaoshi</forename><surname>Zhong</surname></persName>
+							<email>xszhong@ntu.edu.sg</email>
+							<affiliation key="aff0">
+								<orgName type="department">School of Computer Science and Engineering</orgName>
+								<orgName type="institution">Nanyang Technological University</orgName>
+								<address>
+									<country key="SG">Singapore</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Aixin</forename><surname>Sun</surname></persName>
+							<email>axsun@ntu.edu.sg</email>
+							<affiliation key="aff0">
+								<orgName type="department">School of Computer Science and Engineering</orgName>
+								<orgName type="institution">Nanyang Technological University</orgName>
+								<address>
+									<country key="SG">Singapore</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Erik</forename><surname>Cambria</surname></persName>
+							<email>cambria@ntu.edu.sg</email>
+							<affiliation key="aff0">
+								<orgName type="department">School of Computer Science and Engineering</orgName>
+								<orgName type="institution">Nanyang Technological University</orgName>
+								<address>
+									<country key="SG">Singapore</country>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Time Expression Analysis and Recognition Using Syntactic Token Types and General Heuristic Rules</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date/>
+						</imprint>
+					</monogr>
+					<idno type="MD5">EF01D235896233C0800DF568181576C5</idno>
+					<idno type="DOI">10.18653/v1/P17-1039</idno>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<encodingDesc>
+			<appInfo>
+				<application version="0.7.1-SNAPSHOT" ident="GROBID" when="2023-04-04T10:11+0000">
+					<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>
+					<ref target="https://github.com/kermitt2/grobid"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<profileDesc>
+			<abstract>
+<div xmlns="http://www.tei-c.org/ns/1.0"><p>Extracting time expressions from free text is a fundamental task for many applications. We analyze time expressions from four different datasets and find that only a small group of words are used to express time information and that the words in time expressions demonstrate similar syntactic behaviour. Based on the findings, we propose a type-based approach named SynTime 1 for time expression recognition. Specifically, we define three main syntactic token types, namely time token, modifier, and numeral, to group time-related token regular expressions. On the types we design general heuristic rules to recognize time expressions. In recognition, SynTime first identifies time tokens from raw text, then searches their surroundings for modifiers and numerals to form time segments, and finally merges the time segments to time expressions. As a lightweight rule-based tagger, SynTime runs in real time, and can be easily expanded by simply adding keywords for the text from different domains and different text types. Experiments on benchmark datasets and tweets data show that SynTime outperforms state-of-the-art methods.</p></div>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>Time expression plays an important role in information retrieval and many applications in natural language processing <ref type="bibr" target="#b0">(Alonso et al., 2011;</ref><ref type="bibr" target="#b3">Campos et al., 2014)</ref>. Recognizing time expressions from free text has attracted considerable attention since last decade <ref type="bibr" target="#b26">(Verhagen et al., 2007</ref><ref type="bibr" target="#b28">(Verhagen et al., , 2010</ref><ref type="bibr" target="#b25">UzZaman et al., 2013)</ref>.</p><p>We analyze time expressions in four datasets: TimeBank <ref type="bibr" target="#b19">(Pustejovsky et al., 2003b)</ref>, Gigaword <ref type="bibr" target="#b16">(Parker et al., 2011)</ref>, WikiWars <ref type="bibr" target="#b15">(Mazur and Dale, 2010)</ref>, and Tweets. From the analysis we make four findings about time expressions. First, most time expressions are very short, with 80% of time expressions containing no more than three tokens. Second, at least 91.8% of time expressions contain at least one time token. Third, the vocabulary used to express time information is very small, with a small group of keywords. Finally, words in time expressions demonstrate similar syntactic behaviour. All the findings relate to the principle of least effort <ref type="bibr" target="#b29">(Zipf, 1949)</ref>. That is, people tend to act under the least effort in order to minimize the cost of energy at both individual level and collective level to language usage <ref type="bibr" target="#b29">(Zipf, 1949)</ref>. Time expression is part of language and acts as an interface of communication. Short expressions, occurrence, small vocabulary, and similar syntactic behaviour all reduce the cost of energy required to communicate.</p><p>According to the findings we propose a typebased approach named SynTime ('Syn' stands for syntactic) to recognize time expressions. Specifically, we define three main token types, namely time token, modifier, and numeral, to group timerelated token regular expressions. Time tokens are the words that explicitly express time information, such as time units (e.g., 'year'). Modifiers modify time tokens; they appear before or after time tokens, e.g., 'several' and 'ago' in 'several years ago.' Numerals are ordinals and numbers. From free text SynTime first identifies time tokens, then recognizes modifiers and numerals.</p><p>Naturally, SynTime is a rule-based tagger. The key difference between SynTime and other rulebased taggers lies in the way of defining token types and the way of designing rules. The definition of token type in SynTime is inspired by part-of-speech in which "linguists group some words of language into classes (sets) which show similar syntactic behaviour." <ref type="bibr" target="#b14">(Manning and Schutze, 1999)</ref> SynTime defines token types for tokens according to their syntactic behaviour. Other rulebased taggers define types for tokens based on their semantic meaning. For example, SUTime defines 5 semantic modifier types, such as frequency modifiers; 2 while SynTime defines 5 syntactic modifier types, such as modifiers that appear before time tokens. (See Section 4.1 for details.) Accordingly, other rule-based taggers design deterministic rules based on their meanings of tokens themselves. SynTime instead designs general rules on the token types rather than on the tokens themselves. For example, our general rules do not work on tokens 'February' nor '1989' but on their token types 'MONTH' and 'YEAR.' That is why we call SynTime a type-based approach. More importantly, other rule-based taggers design rules in a fixed method, including fixed length and fixed position. In contrast, SynTime designs general rules in a heuristic way, based on the idea of boundary expansion. The general heuristic rules are quite light-weight that it makes SynTime much more flexible and expansible, and leads SynTime to run in real time.</p><p>The heuristic rules are designed on token types and are independent of specific tokens, SynTime therefore is independent of specific domains, specific text types, and even specific languages that consist of specific tokens. In this paper, we test SynTime on specific domains and specific text types in English. (The test for other languages needs only to construct a collection of token regular expressions in the target language under our defined token types.) Specifically, we evaluate SynTime against three state-of-the-art methods (i.e., HeidelTime, SUTime, and UWTime) on three datasets: TimeBank, WikiWars, and Tweets. 3 TimeBank and Tweets are comprehensive datasets while WikiWars is a specific domain dataset about war; TimeBank and WikiWars are the datasets in formal text while Tweets dataset is in informal text. Experiments show that Syn-Time achieves comparable results on WikiWars dataset, and significantly outperforms the three state-of-the-art baselines on TimeBank and Tweets 2 https://github.com/stanfordnlp/CoreNLP/tree/ master/src/edu/stanford/nlp/time/rules 3 Gigaword dataset is not used in our experiments because the labels in the dataset are not the ground truth labels but instead are automatically generated by other taggers.</p><p>datasets. More importantly, SynTime achieves the best recalls on all three datasets and exceptionally good results on Tweets dataset. To sum up, we make the following contributions.</p><p>• We analyze time expressions from four datasets and make four findings. The findings provide evidence in terms of time expression for the principle of least effort <ref type="bibr" target="#b29">(Zipf, 1949)</ref> </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">Related Work</head><p>Many research works on time expression identification are reported in TempEval exercises <ref type="bibr" target="#b26">(Verhagen et al., 2007</ref><ref type="bibr" target="#b28">(Verhagen et al., , 2010</ref><ref type="bibr" target="#b25">UzZaman et al., 2013)</ref>. The task is divided into two subtasks: recognition and normalization.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Rule-based Time Expression Recognition.</head><p>Rule-based time taggers like GUTime, Heidel-Time, and SUTime, predefine time-related words and rules <ref type="bibr" target="#b27">(Verhagen et al., 2005;</ref><ref type="bibr" target="#b21">Strötgen and Gertz, 2010;</ref><ref type="bibr" target="#b4">Chang and Manning, 2012)</ref>. Heidel-Time <ref type="bibr" target="#b21">(Strötgen and Gertz, 2010)</ref> hand-crafts rules with time resources like weekdays and months, and leverages language clues like part-of-speech to identify time expression. SUTime (Chang and Manning, 2012) designs deterministic rules using a cascade finite automata <ref type="bibr" target="#b10">(Hobbs et al., 1997)</ref> on regular expressions over tokens <ref type="bibr" target="#b6">(Chang and Manning, 2014)</ref>. It first identifies individual words, then expands them to chunks, and finally to time expressions. Rule-based taggers achieve very good results in TempEval exercises. SynTime is also a rule-based tagger while its key difference from other rule-based taggers is that between the rules and the tokens it introduces a layer of token type; its rules work on token types and are independent of specific tokens. Moreover, SynTime designs rules in a heuristic way.</p><p>Machine Learning based Method. Machine learning based methods extract features from the text and apply statistical models on the features for recognizing time expressions. Example features include character features, word features, syntactic features, semantic features, and gazetteer features <ref type="bibr" target="#b13">(Llorens et al., 2010;</ref><ref type="bibr" target="#b9">Filannino et al., 2013;</ref><ref type="bibr" target="#b2">Bethard, 2013)</ref>. The statistical models include Markov logic network, logistic regression, support vector machines, maximum entropy, and conditional random fields <ref type="bibr" target="#b13">(Llorens et al., 2010;</ref><ref type="bibr">Uz-Zaman and Allen, 2010;</ref><ref type="bibr" target="#b9">Filannino et al., 2013;</ref><ref type="bibr" target="#b2">Bethard, 2013)</ref>. Some models obtain good performance, and even achieve the highest F 1 of 82.71% on strict match in TempEval-3 <ref type="bibr" target="#b2">(Bethard, 2013)</ref>.</p><p>Outside TempEval exercises, Angeli et al. leverage compositional grammar and employ a EMstyle approach to learn a latent parser for time expression recognition <ref type="bibr" target="#b1">(Angeli et al., 2012)</ref>. In the method named UWTime, Lee et al. handcraft a combinatory categorial grammar (CCG) <ref type="bibr" target="#b20">(Steedman, 1996)</ref> to define a set of lexicon with rules and use L1-regularization to learn linguistic context <ref type="bibr" target="#b11">(Lee et al., 2014)</ref>. The two methods explicitly use linguistic information. In <ref type="bibr" target="#b11">(Lee et al., 2014)</ref>, especially, CCG could capture rich structure information of language, similar to the rule-based methods. Tabassum et al. focus on resolving the dates in tweets, and use distant supervision to recognize time expressions <ref type="bibr" target="#b23">(Tabassum et al., 2016)</ref>. They use five time types and assign one of them to each word, which is similar to SynTime in the way of defining types over tokens. However, they focus only on the type of date, while SynTime recoginizes all the time expressions and does not involve learning and runs in real time.</p><p>Time Expression Normalization. Methods in TempEval exercises design rules for time expression normalization <ref type="bibr" target="#b27">(Verhagen et al., 2005;</ref><ref type="bibr" target="#b21">Strötgen and Gertz, 2010;</ref><ref type="bibr" target="#b13">Llorens et al., 2010;</ref><ref type="bibr">Uz-Zaman and Allen, 2010;</ref><ref type="bibr" target="#b9">Filannino et al., 2013;</ref><ref type="bibr" target="#b2">Bethard, 2013)</ref>. Because the rule systems have high similarity, Llorens et al. suggest to construct a large knowledge base as a public resource for the task <ref type="bibr" target="#b12">(Llorens et al., 2012)</ref>. Some researchers treat the normalization process as a learning task and use machine learning methods <ref type="bibr" target="#b11">(Lee et al., 2014;</ref><ref type="bibr" target="#b23">Tabassum et al., 2016)</ref>. <ref type="bibr" target="#b11">Lee et al. (Lee et al., 2014)</ref> use AdaGrad algorithm <ref type="bibr" target="#b8">(Duchi et al., 2011)</ref> and <ref type="bibr" target="#b23">Tabassum et al. (Tabassum et al., 2016)</ref> use a loglinear algorithm to normalize time expressions.</p><p>SynTime focuses only on the recognition task. The normalization could be achieved by using methods similar to the existing rule systems, because they are highly similar <ref type="bibr" target="#b12">(Llorens et al., 2012)</ref>.  We conduct an analysis on four datasets: Time-Bank, Gigaword, WikiWars, and Tweets. Time-Bank <ref type="bibr" target="#b19">(Pustejovsky et al., 2003b</ref>) is a benchmark dataset in TempEval series <ref type="bibr" target="#b26">(Verhagen et al., 2007</ref><ref type="bibr" target="#b28">(Verhagen et al., , 2010</ref><ref type="bibr" target="#b25">UzZaman et al., 2013)</ref>, consisting of 183 news articles. Gigaword <ref type="bibr" target="#b16">(Parker et al., 2011</ref>) is a large automatically labelled dataset with 2,452 news articles and used in TempEval-3. WikiWars dataset is derived from Wikipedia articles about wars <ref type="bibr" target="#b15">(Mazur and Dale, 2010)</ref>. Tweets is our manually annotated dataset with 942 tweets of which each contains at least one time expression. Table <ref type="table" target="#tab_1">1</ref> summarizes the datasets.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2">Finding</head><p>From the four datasets, we analyze their time expressions and make four findings. We will see that despite the four datasets vary in corpus sizes, in text types, and in domains, their time expressions demonstrate similar characteristics.</p><p>Finding 1 Time expressions are very short. More than 80% of time expressions contain no more than three words and more than 90% contain no more than four words.</p><p>Figure 1 plots the length distribution of time expressions. Although the texts are collected from different sources (i.e., news articles, Wikipedia articles, and tweets) and vary in sizes, the length Finding 2 More than 91% of time expressions contain at least one time token.</p><p>The second column in Table <ref type="table" target="#tab_2">2</ref> reports the percentage of time expressions that contain at least one time token. We find that at least 91.81% of time expressions contain time token(s). (Some time expressions have no time token but depend on other time expressions; in '2 to 8 days,' for example, '2' depends on '8 days.') This suggests that time tokens account for time expressions. Therefore, to recognize time expressions, it is essential to recognize their time tokens.</p><p>Finding 3 Only a small group of time-related keywords are used to express time information.</p><p>From the time expressions in all four datasets, we find that the group of keywords used to express time information is small.</p><p>Table <ref type="table">3</ref> reports the number of distinct words and of distinct time tokens. The words/tokens are manually normalized before counting and their variants are ignored. For example, 'year' and '5yrs' are counted as one token 'year.' Numerals in the counting are ignored. Despite the four datasets vary in sizes, domains, and text types, the numbers of their distinct time tokens are comparable.</p><p>Across the four datasets, the number of distinct words is 350, about half of the simply summing of 675; the number of distinct time tokens is 123, less than half of the simply summing 282. Among the 123 distinct time tokens, 45 appear in all the four datasets, and 101 appear in at least two datasets. This indicates that time tokens, which account for time expressions, are highly overlapped across the four datasets. In other words, time expressions highly overlap at their time tokens.</p><p>Finding 4 POS information could not distinguish time expressions from common words, but within time expressions, POS tags can help distinguish their constituents.</p><p>For each dataset we list the top 10 POS tags that appear in time expressions, and their percentages over the whole text. Among the 40 tags (10 × 4 datasets), 37 have percentage lower than 20%; other 3 are CD. This indicates that POS could not provide enough information to distinguish time expressions from common words. However, the most common POS tags in time expressions are NN*, JJ, RB, CD, and DT. Within time expressions, the time tokens usually have NN* and RB, the modifiers have JJ and RB, and the numerals have CD. This finding indicates that for the time expressions, their similar constituents behave in similar syntactic way. When seeing this, we realize that this is exactly how linguists define part-of-speech for language. <ref type="bibr">4</ref> The definition of POS for language inspires us to define a syntactic type system for the time expression, part of language.</p><p>The four findings all relate to the principle of least effort <ref type="bibr" target="#b29">(Zipf, 1949)</ref>. That is, people tend to act with least effort so as to minimize the cost of energy at both individual and collective levels to the language usage <ref type="bibr" target="#b29">(Zipf, 1949)</ref>. Time expression is part of language and acts as an interface of communication. Short expressions, occurrence, small vocabulary, and similar syntactic behaviour all reduce the cost of energy required to communicate.</p><p>To summarize: on average, a time expression contains two tokens of which one is time token and the other is modifier/numeral, and the size of time tokens is small. To recognize a time expression, therefore, we first recognize the time token, then recognize the modifier/numeral. 4 SynTime: Syntactic Token Types and General Heuristic Rules</p><p>SynTime defines a syntactic type system for the tokens of time expressions, and designs heuristic rules working on the token types. Figure <ref type="figure" target="#fig_1">2</ref> shows the layout of SynTime, consisting of three levels:</p><p>Token level, type level, and rule level. Token types at the type level group the tokens of time expressions. Heuristic rules lie at the rule level, working on token types rather than on tokens themselves. That is why the heuristic rules are general. For example, the heuristic rules do not work on tokens '1989' nor 'February,' but on their token types 'YEAR' and 'MONTH.' The heuristic rules are only relevant to token types, and are independent of specific tokens. For this reason, our token types and heuristic rules are independent of specific domains, specific text types, and even specific languages that consist of specific tokens. In this paper, we test SynTime on specific domain (i.e., war domain) and specific text types (i.e., formal text and informal text) in English. The test for other languages simply needs to construct a set of token regular expressions in the target language under our defined token types.</p><p>Figure <ref type="figure" target="#fig_2">3</ref> shows the overview of SynTime in practice. Shown on the left-hand side, SynTime is initialized with regular expressions over tokens. After initialization, SynTime can be directly applied on text. On the other hand, SynTime can be easily expanded by simply adding the time-related token regular expressions from training text under each defined token type. The expansion enables SynTime to recognize time expressions in text from different domains and different text types.</p><p>Shown on the right-hand side of Figure <ref type="figure" target="#fig_2">3</ref>, Syn-Time recognizes time expression through three main steps. In the first step, SynTime identifies time tokens from the POS-tagged raw text. Then around the time tokens SynTime searches for modifiers and numerals to form time segments. In the last step, SynTime transforms the time segments to time expressions.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.1">SynTime Construction</head><p>We define a syntactic type system for time expression, specifically, 15 token types for time tokens, 5 token types for modifiers, and 1 token type for numeral. Token types to tokens is like POS tags to words; for example, 'February' has a POS tag of NNP and a token type of MONTH. Time Token. We define 15 token types for the time tokens and use their names similar to Joda-Time classes: 5 DECADE (-), YEAR (-), SEA-SON (5), MONTH (12), WEEK (7), DATE (-), TIME (-), DAY TIME (27), TIMELINE (12), HOLIDAY (20), PERIOD (9), DURATION (-), TIME UNIT (15), TIME ZONE (6), and ERA (2). Number in '()' indicates the number of distinct tokens in this token type. '-' indicates that this token type involves changing digits and cannot be counted.</p><p>Modifier. We define 3 token types for the modifiers according to their possible positions relative to time tokens. Modifiers that appear before time tokens are PREFIX (48); modifiers after time tokens are SUFFIX (2). LINKAGE (4) link two time tokens. Besides, we define 2 special modifier types, COMMA (1) for comma ',' and IN ARTICLE (2) for indefinite articles 'a' and 'an.' TimeML <ref type="bibr" target="#b18">(Pustejovsky et al., 2003a)</ref> and Time-Bank <ref type="bibr" target="#b19">(Pustejovsky et al., 2003b)</ref> do not treat most prepositions like 'on' as a part of time expressions. Thus SynTime does not collect those prepositions.</p><p>Numeral. Number in time expressions can be a time token e.g., '10' in 'October 10, 2016,' or a modifier e.g., '10' in '10 days.' We define NU-MERAL (-) for the ordinals and numbers.</p><p>SynTime Initialization. The token regular expressions for initializing SynTime are collected from SUTime, 6 a state-of-the-art rule-based tagger that achieved the highest recall in TempEval-3 (Chang and <ref type="bibr" target="#b5">Manning, , 2013</ref>. Specifically, we collect from SUTime only the tokens and the regular expressions over tokens, and discard its other rules of recognizing full time expressions.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2">Time Expression Recognition</head><p>On the token types, SynTime designs a small set of heuristic rules to recognize time expressions. The recognition process includes three main steps: (1) time token identification, (2) time segment identification, and (3) time expression extraction.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2.1">Time Token Identification</head><p>Identifying time tokens is simple, through matching of string and regular expressions. Some words might cause ambiguity. For example, 'May' could be a modal verb, or the fifth month of year. To filter out the ambiguous words, we use POS information. In implementation, we use Stanford POS Tagger; 7 and the POS tags for matching the instances of token types in SynTime are based on our Finding 4 in Section 3.2.</p><p>Besides time tokens are identified, in this step, individual token is assigned with one token type of either modifier or numeral if it is matched with token regular expressions. In the next two steps, SynTime works on those token types.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2.2">Time Segment Identification</head><p>The task of time segment identification is to search the surrounding of each time token identified in previous step for modifiers and numerals, then gather the time token with its modifiers and numerals to form a time segment. The searching is  under simple heuristic rules in which the key idea is to expand the time token's boundaries. At first, each time token is a time segment. If it is either a PERIOD or DURATION, then no need to further search. Otherwise, search its left and its right for modifiers and numerals. For the left searching, if encounter a PREFIX or NUMERAL or IN ARTICLE, then continue searching. For the right searching, if encounter a SUFFIX or NUMERAL, then continue searching. Both the left and the right searching stop when reaching a COMMA or LINK-AGE or a non-modifier/numeral word. The left searching does not exceed the previous time token; the right searching does not exceed the next time token. A time segment consists of exactly one time token, and zero or some modifiers/numerals.</p><p>A special kind of time segments do not contain any time token; they depend on other time segments next to them. For example, in '8 to 20 days,' 'to 20 days' is a time segment, and '8 to' forms a dependent time segment. (See Figure <ref type="figure" target="#fig_3">4</ref>(e).)</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2.3">Time Expression Extraction</head><p>The task of time expression extraction is to extract time expressions from the identified time segments in which the core step is to determine whether to merge two adjacent or overlapping time segments into a new time segment.</p><p>We scan the time segments in a sentence from beginning to the end. A stand-alone time segment is a time expression. (See Figure <ref type="figure" target="#fig_3">4(a)</ref>.) The focus is to deal with two or more time segments that are adjacent or overlapping. If two time segments s 1 and s 2 are adjacent, merge them to form a new time segment s 1 . (See Figure <ref type="figure" target="#fig_3">4</ref>(b).) Consider that s 1 and s 2 overlap at a shared boundary. According to our time segment identification, the shared boundary could be a modifier or a numeral. If the word at the shared boundary is neither a COMMA nor a LINKAGE, then merge s 1 and s 2 . (See <ref type="bibr">Figure 4(c)</ref>.) If the word is a LINKAGE, then extract s 1 as a time expression and continue scanning. When the shared boundary is a COMMA, merge s 1 and s 2 only if the COMMA's previous token and its next token satisfy the three conditions: (1) the previous token is a time token or a NUMERAL; (2) the next token is a time token; (3) the token types of the previous token and of the next token are not the same. (See Figure <ref type="figure" target="#fig_3">4(d).</ref>)</p><p>Although Figure <ref type="figure" target="#fig_3">4</ref> shows the examples as token types together with the tokens, we should note that the heuristic rules only work on the token types. After the extraction step, time expressions are exported as a sequence of tokens from the sequence of token types.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.3">SynTime Expansion</head><p>SynTime could be expanded by simply adding new words under each defined token type without changing any rule. The expansion requires the words to be added to be annotated manually. We apply the initial SynTime on the time expressions from training text and list the words that are not covered. Whether the uncovered words are added to SynTime is manually determined. The rule for determination is that the added words can not cause ambiguity and should be generic. Wiki-Wars dataset contains a few examples like this: 'The time Arnold reached Quebec City.' Words in this example are extremely descriptive, and we do not collect them. In tweets, on the other hand, people may use abbreviations and informal variants; for example, '2day' and 'tday' are popular spellings of 'today.' Such kind of abbreviations and informal variants will be collected.</p><p>According to our findings, not many words are used to express time information, the manual addition of keywords thus will not cost much. In addition, we find that even in tweets people tend to use formal words. In the Twitter word clusters trained from 56 million English tweets, 8 the most often used words are the formal words, and their frequencies are much greater than the informal words'. The cluster of 'today,' 9 for example, its most often use is the formal one, 'today,' which appears 1,220,829 times; while its second most often use '2day' appears only 34,827 times. The low rate of informal words (e.g., about 3% in 'today' cluster) suggests that even in informal environment the manual keyword addition costs little.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">Experiments</head><p>We evaluate SynTime against three state-of-theart baselines (i.e., HeidelTime, SUTime, and UW-Time) on three datasets (i.e., TimeBank, Wiki-Wars, and Tweets). WikiWars is a specific domain dataset about war; TimeBank and WikiWars are the datasets in formal text while Tweets dataset is in informal text. For SynTime we report the results of its two versions: SynTime-I and SynTime-E. SynTime-I is the initial version, and SynTime-E is the expanded version of SynTime-I.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.1">Experiment Setting</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Datasets.</head><p>We use three datasets of which TimeBank and WikiWars are benchmark datasets whose details are shown in Section 3.1; Tweets is our manually labeled dataset that are collected from Twitter. For Tweets dataset, we randomly sample 4000 tweets and use SUTime to tag them. 942 tweets of which each contains at least one time expression. From the remaining 3,058 tweets, we randomly sample 500 and manually annotate them, and find that only 15 tweets contain time expressions. We therefore roughly consider that SU-Time misses about 3% time expressions in tweets. Two annotators then manually annotate the 942 tweets with discussion to final agreement according to the standards of TimeML and TimeBank. We finally get 1,127 manually labeled time expressions. For the 942 tweets, we randomly sample 200 tweets as test set, and the rest 742 as training set, because a baseline UWTime requires training.</p><p>Baseline Methods. We compare SynTime with methods: HeidelTime <ref type="bibr" target="#b21">(Strötgen and Gertz, 2010)</ref>, SUTime (Chang and , and UW- Evaluation Metrics. We follow TempEval-3 and use their evaluation toolkit 10 to report P recision, Recall, and F 1 in terms of strict match and relaxed match (UzZaman et al., 2013). </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.2">Experiment Result</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.2.1">SynTime-I vs. Baseline Methods</head><p>On TimeBank dataset, SynTime-I achieves F 1 of 92.09% in strict match and of 94.96% in relaxed match. On Tweets, SynTime-I achieves 91.74% and 95.87%, respectively. It outperforms all the baseline methods. The reason is that for the rulebased time taggers, their rules are designed in a fixed way, lacking flexibility. For example, SU-Time could recognize '1 year' but not 'year 1.' For the machine learning based methods, some of the features they used actually hurt the modelling. Time expressions involve quite many changing numbers which in themselves affect the pattern recognition. For example, it is difficult to build connection between <ref type="bibr">'May 22, 1986' and</ref><ref type="bibr">'February 01, 1989</ref>' at the level of word or of character.</p><p>One suggestion is to consider a type-based learning method that could use type information. For example, the above two time expressions refer to the same pattern of 'MONTH NUMERAL COMMA On TimeBank and Tweets datasets, only a few tokens are added, the corresponding results are affected slightly. This confirms that the size of time words is small, and that SynTime-I covers most of time words. On WikiWars dataset, relatively more tokens are added, SynTime-E performs much better than SynTime-I, especially in recall. It improves the recall by 3.25% in strict match and by 2.98% in relaxed match. This indicates that with more words added from specific domains (e.g., WikiWars dataset about war), SynTime can significantly improve the performance.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.3">Limitations</head><p>SynTime assumes that words are tokenized and POS tagged correctly. In reality, however, the tokenized and tagged words are not that perfect, due to the limitation of used tools. For example, Stanford POS Tagger assigns VBD to the word 'sat' in 'friday or sat' while whose tag should be NNP. The incorrect tokens and POS tags affect the result.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6">Conclusion and future work</head><p>We conduct an analysis on time expressions from four datasets, and find that time expressions in general are very short and expressed by a small vocabulary, and words in time expressions demonstrate similar syntactic behavior. Our findings provide evidence in terms of time expression for the principle of least effort <ref type="bibr" target="#b29">(Zipf, 1949)</ref>. Inspired by part-of-speech, based on the findings, we define a syntactic type system for the time expression, and propose a type-based time expression tagger, named by SynTime. SynTime defines syntactic token types for tokens and on the token types it designs general heuristic rules based on the idea of boundary expansion. Experiments on three datasets show that SynTime outperforms the stateof-the-art baselines, including rule-based time taggers and machine learning based time tagger. Because our heuristic rules are quite simple, Syn-Time is light-weight and runs in real time.</p><p>Our token types and heuristic rules are independent of specific tokens, SynTime therefore is independent of specific domains, specific text types, and even specific languages that consist of specific tokens. In this paper, we test SynTime on specific domains and specific text types in English. The test for other languages needs only to construct a collection of token regular expressions in the target language under our defined token types.</p><p>Time expression is part of language and follows the principle of least effort. Since language usage relates to human habits <ref type="bibr" target="#b29">(Zipf, 1949;</ref><ref type="bibr" target="#b7">Chomsky, 1986;</ref><ref type="bibr" target="#b17">Pinker, 1995)</ref>, we might expect that humans would share some common habits, and therefore expect that other parts of language would more or less follow the same principle. In the future we will try our analytical method on other parts of language.</p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head></head><label></label><figDesc>Figure 1: Length distribution of time expressions 3 Time Expression Analysis 3.1 Dataset</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head>Figure 2 :</head><label>2</label><figDesc>Figure 2: Layout of SynTime. The layout consists of three levels: token level, type level, and rule level. Token types group the constituent tokens of time expressions. Heuristic rules work on token types, and are independent of specific tokens.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head>Figure 3 :</head><label>3</label><figDesc>Figure 3: Overview of SynTime. Left-hand side shows the construction of SynTime, with initialization using token regular expressions, and optional expansion using training text. Right-hand side shows the main steps of SynTime recognizing time expressions.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3"><head>Figure 4 :</head><label>4</label><figDesc>Figure 4: Example time segments and time expressions. The above labels are from time segment identification; the below labels are for time expression extraction.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_1"><head>Table 1 :</head><label>1</label><figDesc>Statistics of the datasets (A tweet here is a document.)</figDesc><table><row><cell>Dataset</cell><cell cols="3">#Docs #Words #TIMEX</cell></row><row><cell>TimeBank</cell><cell>183</cell><cell>61,418</cell><cell>1,243</cell></row><row><cell>Gigaword</cell><cell cols="2">2,452 666,309</cell><cell>12,739</cell></row><row><cell>WikiWars</cell><cell cols="2">22 119,468</cell><cell>2,671</cell></row><row><cell>Tweets</cell><cell>942</cell><cell>18,199</cell><cell>1,127</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_2"><head>Table 2 :</head><label>2</label><figDesc>The percentage of time expressions that contain at least one time token, and the average length of time expressions</figDesc><table><row><cell>Dataset</cell><cell cols="2">Percent Average Length</cell></row><row><cell>TimeBank</cell><cell>94.61</cell><cell>2.00</cell></row><row><cell>Gigaword</cell><cell>96.44</cell><cell>1.70</cell></row><row><cell>WikiWars</cell><cell>91.81</cell><cell>2.38</cell></row><row><cell>Tweets</cell><cell>96.01</cell><cell>1.51</cell></row><row><cell cols="3">Table 3: Number of distinct words and number of</cell></row><row><cell cols="3">distinct time tokens in time expressions Dataset #Words #Time Tokens</cell></row><row><cell>TimeBank</cell><cell>130</cell><cell>64</cell></row><row><cell>Gigaword</cell><cell>214</cell><cell>80</cell></row><row><cell>WikiWars</cell><cell>224</cell><cell>74</cell></row><row><cell>Tweets</cell><cell>107</cell><cell>64</cell></row></table><note>of time expressions follow a similar distribution.In particular, the one-word time expressions range from 36.23% in WikiWars to 62.91% in Tweets. In informal communication people tend to use words in minimum length to express time information. The third column in Table 2 reports the average length of time expressions. On average, time expressions contain about two words.</note></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_4"><head>Table 4 :</head><label>4</label><figDesc>Overall performance. The best results are in bold face and the second best are underlined. Some results are borrowed from their original papers and the papers are indicated by the references.</figDesc><table><row><cell>Dataset</cell><cell>Method</cell><cell>Strict Match P r. Re.</cell><cell>F 1</cell><cell>Relaxed Match P r. Re. F 1</cell></row><row><cell></cell><cell>HeidelTime(Strotgen et al., 2013)</cell><cell cols="3">83.85 78.99 81.34 93.08 87.68 90.30</cell></row><row><cell></cell><cell cols="4">SUTime(Chang and Manning, 2013) 78.72 80.43 79.57 89.36 91.30 90.32</cell></row><row><cell>TimeBank</cell><cell>UWTime(Lee et al., 2014) SynTime-I SynTime-E</cell><cell cols="3">86.10 80.40 83.10 94.60 88.40 91.40 91.43 92.75 92.09 94.29 95.65 94.96 91.49 93.48 92.47 93.62 95.65 94.62</cell></row><row><cell></cell><cell>HeidelTime(Lee et al., 2014)</cell><cell cols="3">85.20 79.30 82.10 92.60 86.20 89.30</cell></row><row><cell></cell><cell>SUTime</cell><cell cols="3">78.61 76.69 76.64 95.74 89.57 92.55</cell></row><row><cell>WikiWars</cell><cell>UWTime(Lee et al., 2014) SynTime-I</cell><cell cols="3">87.70 78.80 83.00 97.60 87.60 92.30 80.00 80.22 80.11 92.16 92.41 92.29</cell></row><row><cell></cell><cell>SynTime-E HeidelTime SUTime</cell><cell cols="3">79.18 83.47 81.27 90.49 95.39 92.88 89.58 72.88 80.37 95.83 77.97 85.98 76.03 77.97 76.99 88.43 90.68 89.54</cell></row><row><cell>Tweets</cell><cell>UWTime SynTime-I</cell><cell cols="3">88.54 72.03 79.44 96.88 78.81 86.92 89.52 94.07 91.74 93.55 98.31 95.87</cell></row><row><cell></cell><cell>SynTime-E</cell><cell cols="3">89.20 94.49 91.77 93.20 98.78 95.88</cell></row><row><cell cols="2">Time (Lee et al., 2014). HeidelTime and SU-</cell><cell></cell><cell></cell><cell></cell></row><row><cell cols="2">Time both are rule-based methods, and UWTime</cell><cell></cell><cell></cell><cell></cell></row><row><cell cols="2">is a learning method. When training UWTime on</cell><cell></cell><cell></cell><cell></cell></row><row><cell cols="2">Tweets, we try two settings: (1) train with only</cell><cell></cell><cell></cell><cell></cell></row><row><cell cols="2">Tweets training set; (2) train with TimeBank and</cell><cell></cell><cell></cell><cell></cell></row><row><cell cols="2">Tweets training set. The second setting achieves</cell><cell></cell><cell></cell><cell></cell></row><row><cell cols="2">slightly better result and we report that result.</cell><cell></cell><cell></cell><cell></cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_5"><head>Table 4</head><label>4</label><figDesc></figDesc><table><row><cell>laxed match. The reasons are that in informal en-</cell></row><row><cell>vironment people tend to use time expressions in</cell></row><row><cell>minimum length, (62.91% of one-word time ex-</cell></row><row><cell>pressions in Tweets; see Figure 1.) the size of time</cell></row><row><cell>keywords is small, (only 60 distinct time tokens;</cell></row><row><cell>see Table 3.) and even in tweets people tend to</cell></row><row><cell>use formal words. (See Section 4.3 for our finding</cell></row><row><cell>from Twitter word clusters.) For precision, Syn-</cell></row><row><cell>Time achieves comparable results in strict match</cell></row><row><cell>and performs slightly poorer in relaxed match.</cell></row><row><cell>reports the overall performance. Among</cell></row><row><cell>the 18 measures, SynTime-I and SynTime-E</cell></row><row><cell>achieve 12 best results and 13 second best re-</cell></row><row><cell>sults. Except the strict match on WikiWars dataset,</cell></row><row><cell>both SynTime-I and SynTime-E achieve F 1 above 91%. For the relaxed match on all three datasets,</cell></row><row><cell>SynTime-I and SynTime-E achieve recalls above</cell></row><row><cell>92%. The high recalls are consistent with our</cell></row><row><cell>finding that at least 91.81% of time expressions</cell></row><row><cell>contain time token(s). (See Table 2.) This indi-</cell></row><row><cell>cates that SynTime covers most of time tokens.</cell></row><row><cell>On Tweets dataset, SynTime-I and SynTime-E</cell></row><row><cell>achieve exceptionally good performance. Their F 1 reach 91.74% with 11.37% improvement in strict</cell></row><row><cell>match and 95.87% with 6.33% improvement in re-</cell></row><row><cell>10 http://www.cs.rochester.edu/ ˜naushad/tempeval3/ tools.zip</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_6"><head>Table 5 :</head><label>5</label><figDesc>Number of time tokens and modifiers forTable5lists the number of time tokens and modifiers added to SynTime-I to get SynTime-E.</figDesc><table><row><cell>expansion Dataset</cell><cell cols="2">#Time Tokens #Modifiers</cell></row><row><cell>TimeBank</cell><cell>3</cell><cell>5</cell></row><row><cell>WikiWars</cell><cell>16</cell><cell>21</cell></row><row><cell>Tweets</cell><cell>3</cell><cell>2</cell></row><row><cell cols="3">YEAR' at the level of token type. POS is a kind of</cell></row><row><cell cols="3">type information. But according to our analysis,</cell></row><row><cell cols="3">POS could not distinguish time expressions from</cell></row><row><cell cols="3">common words. Features need carefully design-</cell></row><row><cell cols="3">ing. On WikiWars, SynTime-I achieves competi-</cell></row><row><cell cols="3">tive results in both matches. Time expressions in</cell></row><row><cell cols="3">WikiWars include lots of prepositions and quite a</cell></row><row><cell cols="3">few descriptive time expressions. SynTime could</cell></row><row><cell cols="3">not fully recognize such kinds of time expressions</cell></row><row><cell cols="3">because it follows TimeML and TimeBank.</cell></row><row><cell cols="2">5.2.2 SynTime-E vs. SynTime-I</cell><cell></cell></row></table></figure>
+			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="1">Source: https://github.com/zhongxiaoshi/syntime</note>
+			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="4">"linguists group some words of language into classes (sets) which show similar syntactic behaviour."<ref type="bibr" target="#b14">(Manning and Schutze, 1999)</ref> </note>
+			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="5">http://www.joda.org/joda-time/</note>
+			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="6">https://github.com/stanfordnlp/CoreNLP/tree/</note>
+			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="8">http://www.cs.cmu.edu/ ˜ark/TweetNLP/cluster_ viewer.html 9 http://www.cs.cmu.edu/ ˜ark/TweetNLP/paths/ 01111110010.html</note>
+		</body>
+		<back>
+
+			<div type="acknowledgement">
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Acknowledgments</head><p>The authors would like to thank the three anonymous reviewers for their insightful comments and constructive suggestions. This research is mainly supported by the Singapore Ministry of Education Research Fund MOE2014-T2-2-066.</p></div>
+			</div>
+
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">Temporal information retrieval: Challenges and opportunities</title>
+		<author>
+			<persName><forename type="first">Omar</forename><surname>Alonso</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jannik</forename><surname>Strotgen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ricardo</forename><surname>Baeza-Yates</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Michael</forename><surname>Gertz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of 1st International Temporal Web Analytics Workshop</title>
+				<meeting>1st International Temporal Web Analytics Workshop</meeting>
+		<imprint>
+			<date type="published" when="2011" />
+			<biblScope unit="page" from="1" to="8" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">Parsing time: Learning to interpret time expressions</title>
+		<author>
+			<persName><forename type="first">Gabor</forename><surname>Angeli</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Christopher</forename><forename type="middle">D</forename><surname>Manning</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Daniel</forename><surname>Jurafsky</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of 2012 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</title>
+				<meeting>2012 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</meeting>
+		<imprint>
+			<date type="published" when="2012" />
+			<biblScope unit="page" from="446" to="455" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<analytic>
+		<title level="a" type="main">Cleartk-timeml: A minimalist approach to tempeval</title>
+		<author>
+			<persName><forename type="first">Steven</forename><surname>Bethard</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 7th International Workshop on Semantic Evaluation</title>
+				<meeting>the 7th International Workshop on Semantic Evaluation</meeting>
+		<imprint>
+			<date type="published" when="2013" />
+			<biblScope unit="page" from="10" to="14" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<analytic>
+		<title level="a" type="main">Survey of temporal information retrieval and related applications</title>
+		<author>
+			<persName><forename type="first">Ricardo</forename><surname>Campos</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Gael</forename><surname>Dias</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Alipio</forename><forename type="middle">M</forename><surname>Jorge</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Adam</forename><surname>Jatowt</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ACM Computing Surveys</title>
+		<imprint>
+			<biblScope unit="volume">47</biblScope>
+			<biblScope unit="issue">2</biblScope>
+			<biblScope unit="page">15</biblScope>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<analytic>
+		<title level="a" type="main">Sutime: A library for recognizing and normalizing time expressions</title>
+		<author>
+			<persName><forename type="first">X</forename><surname>Angel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Christopher</forename><forename type="middle">D</forename><surname>Chang</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Manning</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of 8th International Conference on Language Resources and Evaluation</title>
+				<meeting>8th International Conference on Language Resources and Evaluation</meeting>
+		<imprint>
+			<date type="published" when="2012" />
+			<biblScope unit="page" from="3735" to="3740" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<title level="a" type="main">Sutime: Evaluation in tempeval-3</title>
+		<author>
+			<persName><forename type="first">X</forename><surname>Angel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Christopher</forename><forename type="middle">D</forename><surname>Chang</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Manning</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of second Joint Conference on Lexical and Computational Semantics (SEM)</title>
+				<meeting>second Joint Conference on Lexical and Computational Semantics (SEM)</meeting>
+		<imprint>
+			<date type="published" when="2013" />
+			<biblScope unit="page" from="78" to="82" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<monogr>
+		<title level="m" type="main">Tokensregex: Defining cascaded regular expressions over tokens</title>
+		<author>
+			<persName><forename type="first">X</forename><surname>Angel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Christopher</forename><forename type="middle">D</forename><surname>Chang</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Manning</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+		<respStmt>
+			<orgName>Department of Computer Science, Stanford University</orgName>
+		</respStmt>
+	</monogr>
+	<note type="report_type">Technical report</note>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<monogr>
+		<title level="m" type="main">Knowledge of Language: Its Nature, Origin, and Use</title>
+		<author>
+			<persName><forename type="first">Noam</forename><surname>Chomsky</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1986" />
+			<publisher>Prager</publisher>
+			<pubPlace>New York</pubPlace>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<analytic>
+		<title level="a" type="main">Adaptive subgradient methods for online learning and stochastic optimization</title>
+		<author>
+			<persName><forename type="first">John</forename><surname>Duchi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Elad</forename><surname>Hazan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yoram</forename><surname>Singer</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">The Journal of Machine Learning Research</title>
+		<imprint>
+			<biblScope unit="volume">12</biblScope>
+			<biblScope unit="page" from="2121" to="2159" />
+			<date type="published" when="2011" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<analytic>
+		<title level="a" type="main">Mantime: Temporal expression identification and normalization in the tempeval-3 challenge</title>
+		<author>
+			<persName><forename type="first">Michele</forename><surname>Filannino</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Gavin</forename><surname>Brown</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Goran</forename><surname>Nenadic</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 7th International Workshop on Semantic Evaluation</title>
+				<meeting>the 7th International Workshop on Semantic Evaluation</meeting>
+		<imprint>
+			<date type="published" when="2013" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<analytic>
+		<title level="a" type="main">Fastus: A cascaded finite-state transducer for extracting information from natrual-language text</title>
+		<author>
+			<persName><forename type="first">Jerry</forename><forename type="middle">R</forename><surname>Hobbs</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Douglas</forename><forename type="middle">E</forename><surname>Appelt</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">John</forename><surname>Bear</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">David</forename><surname>Israel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Megumi</forename><surname>Kameyama</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mark</forename><surname>Stickel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mabry</forename><surname>Tyson</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Finite State Devices for Natural Language Processing</title>
+				<imprint>
+			<date type="published" when="1997" />
+			<biblScope unit="page" from="383" to="406" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<analytic>
+		<title level="a" type="main">Context-dependent semantic parsing for time expressions</title>
+		<author>
+			<persName><forename type="first">Kenton</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yoav</forename><surname>Artzi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jesse</forename><surname>Dodge</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Luke</forename><surname>Zettlemoyer</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 52th Annual Meeting of the Association for Computational Linguistics</title>
+				<meeting>the 52th Annual Meeting of the Association for Computational Linguistics</meeting>
+		<imprint>
+			<date type="published" when="2014" />
+			<biblScope unit="page" from="1437" to="1447" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<analytic>
+		<title level="a" type="main">Timen: An open temporal expression normalisation resource</title>
+		<author>
+			<persName><forename type="first">Hector</forename><surname>Llorens</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Leon</forename><surname>Derczynski</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Robert</forename><surname>Gaizauskas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Estela</forename><surname>Saquete</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of 8th International Conference on Language Resources and Evaluation</title>
+				<meeting>8th International Conference on Language Resources and Evaluation</meeting>
+		<imprint>
+			<date type="published" when="2012" />
+			<biblScope unit="page" from="3044" to="3051" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<analytic>
+		<title level="a" type="main">Tipsem (english and spanish): Evaluating crfs and semantic roles in tempeval-2</title>
+		<author>
+			<persName><forename type="first">Hector</forename><surname>Llorens</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Estela</forename><surname>Saquete</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Borja</forename><surname>Navarro</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 5th International Workshop on Semantic Evaluation</title>
+				<meeting>the 5th International Workshop on Semantic Evaluation</meeting>
+		<imprint>
+			<date type="published" when="2010" />
+			<biblScope unit="page" from="284" to="291" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<monogr>
+		<author>
+			<persName><forename type="first">Christopher</forename><surname>Manning</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hinrich</forename><surname>Schutze</surname></persName>
+		</author>
+		<title level="m">Foundations of Statistical Natural Language Processing</title>
+				<meeting><address><addrLine>Cambride</addrLine></address></meeting>
+		<imprint>
+			<publisher>MIT Press</publisher>
+			<date type="published" when="1999" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<analytic>
+		<title level="a" type="main">Wikiwars: A new corpus for research on temporal expressions</title>
+		<author>
+			<persName><forename type="first">Pawel</forename><surname>Mazur</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Robert</forename><surname>Dale</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2010 Conference on Empirical Methods in Natural Language Processing</title>
+				<meeting>the 2010 Conference on Empirical Methods in Natural Language Processing</meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2010" />
+			<biblScope unit="page" from="913" to="922" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<monogr>
+		<title/>
+		<author>
+			<persName><forename type="first">Robert</forename><surname>Parker</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">David</forename><surname>Graff</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Junbo</forename><surname>Kong</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ke</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kazuaki</forename><surname>Maeda</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2011" />
+		</imprint>
+	</monogr>
+	<note>Engilish gigaword fifth edition</note>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<monogr>
+		<title level="m" type="main">The language instinct: The new science of language and mind</title>
+		<author>
+			<persName><forename type="first">Steven</forename><surname>Pinker</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1995" />
+			<biblScope unit="volume">7529</biblScope>
+		</imprint>
+	</monogr>
+	<note>Penguin</note>
+</biblStruct>
+
+<biblStruct xml:id="b18">
+	<analytic>
+		<title level="a" type="main">Timeml: Robust specification of event and temporal expressions in text</title>
+		<author>
+			<persName><forename type="first">James</forename><surname>Pustejovsky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jose</forename><surname>Castano</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Robert</forename><surname>Ingria</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Roser</forename><surname>Sauri</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Robert</forename><surname>Gaizauskas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Andrea</forename><surname>Setzer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Graham</forename><surname>Katz</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dragomir</forename><surname>Radev</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">New Directions in Question Answering</title>
+		<imprint>
+			<biblScope unit="volume">3</biblScope>
+			<biblScope unit="page" from="28" to="34" />
+			<date type="published" when="2003" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b19">
+	<monogr>
+		<author>
+			<persName><forename type="first">James</forename><surname>Pustejovsky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Patrick</forename><surname>Hanks</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Roser</forename><surname>Sauri</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Andrew</forename><surname>See</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Robert</forename><surname>Gaizauskas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Andrea</forename><surname>Setzer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Beth</forename><surname>Sundheim</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dragomir</forename><surname>Radev</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">David</forename><surname>Day</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lisa</forename><surname>Ferro</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Marcia</forename><surname>Lazo</surname></persName>
+		</author>
+		<title level="m">The timebank corpus. Corpus Linguistics</title>
+				<imprint>
+			<date type="published" when="2003" />
+			<biblScope unit="page" from="647" to="656" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b20">
+	<monogr>
+		<title level="m" type="main">Surface Structure and Interpretation</title>
+		<author>
+			<persName><forename type="first">Mark</forename><surname>Steedman</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1996" />
+			<publisher>The MIT Press</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b21">
+	<analytic>
+		<title level="a" type="main">Heideltime: High quality rule-based extraction and normalization of temporal expressions</title>
+		<author>
+			<persName><forename type="first">Jannik</forename><surname>Strötgen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Michael</forename><surname>Gertz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 5th International Workshop on Semantic Evaluation (SemEval&apos;10). Association for Computational Linguistics</title>
+				<meeting>the 5th International Workshop on Semantic Evaluation (SemEval&apos;10). Association for Computational Linguistics<address><addrLine>Stroudsburg, PA, USA</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2010" />
+			<biblScope unit="page" from="321" to="324" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b22">
+	<analytic>
+		<title level="a" type="main">Heideltime: Tuning english and developing spanish resources</title>
+		<author>
+			<persName><forename type="first">Jannik</forename><surname>Strotgen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Julian</forename><surname>Zell</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Michael</forename><surname>Gertz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of second Joint Conference on Lexical and Computational Semantics (SEM)</title>
+				<meeting>second Joint Conference on Lexical and Computational Semantics (SEM)</meeting>
+		<imprint>
+			<date type="published" when="2013" />
+			<biblScope unit="page" from="15" to="19" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b23">
+	<analytic>
+		<title level="a" type="main">Tweetime: A minimally supervised method for recognizing and normalizing time expressions in twitter</title>
+		<author>
+			<persName><forename type="first">Jeniya</forename><surname>Tabassum</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Alan</forename><surname>Ritter</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Wei</forename><surname>Xu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing</title>
+				<meeting>the 2016 Conference on Empirical Methods in Natural Language Processing</meeting>
+		<imprint>
+			<date type="published" when="2016" />
+			<biblScope unit="page" from="307" to="318" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b24">
+	<analytic>
+		<title level="a" type="main">Trips and trios system for tempeval-2: Extracting temporal information from text</title>
+		<author>
+			<persName><forename type="first">Naushad</forename><surname>Uzzaman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James</forename><forename type="middle">F</forename><surname>Allen</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 5th International Workshop on Semantic Evaluation</title>
+				<meeting>the 5th International Workshop on Semantic Evaluation</meeting>
+		<imprint>
+			<date type="published" when="2010" />
+			<biblScope unit="page" from="276" to="283" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b25">
+	<analytic>
+		<title level="a" type="main">Semeval-2013 task 1: Tempeval-3: Evaluating time expressions, events, and temporal relations</title>
+		<author>
+			<persName><forename type="first">Naushad</forename><surname>Uzzaman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hector</forename><surname>Llorens</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Leon</forename><surname>Derczynski</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Marc</forename><surname>Verhagen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James</forename><surname>Allen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James</forename><surname>Pustejovsky</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 7th International Workshop on Semantic Evaluation</title>
+				<meeting>the 7th International Workshop on Semantic Evaluation</meeting>
+		<imprint>
+			<date type="published" when="2013" />
+			<biblScope unit="page" from="1" to="9" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b26">
+	<analytic>
+		<title level="a" type="main">Semeval-2007 task 15: Tempeval temporal relation identification</title>
+		<author>
+			<persName><forename type="first">Marc</forename><surname>Verhagen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Robert</forename><surname>Gaizauskas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Frank</forename><surname>Schilder</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mark</forename><surname>Hepple</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Graham</forename><surname>Katz</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James</forename><surname>Pustejovsky</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 4th International Workshop on Semantic Evaluation</title>
+				<meeting>the 4th International Workshop on Semantic Evaluation</meeting>
+		<imprint>
+			<date type="published" when="2007" />
+			<biblScope unit="page" from="75" to="80" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b27">
+	<analytic>
+		<title level="a" type="main">Automating temporal annotation with tarqi</title>
+		<author>
+			<persName><forename type="first">Marc</forename><surname>Verhagen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Inderjeet</forename><surname>Mani</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Roser</forename><surname>Sauri</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Robert</forename><surname>Knippen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jessica</forename><surname>Seok Bae Jang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Anna</forename><surname>Littman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">John</forename><surname>Rumshisky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Inderjeet</forename><surname>Phillips</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Roser</forename><surname>Mani</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Robert</forename><surname>Sauri</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Knippen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jessica</forename><surname>Seok Bae Jang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Anna</forename><surname>Littman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">John</forename><surname>Rumshisky</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James</forename><surname>Phillips</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Pustejovsky</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the ACL Interactive Poster and Demonstration Sessions</title>
+				<meeting>the ACL Interactive Poster and Demonstration Sessions</meeting>
+		<imprint>
+			<date type="published" when="2005" />
+			<biblScope unit="page" from="81" to="84" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b28">
+	<analytic>
+		<title level="a" type="main">Semeval-2010 task 13: Tempeval-2</title>
+		<author>
+			<persName><forename type="first">Marc</forename><surname>Verhagen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Roser</forename><surname>Sauri</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tommaso</forename><surname>Caselli</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">James</forename><surname>Pustejovsky</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 5th International Workshop on Semantic Evaluation</title>
+				<meeting>the 5th International Workshop on Semantic Evaluation</meeting>
+		<imprint>
+			<date type="published" when="2010" />
+			<biblScope unit="page" from="57" to="62" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b29">
+	<monogr>
+		<title level="m" type="main">Human Behavior and the Principle of Least Effort: An Introduction to Human Ecology</title>
+		<author>
+			<persName><forename type="first">George</forename><surname>Zipf</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1949" />
+			<publisher>Addison-Wesley Press, Inc</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

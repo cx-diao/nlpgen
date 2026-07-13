@@ -1,0 +1,87 @@
+latest: | 
+  # Task: Determine if the target claim is generalised. Answer with generalised or not generalised.
+
+  # Decision process:
+  1. Check the context
+  The context provided is the previous two sentences before the target claim.
+
+  2. Ignore hedging
+  Do not let hedging affect the decision.
+  Examples of hedging: can, could, would, may, might, appears to, seem, likely, necessarily.
+
+  3. Check for explicit causality
+  Check whether the sentence explicitly expresses causality, for example by using words or phrases such as: because, reason, due to, so, lead to, result in, cause.
+  If YES -> generalised
+  If NO -> continue
+  Example:
+  "The improvement is due to better attention alignment." -> generalised
+
+  4. Check for a frequency expression in the whole sentence
+  4.1. If there is no frequency expression
+  -> continue to 5
+
+  4.2. If there is already a frequency expression, check whether it expresses or implies one of the following:
+  * a specific frequency, e.g. "3 out of 10", "in 62% of cases"
+  * 100% frequency, e.g. "in all cases", "always", "all the time", "consistently"
+  * 0% frequency, e.g. "never", "no", "none"
+  If YES -> not generalised
+  If NO -> generalised
+  Examples:
+  "The model succeeds half of the time."
+  -> not generalised
+  "The model always outperforms the baseline."
+  -> not generalised
+  "The model often/usually/sometimes outperforms the baseline."
+  -> generalised
+  "The model outperforms the baseline most of the time/more than half of the time."
+  -> generalised
+
+  5. If there is no frequency expression, apply the insertion test
+  Try inserting either "usually" or "generally" into the **main clause**, taking the context into account.
+  Then ask: Does the modified sentence still sound natural in the context?
+  If the modified sentence still sounds natural in the context -> generalised
+  If the modified sentence does not sound natural in the context -> not generalised
+
+  Notes on interpretation
+  * "generally" ONLY allows a collective reading
+    * the property applies to the subject as a class/kind or whole, not to a single instance
+  * "usually" can allow:
+    * a distributive reading: indicates the proportion of subject instances that the property applies to, e.g.
+    "The scores of A are usually lower than B"
+    * a temporal reading: indicates the proportion of time that the property applies, e.g.
+    "A usually works better than B"
+  * Use whichever reading fits the context best.
+
+  6. Mixed cases
+  If a sentence contains both a generalised part and a non-generalised part, annotate it as generalised.
+  Example:
+  "On this dataset, the model consistently achieved 85% accuracy; this shows that graph structure helps."
+  -> contains both 100% frequency ("consistently") and a generalised claim ("graph structure helps")
+  -> generalised
+
+  # Decision summary
+  Use this decision order:
+  * Read the previous three sentences for context.
+  1. Read the previous three sentences for context.
+  2. Ignore hedging.
+  3. If it explicitly expresses causality -> **generalised**.
+  4. Otherwise, check for a frequency expression in the whole sentence:
+    * no frequency expression -> continue to 5
+    * specific / 100% / 0% frequency -> **not generalised**
+    * other frequency expressions -> **generalised**
+  5. If there is no frequency expression, try inserting "usually/generally" into the main clause:
+    * the modified sentence still sounds natural in the context -> **generalised**
+    * the modified sentence does not sound natural in the context -> **not generalised**
+  6. If both types are present, choose **generalised**.
+
+  # Target Claim:
+  context: {two_sent_context}
+  claim: {get_target_sent_label}
+  Following the instructions above, is the target claim generalised? Give the reasoning process first and then answer with "generalised" or "not generalised". The output should be in the format below.
+  Reasoning Process:
+    * explicit causality exists: Yes/No
+    * given no explicit causality, frequency expression exists: Yes/No/NA
+    * given frequency expression exists, it is a specific / 100% / 0% frequency: Yes/No/NA
+    * given frequency expression exists, it is other frequency expression: Yes/No/NA
+    * given no frequency expression, adding "usually/generally" into the main clause sounds natural: Yes/No/NA
+  Answer: generalised/not generalised

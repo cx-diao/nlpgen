@@ -1,0 +1,28 @@
+latest: |
+  # Task: Determine if the main clause of the target claim is in the present tense. State the main verb in the main clause, then answer with "Yes" or "No".
+
+  # Instructions:
+  * Predication combined with present tense and other tenses should be counted as present tense. For example, "it passed the test and shows great improvement" should be classified as present tense.
+  * Treat "can" and "may" as present tense.
+  * Treat "shall" and "will" as future tense.
+  * Treat "could", "would" as past tense
+
+  # Examples:
+  Claim: "it passed the test and shows great improvement"
+  Main verb: "passed", "shows"
+  Answer: Yes
+
+  Claim: Adult's performance on a spatial reasoning task was not related to their scores on a verbal reasoning task
+  Main verb: "was"
+  Answer: No
+
+  Claim: The three groups did not differ in their ability to discriminate non-modified word
+  Main verb: "did not differ"
+  Answer: No
+
+  # Target Claim:
+  Claim: {get_target_sent_label}
+
+  Determine whether the target claim is in the present tense. State the main verb in the main clause, then answer with "Yes" or "No". The output should be in the format below.
+  Main verb: <main verb in the main clause>
+  Answer: Yes/No

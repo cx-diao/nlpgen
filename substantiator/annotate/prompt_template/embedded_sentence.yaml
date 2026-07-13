@@ -1,0 +1,41 @@
+latest: |
+  # Task: Determine whether the target claim contains a complement clause.
+
+  # Instructions:
+  A complement clause can be distinguished from a relative clause because a relative complementiser can be replaced by a relative wh-pronoun (e.g. who or which), whereas a complement clause cannot be replaced in this way.
+
+  # Examples:
+  Claim: The present study confirms that there exist significant associations between musical practice and intelligence.
+  Reasoning: “The present study confirms which there exist significant associations between musical practice and intelligence” does NOT make sense.
+  Answer: Yes
+
+  Claim: These findings suggest a promising new avenue for early EF intervention.
+  Reasoning: There is no subordinate clause in the sentence; the part after “suggest” is a noun phrase.
+  Answer: No
+
+  Claim: The present study confirms the existence of significant associations between musical practice and intelligence.
+  Reasoning: There is no subordinate clause in the sentence; the part after “confirms” is a noun phrase.
+  Answer: No
+
+  Claim: These findings suggest that this is a promising new avenue for early EF intervention.
+  Reasoning: “These findings suggest which this is a promising new avenue for early EF intervention” does NOT make sense.
+  Answer: Yes
+
+  Claim: Our results speak to the fact that psychological distancing is important in the expression of conscious control over thought and action from a young age.
+  Reasoning: “Our results speak to the fact which psychological distancing is important in the expression of conscious control over thought and action from a young age” does NOT make sense.
+  Answer: Yes
+
+  Claim: Our results speak to the importance of psychological distancing in the expression of conscious control over thought and action from a young age.
+  Reasoning: There is no subordinate clause in the sentence; the part after “speak to” is a noun phrase.
+  Answer: No
+
+  Claim: Our results show L1 loss is not a crucial condition for acquiring an L2.
+  Reasoning: “Our results show which L1 loss is not a crucial condition for acquiring an L2” does NOT make sense.
+  Answer: Yes
+
+  # Target Claim:
+  {claim}
+
+  Does the target claim contain a complement clause? Give your reasoning first, then answer with Yes or No. Use the format below.
+  Reasoning: <your reasoning>
+  Answer: Yes/No

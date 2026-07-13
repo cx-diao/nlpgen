@@ -1,0 +1,39 @@
+latest: |
+  # Task
+  Determine whether the target sentence includes an under-specified adjective or adverb.
+
+  # Instructions
+  * If there is an adjective or adverb in the sentence, consider whether it is a valid question to ask "how <adjective/adverb>?" If so, then the adjective/adverb is under-specified, answer Yes.
+  * If there is no adjective or adverb in the sentence, then answer No.
+  * When there are both specified and under-specified adjectives/adverbs in the sentence, count it as under-specified.
+  * Example of valid question: "how significant?", "how good?", "how efficient?"
+  * Example of non-valid question: "how true?", "how better?", "how best?", "how middle?", "how average?"
+  
+  * More examples:
+  Sentence: "Furthermore, we observe significant discrepancies when applying the models to different domains."
+  Question: "how significant?"
+  Valid: Yes
+  Answer: Yes
+
+  Sentence: "The same is true here."
+  Question: "how true?"
+  Valid: No
+  Answer: No
+
+  Sentence: "In order to guarantee the annotation consistency, people turn to predefined annotation guidelines according to specific tasks or applications."
+  Question: "how predefined?", "how specific?"
+  Valid: No, Yes
+  Answer: Yes
+
+  Sentence: "The boxplots confirm the strength of CRF over the other models."
+  Question: None
+  Valid: NA
+  Answer: No
+
+  # Target sentence
+  Sentence: {claim}
+
+  Does the target sentence include an under-specified adjective or adverb? State the question you would ask, determine whether it is valid, and then answer with Yes or No. The output should be in the format below.
+  Question: <question(s) you would ask, or "None">
+  Valid: <Yes/No/NA for each question>
+  Answer: Yes/No

@@ -1,0 +1,39 @@
+latest: |
+  # Task
+  You will be given a reporting clause (e.g., "this table suggests...", "we found...", "it shows..."). Your task is to analyse it and extract the embedded sentence (complement clause) being reported. If the sentence is not a reporting clause, or if the reported content is not a complete sentence, return the original sentence.
+
+  # Instructions
+  * Possible reporting verbs include, but are not limited to: suggest, indicate, demonstrate, show, argue, highlight, report, note, observe, conclude, state, claim, illustrate, examine, propose, and find.
+  * The reported content should be a complete sentence.
+
+  # Examples
+  Sentence: This table suggests that each handcrafted feature contributes to some extent, whereas features with large weights vary across prompts.
+  Reasoning: "suggests" is a reporting verb, and the reported content is a complete sentence, so we extract it; the "whereas" clause should also be included.
+  Answer: Each handcrafted feature contributes to some extent, whereas features with large weights vary across prompts.
+
+  Sentence: Table 4 shows that by incorporating handcrafted essay-level features, the proposed method drastically improves the accuracy of all base DNN-AES models.
+  Reasoning: "shows" is a reporting verb, and the reported content is a complete sentence, so we extract it; the "by incorporating" clause should also be included.
+  Answer: By incorporating handcrafted essay-level features, the proposed method drastically improves the accuracy of all base DNN-AES models.
+
+  Sentence: Table 4 shows the experimental results.
+  Reasoning: "shows" is a reporting verb, but the reported content is not a complete sentence, so we return the original sentence.
+  Answer: Table 4 shows the experimental results.
+
+  Sentence: This task presents specific challenges: the output is subject to strong structural constraints and is significantly longer than the input.
+  Reasoning: "presents" functions as a reporting verb here, and the reported content is a complete sentence, so we extract it.
+  Answer: The output is subject to strong structural constraints and is significantly longer than the input.
+
+  Sentence: Another reason is that reducing the attention key size hurts model quality.
+  Reasoning: "is" is not a reporting verb, so we return the original sentence.
+  Answer: Another reason is that reducing the attention key size hurts model quality.
+
+  Sentence: The results, shown in the "p-value" column in Table 4, indicated that the proposed method improved performance at the 5% significance level for the LSTM- and BERT-based models, and at the 10% significance level for the conventional hybrid model.
+  Reasoning: "indicated" is a reporting verb, and the reported content is a complete sentence, so we extract it.
+  Answer: The proposed method improved performance at the 5% significance level for the LSTM- and BERT-based models, and at the 10% significance level for the conventional hybrid model.
+
+  # Target Sentence
+  Sentence: {claim}
+
+  Analyse the sentence and extract the embedded sentence being reported. If the sentence is not a reporting clause, or if the reported content is not a complete sentence, return the original sentence. Give your reasoning first, then provide the extracted sentence. Use the format below.
+  Reasoning: <your reasoning>
+  Answer: <extracted sentence>

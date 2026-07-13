@@ -1,0 +1,26 @@
+latest: |
+  # Task
+  Determine whether the target sentence includes an explicit citation.
+
+  # Instructions
+  Count it as a citation only if the sentence contains a clear textual source reference, such as:
+  * author + year, e.g. "Smith (2020)", "(Smith, 2020)"
+  * numeric reference markers, e.g. "[4]", "[4, 7]", "[2–5]"
+  * equivalent source-reference notation commonly used in academic writing
+
+  Do not infer a citation from general mentions of:
+  * names
+  * years
+  * methods
+  * models
+  * datasets
+  unless they are clearly presented as a source reference.
+
+  If there is at least one explicit citation marker, answer "Yes". Otherwise, answer "No".
+
+  # Target Sentence
+  Sentence: {claim}
+
+  Does the target sentence include an explicit citation? State the citation marker(s) from the target sentence, then answer with Yes or No. Use the format below.
+  Citation: <citation marker(s) in the target sentence or "None">
+  Answer: Yes/No

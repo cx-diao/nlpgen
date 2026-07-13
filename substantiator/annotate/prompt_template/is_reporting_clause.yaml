@@ -1,0 +1,35 @@
+latest: |
+  # Task: Determine whether the target claim contains a reporting verb.
+
+  # Instructions:
+  * A reporting clause is a clause that indicates you are referring to what someone said or thought. For example, in "She said that she was hungry", "She said" is a reporting clause. 
+  * In the context of academic writing, a reporting clause is often used to report the findings of a study. For example, "We found ...", "the results demonstrate ...", and "it suggests ..." are reporting clauses.
+  * A reporting verb is the main verb in the reporting clause, e.g. "found", "demonstrate", "suggest".
+
+  # Examples:
+  Claim: Our results speak to the importance of psychological distancing in the expression of conscious control over thought and action from a young age
+  Reasoning: "speak" is a reporting verb
+  Answer: Yes
+
+  Claim: The finding that the developing system favours risky visuomotor choices forms a first step towards understanding how children deal with everyday activities
+  Reasoning: "forms" is not a reporting verb
+  Answer: No
+
+  Claim: Children's ability to improve executive function by mentally transcending their egocentric perspective underscores the critical role of representational capacities in self-control
+  Reasoning: "underscores" is a reporting verb
+  Answer: Yes
+
+  Claim: Across four studies it shows that people do better on shape-recognition tasks
+  Reasoning: "shows" is a reporting verb
+  Answer: Yes
+
+  Claim: the MedBERT model achieves state-of-the-art results for multiple tasks.
+  Reasoning: "achieves" is not a reporting verb
+  Answer: No
+
+  # Target Claim:
+  Claim: {claim}
+
+  Determine whether the target claim contains a reporting verb. Give your reasoning first, and then answer with Yes or No. The output should be in the format below.
+  Reasoning: <your reasoning>
+  Answer: Yes/No

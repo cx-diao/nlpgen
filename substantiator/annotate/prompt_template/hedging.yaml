@@ -1,0 +1,15 @@
+latest: |
+  # Task
+  Determine whether the target sentence includes explicit hedging.
+
+  # Instructions
+  * A sentence includes explicit hedging if it contains words or phrases that directly express uncertainty, possibility, approximation, limited generality, or reduced commitment, e.g. "may", "might", "tend to", "likely", "necessarily", "probably", "could", "would", "should", "can".
+  * Do not infer hedging unless it is explicitly signalled by the wording.
+
+  # Target sentence
+  Sentence: {claim}
+
+  Does the target sentence include explicit hedging? State the hedging expression in the sentence first and then answer with Yes or No. The output should be in the format below.
+  Hedging expression: <exact word(s) or phrase(s), or "none">
+  Answer: Yes/No
+

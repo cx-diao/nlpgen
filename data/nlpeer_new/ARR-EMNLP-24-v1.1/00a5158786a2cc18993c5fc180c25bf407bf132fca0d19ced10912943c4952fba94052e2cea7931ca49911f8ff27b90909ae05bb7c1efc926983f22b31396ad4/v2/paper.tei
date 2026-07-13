@@ -1,0 +1,1245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.com/kermitt2/grobid/master/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Instance-Level Dynamic LoRAs Composition for Cross-Task Generalization</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName><forename type="first">Zhiqi</forename><surname>Wang</surname></persName>
+							<email>wangzhiqi2022@ia.ac.cn</email>
+							<affiliation key="aff0">
+								<orgName type="department">Institute of Automation</orgName>
+								<orgName type="laboratory">The Key Laboratory of Cognition and Decision Intelligence for Complex Systems</orgName>
+								<orgName type="institution">Chinese Academy of Sciences</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+							<affiliation key="aff1">
+								<orgName type="department">School of Artificial Intelligence</orgName>
+								<orgName type="institution">University of Chinese Academy of Sciences</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Shizhu</forename><surname>He</surname></persName>
+							<email>shizhu.he@nlpr.ia.ac.cn</email>
+							<affiliation key="aff0">
+								<orgName type="department">Institute of Automation</orgName>
+								<orgName type="laboratory">The Key Laboratory of Cognition and Decision Intelligence for Complex Systems</orgName>
+								<orgName type="institution">Chinese Academy of Sciences</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+							<affiliation key="aff1">
+								<orgName type="department">School of Artificial Intelligence</orgName>
+								<orgName type="institution">University of Chinese Academy of Sciences</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Kang</forename><surname>Liu</surname></persName>
+							<email>kliu@nlpr.ia.ac.cn</email>
+							<affiliation key="aff0">
+								<orgName type="department">Institute of Automation</orgName>
+								<orgName type="laboratory">The Key Laboratory of Cognition and Decision Intelligence for Complex Systems</orgName>
+								<orgName type="institution">Chinese Academy of Sciences</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+							<affiliation key="aff1">
+								<orgName type="department">School of Artificial Intelligence</orgName>
+								<orgName type="institution">University of Chinese Academy of Sciences</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Jun</forename><surname>Zhao</surname></persName>
+							<email>jzhao@nlpr.ia.ac.cn</email>
+							<affiliation key="aff0">
+								<orgName type="department">Institute of Automation</orgName>
+								<orgName type="laboratory">The Key Laboratory of Cognition and Decision Intelligence for Complex Systems</orgName>
+								<orgName type="institution">Chinese Academy of Sciences</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+							<affiliation key="aff1">
+								<orgName type="department">School of Artificial Intelligence</orgName>
+								<orgName type="institution">University of Chinese Academy of Sciences</orgName>
+								<address>
+									<settlement>Beijing</settlement>
+									<country key="CN">China</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName><forename type="first">Lora</forename><surname>Library</surname></persName>
+						</author>
+						<title level="a" type="main">Instance-Level Dynamic LoRAs Composition for Cross-Task Generalization</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date/>
+						</imprint>
+					</monogr>
+					<idno type="MD5">16432372980682A708A8BEB0B01D7781</idno>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<encodingDesc>
+			<appInfo>
+				<application version="0.7.1-SNAPSHOT" ident="GROBID" when="2025-03-27T19:50+0000">
+					<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>
+					<ref target="https://github.com/kermitt2/grobid"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<profileDesc>
+			<abstract>
+<div xmlns="http://www.tei-c.org/ns/1.0"><p>Large language models perform well on tasks that have undergone fine-tuning of instructions, but their performance on completely unseen tasks is often less than ideal. To overcome the challenge of cross-task generalization, tasklevel LoRAs combination is proposed, which does not require training a model for new tasks. Instead, it learns the LoRA modules combination weights based on a small number of samples to form the task model. However, task-level LoRAs combination only utilizes a few task modules due to its reliance on the weight enumeration method, and it also ignores the specificity between different instances. Therefore, we proposed an instancelevel LoRAs composition for cross-task generalization, which selects appropriate multiple task LoRA modules for each input instance and dynamically determines the composition weights. Our experiments on publicly available datasets show that our method outperforms the typical method, LoraHub, in 16 out of 27 tasks. We release the source code at https: //github.com/noname822/iLoraComp.git</p></div>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>Currently, large language models (LLMs) demonstrate remarkable zero-shot learning capabilities on tasks that have undergone instruction tuning <ref type="bibr">Achiam et al., 2023;</ref><ref type="bibr">Touvron et al., 2023;</ref><ref type="bibr" target="#b1">AI@Meta, 2024)</ref>. However, numerous studies have revealed that when encountering novel tasks outside their training distribution, these models often fail to exhibit satisfactory performance <ref type="bibr">(Ovadia et al., 2024;</ref><ref type="bibr" target="#b7">Huang et al., 2024)</ref>. Exploring strategies to enhance the cross-task generalization abilities of these massive language models, enabling them to adapt swiftly and accurately to diverse new tasks, has emerged as a pressing challenge that demands attention. Addressing the challenge of cross-task generalization has traditionally involved fine-tuning models for each task and in-context learning. However, these conventional approaches come with inherent limitations. Fine-tuning for every new task can be resource-intensive, demanding extensive data, storage, and computing power, which compromises flexibility. Although methods such as LoRA <ref type="bibr" target="#b6">(Hu et al., 2021)</ref>, falling under the delta tuning <ref type="bibr" target="#b3">(Ding et al., 2022)</ref> approach, aim to adapt to specific tasks or domains by introducing smaller parameter updates while minimizing computation and storage costs, thus mitigating storage issues and enhancing flexibility, they still require backpropagation for precise output tuning, rendering them less costeffective for multiple tasks. In-context learning <ref type="bibr">(Dong et al., 2022)</ref>, on the other hand, necessitates more input than zero-shot to fully leverage the model's capabilities, indirectly increasing the computational resources needed for inference.</p><p>To address the shortcomings of these methods and achieve efficiency and sustainability in multitask, few-shot, and high-volume scenarios, innovative approaches such as LoraHub <ref type="bibr" target="#b7">(Huang et al., 2024)</ref> have emerged. LoraHub rapidly adapts to unseen tasks by intelligently combining pre-trained low-rank adapters from other relevant tasks. This method enhances model performance across diverse tasks without increasing input requirements, striking a balance between performance and energy consumption.</p><p>However, LoraHub also has room for improvement in terms of its effectiveness. Firstly, when selecting LoRA modules from a trained LoRA library for task adaptation composition, LoraHub's current strategy is to randomly select modules from the library. This random selection may result in the inclusion of tasks that are either overly similar or completely unrelated, leading to significant performance variations under different random seeds for the same task, thus exhibiting poor stability. Secondly, when training on instances, LoraHub does not consider the subtle nuances between individual instances, preventing the full utilization of the limited instance data to capture the potential specificity of inputs, which in turn limits LoraHub's performance. To address these two issues, we propose the following solutions:</p><p>• To address the issue with the LoRA module selection strategy, we adopt a selection method based on task similarity. By calculating the semantic similarity between the target task and the training sets of the available LoRA modules, we prioritize the combination of LoRA modules that are most closely related to the current task, thereby enhancing the stability and effectiveness of the task-level adaptation.</p><p>• To fully account for the unique characteristics of each input instance, we propose tailoring a dedicated LoRA module combination for each instance. By calculating the semantic similarity between the input instance and the training instances used to create the available LoRA modules, we select the most fitting instancespecific LoRA combination as the processing strategy for that input. This approach effectively leverages the subtle nuances across different input instances.</p><p>By employing the aforementioned improvements, our method has achieved a significant enhancement in inference stability. Additionally, compared to the original LoraHub, our approach has demonstrated a noticeable performance advantage. In our experiments, a total of 27 tasks were tested, and in these, our proposed method outperformed LoraHub on 16 of them.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">Related work</head><p>Instance-Based Generation for LLMs refers to a method that leverages dataset analysis to extract valuable instance, thereby enhancing the performance of a task. The introduction of large language models has since inspired numerous works <ref type="bibr" target="#b28">(Xu et al., 2024)</ref>, including Wiki-Chat <ref type="bibr" target="#b20">(Semnani et al., 2023)</ref>, EPR <ref type="bibr" target="#b19">(Rubin et al., 2022)</ref>, LLM-R <ref type="bibr" target="#b26">(Wang et al., 2024b)</ref>, which have sought to augment language model capabilities through retrieval-based knowledge enhancement. This trend originated with RAG <ref type="bibr" target="#b10">(Lewis et al., 2020)</ref>, which incorporates knowledge as prompts for in-context learning in LLM. Additionally, there are works that do not retrieve text as prompts, but instead retrieve deltatuning modules, using these modules to generate prompts for answering questions, such as Knowledge Card . In this paper, we retrieve delta-tuning modules by calculating the semantic similarity between instance and question using the method of DPR <ref type="bibr" target="#b8">(Karpukhin et al., 2020a)</ref>.</p><p>Module Composition represents an endeavor to integrate diverse models, Consequently, tasks that retrieve model modules for composition have naturally emerged, such as MAC <ref type="bibr" target="#b23">(Tack et al., 2024)</ref>, SLM <ref type="bibr" target="#b16">(Peng et al., 2024)</ref>, Arrow <ref type="bibr" target="#b14">(Ostapenko et al., 2024)</ref>, LoraRetriever <ref type="bibr" target="#b29">(Zhao et al., 2024)</ref>, and Lora-Flow <ref type="bibr" target="#b25">(Wang et al., 2024a)</ref>. While most methods adopt a simplistic processing approach for models. These approaches strive to leverage retrieval methods by employing retrieval scores as weights during composition, thereby obviating the need for manual parameter tuning and facilitating immediate usage. Concurrently, methods such as Moelora <ref type="bibr" target="#b11">(Liu et al., 2023)</ref> exist that directly assign weights through backpropagation. LoraHub occupies an intermediary position that uses a gradient-free optimization. In comparison to previous work, our approach places a stronger emphasis on utilizing instances to get model modules that are more relevant to the given question.</p><p>3 Background</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1">LoRA</head><p>LoRA <ref type="bibr" target="#b6">(Hu et al., 2021)</ref> is an efficient parameter fine-tuning technique designed to address the issue of excessive storage space needed for model modifications. Specifically, in each selected linear layer, LoRA uses two low-rank matrices, A ∈ R r×d and B ∈ R m×r . Here, r ∈ Z denotes the custom rank of the matrices, while d, m ∈ Z represent the original dimensions of the linear layer. These matrices are applied in Equation 1 to calculate the weight change matrix ∆W ∈ R m×d , which is subsequently incorporated into the linear layer during model inference.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>∆W = BA</head><p>(1)</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2">LoraHub</head><p>LoraHub <ref type="bibr" target="#b7">(Huang et al., 2024)</ref> is a method for adaptive integration of LoRA modules. With LoraHub, we can swiftly adapt to various tasks using a minimal number of instances, employing a gradient-free method <ref type="bibr" target="#b21">(Sun et al., 2022)</ref>. Through LoraHub, we obtain a set of weights ŵ = {w 1 , . . . , w N } for N LoRA modules. For every linear layer within LoRAs, the weights are combined according to Equation <ref type="formula">2</ref>.</p><formula xml:id="formula_0">∆W combine = N i=1 w i ∆W i (2)</formula><p>4 Method</p><p>In this section, we will provide an overview of the process, followed by an explanation of how to identify appropriate task LoRA modules based on LoRA training data. Finally, we will offer a detailed account of how to integrate the selected LoRA combinations with the input data.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.1">Overview</head><p>We first train the upstream tasks T on the large model M θ using the training set T i ∈ T to get LoRA module L i and collect them into LoRA library L. Next, We specify the hyperparameter N as the number of LoRA modules to be composed. Each new task T ′ / ∈ T has their instance set I ′ . For each instance e j ∈ I ′ , we find the closest N LoRA library from L, denoted as L e j = {L 1 , . . . , L N }, and optimize a weight combination ŵe j = {w 1 , . . . , w N } using a gradientfree method <ref type="bibr" target="#b21">(Sun et al., 2022)</ref> as ng. For a new question Q belonging to new task T ′ , we select the most suitable weight combination ŵe j based on the semantic similarity between Q and e j then make new LoRA module Lj . Finally, we combine these to form the model M ϕ = LoRA(M θ , L) and use it for reasoning on Q.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2">LoRA module Retrieval</head><p>To select the most suitable LoRA modules from L for composition, we identify the corresponding training set T i = {(x 1 , y 1 ), . . . , (x n , y n )} for each L i ∈ L. We then derive the task embedding vector emb T i = 1 n n k=1 M s (x k +y k ) using the sentence vectorization model M s . Similarly, for the instance e j = (x e j , y e j ), we can obtain its embedding vector emb e j = M s (x e j +y e j ). Consequently, Following the approach of <ref type="bibr" target="#b13">Mussmann and</ref><ref type="bibr" target="#b13">Ermon, 2016 and</ref><ref type="bibr" target="#b9">Karpukhin et al., 2020b</ref> in using cosine similarity as a measure of task similarity, we can identify the top N most similar tasks to e j . The formula for cosine similarity is as follows:</p><formula xml:id="formula_1">similarity(e j , T i) = emb e j • emb T i ∥emb e j ∥ • ∥emb T i ∥ (3)</formula><p>Where emb T i represents the embedding vector of the i-th task, and ∥ • ∥ denotes the Euclidean norm of a vector. By calculating the cosine similarity between each task T i and the instance e j , we can select the top N tasks with the highest similarity as the candidate set of similar tasks for e j , which is denoted as L e j , and then collect all L e j as a set called S L .</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.3">Instruct based Module Composition and Inference</head><p>To fine-tune the model M θ to the state that best aligns with the instance e j = (x j , y j ), we employ the non-gradient optimization method ng to refine the weights. We perform a broad adjustment of the init weights w init using all the instances for T i donated as I i = {e 1 , . . . , e n }. Then, we conduct a targeted adjustment using the instruct-level LoRA set L e j corresponding to the specific instance e j . The optimization process is encapsulated in the following formula:</p><formula xml:id="formula_2">ŵe j = ng(I i , L e j , w init )<label>(4)</label></formula><p>Having aggregated the adjusted weights ŵe j for all e into the set S ŵ, we proceed to identify the e j that shares the most affinity with the input x. This is accomplished by calculating the cosine similarity between the input embedding vector emb e ix = M s (x j ) for e j and the embedding vector emb x = M s (x) for the input x. This analysis allows us to select the most suitable LoRA module from S L , denoted as L suit , and its corresponding weights from S ŵ, denoted as ŵsuit . Utilizing these components, we construct the optimal LoRA module L = ŵsuit L suit . As a result, we obtain the model M ϕ = LoRA(M θ , L) that is specifically tailored to the given input. This model is then employed for inference, with the output expressed as y = M ϕ (x).</p><p>5 Experimental Setup LLM. We utilized the Flan-T5-Large (Chung et al., 2022) model as our foundational large language model M θ for experimentation purposes. Concurrently, we employed the compact all_datasets_v4_MiniLM-L6 (flax sentence embeddings, 2021; <ref type="bibr" target="#b27">Wang et al., 2020)</ref> model as our M s , which was trained on a dataset comprising one billion sentence pairs, excluding the BBH and flanv2 datasets that we utilized. This compact model effectively supported our sentence vectorization efforts.</p><p>Dataset and Evaluation. We utilize the flanv2 dataset <ref type="bibr" target="#b12">(Longpre et al., 2023)</ref>, which incorporates data from four mixed sources, as the training set for upstream tasks. It encompasses 264 distinct datasets, out of which we selected 97 for our purposes. We then employed the LoRA modules trained on these datasets by <ref type="bibr" target="#b7">Huang et al. (2024)</ref> as our repository of LoRA modules for potential selection.</p><p>The Big-Bench Hard benchmark , with 27 tasks, offers a valid test for M θ as it was not trained on these datasets. We sampled 5 instances per task, used 20 LoRA modules for adaptation, and initiated with 40 steps of global optimization, followed by EM-based evaluation on the remaining data.</p><p>Baseline Setup. To ensure our method's credibility, we used our LoRA library to test LoraHub <ref type="bibr" target="#b7">(Huang et al., 2024)</ref> refined parameters for 40 steps as a baseline, averaging three runs for the final score (LoraHub avg ). We compared scores using zeroshot, full fine-tuning (FFT), and in-context learning (ICL). For LoRA module selection, we conducted ablation experiments using the average embedding vector of five instances per task (BatchComp). In FFT, we maintained consistency by training with the same random seeds and 5 instances. We trained the model over 40 epochs with a learning rate of 3e-5 and batch size of 5. 6 Result And Discussion</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6.1">Result</head><p>The primary results are presented in Table <ref type="table">1</ref> and Table <ref type="table" target="#tab_0">2</ref>, with detailed task scores in Appendix A.</p><p>Our method significantly outperforms the zero-shot approach on 19 out of 27 tasks and the in-context learning (ICL) method on 18 tasks in terms of average performance. Compared to ICL, our approach is more computationally efficient, requiring fewer tokens. Our modifications to LoraHub are also notably successful, with our method outperforming LoraHub's random selection approach on 16 tasks. Crucially, our instance-level method exhibits a 0.9% performance enhancement over our tasklevel method in the ablation study, underscoring the efficacy of capturing input nuances through instance-specific adaptation. However, our method still cannot compete with full fine-tuning (FFT), which holds a significant performance advantage over other methods on certain highly structured tasks, such as "date understanding" and "dyck language". The results suggest that only FFT enables the model to adequately learn the underlying structure and patterns required for these more complex and specialized tasks.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6.2">Discussion</head><p>Ablation study. Our instance-level approach significantly outperforms the task-level BatchComp, which directly selects LoRA modules without pairing questions to instances. BatchComp's 0.7% im-provement over random LoraHub selection pales in comparison to our approach's doubling of performance in the "disambiguation qa" task, likely due to our method's superior ability to highlight the importance of key instances for task success. Retrieval strategy. Our approach is highly dependent on retrieval performance. If accurate retrieval is not achieved, properly aligning suitable instances with corresponding questions and matching them with the appropriate LoRA modules, the overall effectiveness will be reduced, as demonstrated in Table <ref type="table" target="#tab_3">3 like BM25</ref> <ref type="bibr" target="#b18">(Robertson et al., 1995)</ref>. The results obtained from the DPR's L2 distance <ref type="bibr" target="#b17">(Ram and Gray, 2012)</ref> and Cosine Similarity <ref type="bibr" target="#b13">(Mussmann and Ermon, 2016)</ref> confirm the efficacy of DPR in instance-level fusion.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Retrieval</head><p>Time consumption. We evaluated the training and inference times for four methods-fewshot, LoraHub, BatchComp, and our Instance-Level method on a single RTX 3090 GPU. All inference tasks used a batch size of 10. The average time per batch was 2.1s for few-shot, 1.4s for LoraHub, 1.4s for BatchComp, and 3.7s for our method, respectively. Our method is 2.3 seconds slower than LoraHub because it requires training different parameters for each instance, which approximately necessitates N times the training resources for N instances. However, since inference utilizes the same resources, the time consumption is less than N times. Compared to the few-shot method, our method is only 1.6 seconds slower, as it, like LoraHub, does not require additional tokens for in-context learning.</p><p>Case study. Upon closer examination of the results for each task, we observed that tasks requiring reasoning, such as those performed with flan-t5-large, showed varying contributions to performance improvements based on the learning of task patterns. For instance, the Boolean expressions task, which has a standard "True or False" answer format, saw its accuracy increase to approximately 50% after training, compared to a significantly lower pre-training accuracy. Conversely, tasks involving date understanding, which could potentially mislead the model, exhibited shifts in outcomes for both zero-shot and ICL scenarios. Specifically, while the standard answer required selecting a response from given options, the inclusion of the MM/DD/YYYY format in the prompt led many responses to incorrectly provide dates like "08/03/1996" instead of choosing the correct option. However, methods that learned from individual instances were able to effectively avoid this type of misguidance.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="7">Conclusion</head><p>Our work introduces two key enhancements to the LoraHub framework. The first is a method that indexes models trained on datasets based on their semantic centroids, improving LoraHub's precision at the task level. The second is instance-level adaptation, which leverages the unique characteristics of individual instances to raise the performance ceiling of the LoraHub approach. These complementary strategies work together to enhance the model's cross-task generalization capabilities. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="8">Acknowledgements</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="9">Limitation</head><p>Increased Computational Cost. Our method incurs a higher computational cost than LoraHub, mainly because we train weights for each individual instance during the LoRA group weights training phase. This means that our approach will require computational resources proportional to the number of instances, multiplied by the cost of Lo-raHub's training. Application Scenario Limitation. Our method is not universally cost-effective. In scenarios where a task involves a limited number of questions, employing our method may not be the most economical choice. For tasks without any instances, zeroshot learning would be a more appropriate and efficient approach. Additional Preliminary Preparations Required. When utilizing LoRA for composition, our method not only requires identifying the appropriate LoRA modules within the library but also necessitates access to the data used during the training of those LoRA modules. Consequently, our approach incurs greater initial preparation costs compared to methods that do not rely on such specific training data. Requirement For Higher-Quality Instances. Instance-level methods, such as ours, are more sensitive to the quality of the instances used. Lowerquality instances, including those that are flawed or not closely related to the task, can potentially lead to misleading answers for associated questions. This underscores the importance of careful instance selection and curation to ensure the method's effectiveness. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Method</head></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head>Figure 1 :</head><label>1</label><figDesc>Figure 1: Previous task-level composition constructs a shared task model for all instances. The proposed instance-level composition constructs a unique task module for each instance.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head></head><label></label><figDesc>This work was supported by the Strategic Priority Research Program of Chinese Academy of Sciences (No.XDA27020203) and the National Natural Science Foundation of China (No.62376270). This work was supported by the Youth Innovation Promotion Association CAS.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_0"><head>Table 2 :</head><label>2</label><figDesc>In the A/B comparison across all 27 tasks, 'A' represents the number of tasks where our method outperformed the baseline, while 'B' represents the number of tasks where it underperformed compared to the baseline.</figDesc><table><row><cell cols="2">Method</cell><cell cols="2">average average-3</cell></row><row><cell>FFT  *</cell><cell></cell><cell>39.8</cell><cell>44.3</cell></row><row><cell cols="2">0-shot</cell><cell>24.4</cell><cell>27.4</cell></row><row><cell>ICL</cell><cell></cell><cell>30.9</cell><cell>34.8</cell></row><row><cell cols="2">LoraHub avg BatchComp</cell><cell>34.0 34.7</cell><cell>38.1 39.0</cell></row><row><cell>Ours</cell><cell></cell><cell>35.6</cell><cell>40.0</cell></row><row><cell cols="4">Table 1: Experimental results on 27 tasks of BBH, the "average-3" has excluded three tasks with an accuracy of less than 10%, (*) represents the upper limit.</cell></row><row><cell>Method</cell><cell cols="3">FFT ICL 0-shot LoraHub</cell></row><row><cell cols="4">BatchComp 7/18 18/3 16/8</cell><cell>13/12</cell></row><row><cell>Ours</cell><cell cols="3">11/16 19/2 18/7</cell><cell>16/8</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_1"><head>Table 3 :</head><label>3</label><figDesc>Result of different retrieval strategy</figDesc><table><row><cell>method</cell><cell>average</cell></row><row><cell>BM25</cell><cell>25.6</cell></row><row><cell>DPR L2 Distance</cell><cell>34.3</cell></row><row><cell>DPR Cosine Similarity</cell><cell>35.6</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_2"><head>Table 4 :</head><label>4</label><figDesc>The results for the 27 tasks of BBH simulations have been obtained.</figDesc><table><row><cell></cell><cell cols="6">zero-shot ICL FFT LoraHub avg BatchComp Ours</cell></row><row><cell>boolean expressions</cell><cell>35.9</cell><cell cols="2">25.7 53.5</cell><cell>48.2</cell><cell>46.1</cell><cell>49.8</cell></row><row><cell>causal judgement</cell><cell>58.8</cell><cell cols="2">58.2 58.8</cell><cell>58.8</cell><cell>57.7</cell><cell>59.9</cell></row><row><cell>date understanding</cell><cell>0.81</cell><cell cols="2">0.0 73.5</cell><cell>32.0</cell><cell>34.7</cell><cell>31.8</cell></row><row><cell>disambiguation qa</cell><cell>0.0</cell><cell cols="2">65.7 69.4</cell><cell>24.4</cell><cell>22.0</cell><cell>46.9</cell></row><row><cell>dyck languages</cell><cell>0.0</cell><cell>0.0</cell><cell>8.6</cell><cell>1.6</cell><cell>0.0</cell><cell>0.0</cell></row><row><cell>formal fallacies</cell><cell>55.1</cell><cell cols="2">52.7 52.2</cell><cell>53.1</cell><cell>52.2</cell><cell>53.5</cell></row><row><cell>geometric shapes</cell><cell>0.81</cell><cell cols="2">13.5 18.4</cell><cell>14.5</cell><cell>17.6</cell><cell>18.8</cell></row><row><cell>hyperbaton</cell><cell>26.5</cell><cell cols="2">0.41 48.2</cell><cell>68.6</cell><cell>69.8</cell><cell>71.8</cell></row><row><cell>logical deduction 5 objects</cell><cell>33.1</cell><cell cols="2">41.2 43.3</cell><cell>42.6</cell><cell>42.0</cell><cell>43.4</cell></row><row><cell>logical deduction 7 objects</cell><cell>33.5</cell><cell cols="2">38.0 47.4</cell><cell>44.4</cell><cell>41.2</cell><cell>40.8</cell></row><row><cell>logical deduction 3 objects</cell><cell>16.3</cell><cell cols="2">51.0 55.5</cell><cell>45.9</cell><cell>51.0</cell><cell>51.0</cell></row><row><cell>movie recommendation</cell><cell>49.8</cell><cell cols="2">42.4 64.5</cell><cell>53.1</cell><cell>52.7</cell><cell>50.2</cell></row><row><cell>multistep arithmetic two</cell><cell>0.0</cell><cell>0.0</cell><cell>0.0</cell><cell>0.5</cell><cell>0.0</cell><cell>0.4</cell></row><row><cell>navigate</cell><cell>56.3</cell><cell cols="2">59.6 57.1</cell><cell>53.5</cell><cell>58.8</cell><cell>56.3</cell></row><row><cell>object counting</cell><cell>26.5</cell><cell cols="2">26.9 34.7</cell><cell>27.9</cell><cell>28.6</cell><cell>31.4</cell></row><row><cell>penguins in a table</cell><cell>16.3</cell><cell cols="2">28.4 32.6</cell><cell>37.1</cell><cell>40.4</cell><cell>36.9</cell></row><row><cell>reasoning about colored objects</cell><cell>20.0</cell><cell cols="2">37.1 37.1</cell><cell>37.4</cell><cell>42.0</cell><cell>38.0</cell></row><row><cell>ruin names</cell><cell>22.0</cell><cell cols="2">26.1 57.1</cell><cell>21.9</cell><cell>22.4</cell><cell>22.0</cell></row><row><cell>salient translation error detection</cell><cell>29.0</cell><cell cols="2">42.0 20.0</cell><cell>31.6</cell><cell>30.2</cell><cell>31.0</cell></row><row><cell>snarks</cell><cell>48.6</cell><cell cols="2">43.9 48.0</cell><cell>52.2</cell><cell>58.4</cell><cell>58.4</cell></row><row><cell>sports understanding</cell><cell>4.1</cell><cell cols="2">53.5 45.3</cell><cell>50.1</cell><cell>50.2</cell><cell>46.5</cell></row><row><cell>temporal sequences</cell><cell>22.4</cell><cell cols="2">25.7 33.4</cell><cell>24.5</cell><cell>25.3</cell><cell>24.9</cell></row><row><cell>tracking shuffled objects 5 objects</cell><cell>11.0</cell><cell cols="2">10.6 16.7</cell><cell>11.0</cell><cell>11.0</cell><cell>11.0</cell></row><row><cell>tracking shuffled objects 7 objects</cell><cell>8.6</cell><cell cols="2">8.2 13.9</cell><cell>8.6</cell><cell>8.6</cell><cell>8.6</cell></row><row><cell>tracking shuffled objects 3 objects</cell><cell>31.0</cell><cell cols="2">31.8 34.3</cell><cell>31.0</cell><cell>32.2</cell><cell>32.2</cell></row><row><cell>web of lies</cell><cell>52.6</cell><cell cols="2">51.8 48.2</cell><cell>43.4</cell><cell>40.4</cell><cell>44.1</cell></row><row><cell>word sorting</cell><cell>0.81</cell><cell>0.0</cell><cell>3.7</cell><cell>0.95</cell><cell>0.81</cell><cell>0.81</cell></row><row><cell>average</cell><cell>24.4</cell><cell cols="2">30.9 39.8</cell><cell>34.0</cell><cell>34.7</cell><cell>35.6</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_3"><head>Table 5 :</head><label>5</label><figDesc>The results for multiple random experiments.</figDesc><table /></figure>
+		</body>
+		<back>
+			<div type="annex">
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>A Result Detail And Stability Testing</head><p>This section presents our result details. Additionally, we conducted multiple random experiments, using random instances and random LoRA modules for LoraHub in each run to evaluate the stability of our method. We also tested the results with configurations other than the 5-shot, and the outcomes are as follows.  </p></div>			</div>
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<monogr>
+		<author>
+			<persName><forename type="first">Josh</forename><surname>Achiam</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Steven</forename><surname>Adler</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sandhini</forename><surname>Agarwal</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lama</forename><surname>Ahmad</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ilge</forename><surname>Akkaya</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Florencia</forename><forename type="middle">Leoni</forename><surname>Aleman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Diogo</forename><surname>Almeida</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Janko</forename><surname>Altenschmidt</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sam</forename><surname>Altman</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2303.08774</idno>
+		<title level="m">Shyamal Anadkat, et al. 2023. Gpt-4 technical report</title>
+				<imprint/>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<monogr>
+		<title level="m" type="main">Llama 3 model card</title>
+		<author>
+			<persName><surname>Ai@meta</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2024" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<monogr>
+		<title/>
+		<author>
+			<persName><surname>Hyung Won</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Le</forename><surname>Chung</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shayne</forename><surname>Hou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Barret</forename><surname>Longpre</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yi</forename><surname>Zoph</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">William</forename><surname>Tay</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Eric</forename><surname>Fedus</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xuezhi</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mostafa</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Siddhartha</forename><surname>Dehghani</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Albert</forename><surname>Brahma</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Webson</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shane</forename><surname>Shixiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhuyun</forename><surname>Gu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mirac</forename><surname>Dai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xinyun</forename><surname>Suzgun</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Aakanksha</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sharan</forename><surname>Chowdhery</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Gaurav</forename><surname>Narang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Adams</forename><surname>Mishra</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Vincent</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yanping</forename><surname>Zhao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Andrew</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hongkun</forename><surname>Dai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Slav</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ed</forename><forename type="middle">H</forename><surname>Petrov</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jeff</forename><surname>Chi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jacob</forename><surname>Dean</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Adam</forename><surname>Devlin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Denny</forename><surname>Roberts</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Quoc</forename><forename type="middle">V</forename><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jason</forename><surname>Le</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Wei</surname></persName>
+		</author>
+		<idno type="DOI">10.48550/ARXIV.2210.11416</idno>
+		<imprint>
+			<date type="published" when="2022" />
+		</imprint>
+	</monogr>
+	<note>Scaling instruction-finetuned language models. arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<monogr>
+		<title level="m" type="main">Delta tuning: A comprehensive study of parameter efficient methods for pre-trained language models</title>
+		<author>
+			<persName><forename type="first">Ning</forename><surname>Ding</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yujia</forename><surname>Qin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Guang</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Fuchao</forename><surname>Wei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zonghan</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yusheng</forename><surname>Su</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shengding</forename><surname>Hu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yulin</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Chi-Min</forename><surname>Chan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Weize</forename><surname>Chen</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2203.06904</idno>
+		<imprint>
+			<date type="published" when="2022" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<monogr>
+		<author>
+			<persName><forename type="first">Qingxiu</forename><surname>Dong</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lei</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Damai</forename><surname>Dai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ce</forename><surname>Zheng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhiyong</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Baobao</forename><surname>Chang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xu</forename><surname>Sun</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jingjing</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhifang</forename><surname>Sui</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2301.00234</idno>
+		<title level="m">2022. A survey on in-context learning</title>
+				<imprint/>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<title level="a" type="main">Knowledge card: Filling llms&apos; knowledge gaps with plug-in specialized language models</title>
+		<author>
+			<persName><forename type="first">Shangbin</forename><surname>Feng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Weijia</forename><surname>Shi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yuyang</forename><surname>Bai</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">The Twelfth International Conference on Learning Representa</title>
+				<imprint>
+			<date type="published" when="2023" />
+		</imprint>
+	</monogr>
+	<note>Vidhisha Balachandran, Tianxing He, and Yulia Tsvetkov</note>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<monogr>
+		<title level="m" type="main">Lora: Low-rank adaptation of large language models</title>
+		<author>
+			<persName><forename type="first">Edward</forename><forename type="middle">J</forename><surname>Hu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yelong</forename><surname>Shen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Phillip</forename><surname>Wallis</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zeyuan</forename><surname>Allen-Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yuanzhi</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shean</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lu</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Weizhu</forename><surname>Chen</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2106.09685</idno>
+		<imprint>
+			<date type="published" when="2021" />
+		</imprint>
+	</monogr>
+	<note type="report_type">Preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<monogr>
+		<title level="m" type="main">Lorahub: Efficient cross-task generalization via dynamic lora composition</title>
+		<author>
+			<persName><forename type="first">Chengsong</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Qian</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tianyu</forename><surname>Bill Yuchen Lin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Chao</forename><surname>Pang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Min</forename><surname>Du</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Lin</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2307.13269</idno>
+		<imprint>
+			<date type="published" when="2024" />
+		</imprint>
+	</monogr>
+	<note type="report_type">Preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<monogr>
+		<title level="m" type="main">Dense passage retrieval for open-domain question answering</title>
+		<author>
+			<persName><forename type="first">Vladimir</forename><surname>Karpukhin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Barlas</forename><surname>Oguz</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sewon</forename><surname>Min</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Patrick</forename><surname>Lewis</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ledell</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sergey</forename><surname>Edunov</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Danqi</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Wen-Tau</forename><surname>Yih</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2004.04906</idno>
+		<imprint>
+			<date type="published" when="2020" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<analytic>
+		<title level="a" type="main">Dense passage retrieval for open-domain question answering</title>
+		<author>
+			<persName><forename type="first">Vladimir</forename><surname>Karpukhin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Barlas</forename><surname>Oguz</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sewon</forename><surname>Min</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Patrick</forename><surname>Lewis</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ledell</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sergey</forename><surname>Edunov</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Danqi</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Wen-Tau</forename><surname>Yih</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2020.emnlp-main.550</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</title>
+				<meeting>the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)</meeting>
+		<imprint>
+			<date type="published" when="2020" />
+			<biblScope unit="page" from="6769" to="6781" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<analytic>
+		<title level="a" type="main">Retrieval-augmented generation for knowledge-intensive nlp tasks</title>
+		<author>
+			<persName><forename type="first">Patrick</forename><surname>Lewis</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ethan</forename><surname>Perez</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Aleksandra</forename><surname>Piktus</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Fabio</forename><surname>Petroni</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Vladimir</forename><surname>Karpukhin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Naman</forename><surname>Goyal</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Heinrich</forename><surname>Küttler</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mike</forename><surname>Lewis</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Wen-Tau</forename><surname>Yih</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tim</forename><surname>Rocktäschel</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Advances in Neural Information Processing Systems</title>
+				<imprint>
+			<date type="published" when="2020" />
+			<biblScope unit="volume">33</biblScope>
+			<biblScope unit="page" from="9459" to="9474" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<monogr>
+		<title level="m" type="main">Moelora: An moe-based parameter efficient finetuning method for multi-task medical applications</title>
+		<author>
+			<persName><forename type="first">Qidong</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xian</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xiangyu</forename><surname>Zhao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yuanshao</forename><surname>Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Derong</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Feng</forename><surname>Tian</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yefeng</forename><surname>Zheng</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2310.18339</idno>
+		<imprint>
+			<date type="published" when="2023" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<analytic>
+		<title level="a" type="main">The flan collection: Designing data and methods for effective instruction tuning</title>
+		<author>
+			<persName><forename type="first">Shayne</forename><surname>Longpre</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Le</forename><surname>Hou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Tu</forename><surname>Vu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Albert</forename><surname>Webson</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Hyung Won</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yi</forename><surname>Chung</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Denny</forename><surname>Tay</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">V</forename><surname>Quoc</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Barret</forename><surname>Le</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jason</forename><surname>Zoph</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Wei</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">International Conference on Machine Learning</title>
+				<imprint>
+			<publisher>PMLR</publisher>
+			<date type="published" when="2023" />
+			<biblScope unit="page" from="22631" to="22648" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<analytic>
+		<title level="a" type="main">Learning and inference via maximum inner product search</title>
+		<author>
+			<persName><forename type="first">Stephen</forename><surname>Mussmann</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Stefano</forename><surname>Ermon</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">International Conference on Machine Learning</title>
+				<imprint>
+			<publisher>PMLR</publisher>
+			<date type="published" when="2016" />
+			<biblScope unit="page" from="2587" to="2596" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<monogr>
+		<author>
+			<persName><forename type="first">Oleksiy</forename><surname>Ostapenko</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhan</forename><surname>Su</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Maria</forename><surname>Edoardo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Laurent</forename><surname>Ponti</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nicolas</forename><forename type="middle">Le</forename><surname>Charlin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Matheus</forename><surname>Roux</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lucas</forename><surname>Pereira</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Alessandro</forename><surname>Caccia</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Sordoni</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2405.11157</idno>
+		<title level="m">Towards modular llms by building and reusing a library of loras</title>
+				<imprint>
+			<date type="published" when="2024" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<monogr>
+		<title level="m" type="main">Moshik Mishaeli, and Oren Elisha. 2024. Fine-tuning or retrieval? comparing knowledge injection in llms</title>
+		<author>
+			<persName><forename type="first">Oded</forename><surname>Ovadia</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Menachem</forename><surname>Brief</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2312.05934</idno>
+		<imprint/>
+	</monogr>
+	<note type="report_type">Preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<monogr>
+		<author>
+			<persName><forename type="first">Bohao</forename><surname>Peng</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhuotao</forename><surname>Tian</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shu</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mingchang</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jiaya</forename><surname>Jia</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2404.07470</idno>
+		<title level="m">Scalable language model with generalized continual learning</title>
+				<imprint>
+			<date type="published" when="2024" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<analytic>
+		<title level="a" type="main">Maximum inner-product search using cone trees</title>
+		<author>
+			<persName><forename type="first">Parikshit</forename><surname>Ram</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Alexander G</forename><surname>Gray</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 18th ACM SIGKDD international conference on Knowledge discovery and data mining</title>
+				<meeting>the 18th ACM SIGKDD international conference on Knowledge discovery and data mining</meeting>
+		<imprint>
+			<date type="published" when="2012" />
+			<biblScope unit="page" from="931" to="939" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b18">
+	<analytic>
+		<title level="a" type="main">Okapi at trec-3</title>
+		<author>
+			<persName><forename type="first">,</forename><forename type="middle">S</forename><surname>Stephen Robertson</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Walker</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><forename type="middle">M</forename><surname>Jones</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Hancock-Beaulieu</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Gatford</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Overview of the Third Text REtrieval Conference (TREC-3)</title>
+				<meeting><address><addrLine>Gaithersburg, MD</addrLine></address></meeting>
+		<imprint>
+			<publisher>NIST</publisher>
+			<date type="published" when="1995" />
+			<biblScope unit="page" from="109" to="126" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b19">
+	<analytic>
+		<title level="a" type="main">Learning to retrieve prompts for in-context learning</title>
+		<author>
+			<persName><forename type="first">Ohad</forename><surname>Rubin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jonathan</forename><surname>Herzig</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jonathan</forename><surname>Berant</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2022.naacl-main.191</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 2022 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies</title>
+				<meeting>the 2022 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies<address><addrLine>Seattle, United States</addrLine></address></meeting>
+		<imprint>
+			<publisher>Association for Computational Linguistics</publisher>
+			<date type="published" when="2022" />
+			<biblScope unit="page" from="2655" to="2671" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b20">
+	<analytic>
+		<title level="a" type="main">WikiChat: Stopping the hallucination of large language model chatbots by few-shot groundon Wikipedia</title>
+		<author>
+			<persName><forename type="first">Sina</forename><surname>Semnani</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Violet</forename><surname>Yao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Heidi</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Monica</forename><surname>Lam</surname></persName>
+		</author>
+		<idno type="DOI">10.18653/v1/2023.findings-emnlp.157</idno>
+	</analytic>
+	<monogr>
+		<title level="m">Findings of the Association for Computational Linguistics: EMNLP 2023</title>
+				<meeting><address><addrLine>Singapore</addrLine></address></meeting>
+		<imprint>
+			<date type="published" when="2023" />
+			<biblScope unit="page" from="2387" to="2413" />
+		</imprint>
+	</monogr>
+	<note>Association for Computational Linguistics</note>
+</biblStruct>
+
+<biblStruct xml:id="b21">
+	<analytic>
+		<title level="a" type="main">Black-box tuning for language-model-as-a-service</title>
+		<author>
+			<persName><forename type="first">Tianxiang</forename><surname>Sun</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yunfan</forename><surname>Shao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hong</forename><surname>Qian</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xuanjing</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xipeng</forename><surname>Qiu</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">International Conference on Machine Learning</title>
+				<imprint>
+			<publisher>PMLR</publisher>
+			<date type="published" when="2022" />
+			<biblScope unit="page" from="20841" to="20855" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b22">
+	<monogr>
+		<title level="m" type="main">Challenging big-bench tasks and whether chain-of-thought can solve them</title>
+		<author>
+			<persName><forename type="first">Mirac</forename><surname>Suzgun</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nathan</forename><surname>Scales</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nathanael</forename><surname>Schärli</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Sebastian</forename><surname>Gehrmann</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yi</forename><surname>Tay</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Hyung Won</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Aakanksha</forename><surname>Chung</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Chowdhery</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">V</forename><surname>Quoc</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ed</forename><forename type="middle">H</forename><surname>Le</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Denny</forename><surname>Chi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jason</forename><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Wei</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2210.09261</idno>
+		<imprint>
+			<date type="published" when="2022" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b23">
+	<monogr>
+		<title level="m" type="main">Online adaptation of language models with a memory of amortized contexts</title>
+		<author>
+			<persName><forename type="first">Jihoon</forename><surname>Tack</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jaehyung</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Eric</forename><surname>Mitchell</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jinwoo</forename><surname>Shin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yee</forename><forename type="middle">Whye</forename><surname>Teh</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jonathan</forename><forename type="middle">Richard</forename><surname>Schwarz</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2403.04317</idno>
+		<imprint>
+			<date type="published" when="2024" />
+		</imprint>
+	</monogr>
+	<note type="report_type">Preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b24">
+	<monogr>
+		<title/>
+		<author>
+			<persName><forename type="first">Hugo</forename><surname>Touvron</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Louis</forename><surname>Martin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kevin</forename><surname>Stone</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Peter</forename><surname>Albert</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Amjad</forename><surname>Almahairi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yasmine</forename><surname>Babaei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nikolay</forename><surname>Bashlykov</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Soumya</forename><surname>Batra</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Prajjwal</forename><surname>Bhargava</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shruti</forename><surname>Bhosale</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Dan</forename><surname>Bikel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Lukas</forename><surname>Blecher</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Cristian Canton</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Moya</forename><surname>Ferrer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Guillem</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">David</forename><surname>Cucurull</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jude</forename><surname>Esiobu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Jeremy</forename><surname>Fernandes</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Wenyin</forename><surname>Fu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Brian</forename><surname>Fu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Cynthia</forename><surname>Fuller</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Vedanuj</forename><surname>Gao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Naman</forename><surname>Goswami</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Anthony</forename><surname>Goyal</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Saghar</forename><surname>Hartshorn</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Rui</forename><surname>Hosseini</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hakan</forename><surname>Hou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Marcin</forename><surname>Inan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Viktor</forename><surname>Kardas</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Madian</forename><surname>Kerkez</surname></persName>
+		</author>
+		<author>
+			<persName><surname>Khabsa</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2307.09288</idno>
+		<editor>Isabel Kloumann, Artem Korenev, Punit Singh Koura, Marie-Anne Lachaux, Thibaut Lavril, Jenya Lee, Diana Liskovich, Yinghai Lu, Yuning Mao, Xavier Martinet, Todor Mihaylov, Pushkar Mishra, Igor Molybog, Yixin Nie, Andrew Poulton, Jeremy Reizenstein, Rashi Rungta, Kalyan Saladi, Alan Schelten, Ruan Silva, Eric Michael Smith, Ranjan Subramanian, Xiaoqing Ellen Tan, Binh Tang, Ross Taylor, Adina Williams, Jian Xiang Kuan, Puxin Xu, Zheng Yan, Iliyan Zarov, Yuchen Zhang</editor>
+		<imprint>
+			<pubPlace>Angela Fan, Melanie Kambadur, Sharan Narang, Aurelien Rodriguez, Robert Stojnic, Sergey Edunov</pubPlace>
+		</imprint>
+	</monogr>
+	<note type="report_type">Preprint</note>
+	<note>and Thomas Scialom. 2023. Llama 2: Open foundation and finetuned chat models</note>
+</biblStruct>
+
+<biblStruct xml:id="b25">
+	<monogr>
+		<title level="m" type="main">Lora-flow: Dynamic lora fusion for large language models in generative tasks</title>
+		<author>
+			<persName><forename type="first">Hanqing</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Bowen</forename><surname>Ping</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Shuo</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Xu</forename><surname>Han</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yun</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Zhiyuan</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Maosong</forename><surname>Sun</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2402.11455</idno>
+		<imprint>
+			<date type="published" when="2024" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b26">
+	<analytic>
+		<title level="a" type="main">Learning to retrieve in-context examples for large language models</title>
+		<author>
+			<persName><forename type="first">Liang</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nan</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Furu</forename><surname>Wei</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of the 18th Conference of the European Chapter of the Association for Computational Linguistics</title>
+				<meeting>the 18th Conference of the European Chapter of the Association for Computational Linguistics</meeting>
+		<imprint>
+			<publisher>Long Papers</publisher>
+			<date type="published" when="2024" />
+			<biblScope unit="volume">1</biblScope>
+			<biblScope unit="page" from="1752" to="1767" />
+		</imprint>
+		<respStmt>
+			<orgName>St. Julian&apos;s, Malta. Association for Computational Linguistics</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b27">
+	<monogr>
+		<title level="m" type="main">Minilm: Deep self-attention distillation for task-agnostic compression of pre-trained transformers</title>
+		<author>
+			<persName><forename type="first">Wenhui</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Furu</forename><surname>Wei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Li</forename><surname>Dong</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hangbo</forename><surname>Bao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Nan</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Ming</forename><surname>Zhou</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2002.10957</idno>
+		<imprint>
+			<date type="published" when="2020" />
+		</imprint>
+	</monogr>
+	<note type="report_type">Preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b28">
+	<monogr>
+		<author>
+			<persName><forename type="first">Xin</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Yue</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Panupong</forename><surname>Pasupat</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Mehran</forename><surname>Kazemi</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2401.11624</idno>
+		<title level="m">-context learning with retrieved demonstrations for language models: A survey</title>
+				<imprint>
+			<date type="published" when="2024" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b29">
+	<monogr>
+		<title level="m" type="main">Loraretriever: Input-aware lora retrieval and composition for mixed tasks in the wild</title>
+		<author>
+			<persName><forename type="first">Ziyu</forename><surname>Zhao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Leilei</forename><surname>Gan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Guoyin</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Wangchunshu</forename><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Hongxia</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Kun</forename><surname>Kuang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Fei</forename><surname>Wu</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2402.09997</idno>
+		<imprint>
+			<date type="published" when="2024" />
+		</imprint>
+	</monogr>
+	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

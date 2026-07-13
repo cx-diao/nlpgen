@@ -1,0 +1,15 @@
+latest: |
+  # Task
+  Determine whether the Target Sentence expresses an opinion rather than a factual claim.
+
+  # Instructions
+  * An opinion is a subjective statement that clearly expresses a judgement, belief, preference, or recommendation, rather than a verifiable fact, e.g. "we believe", "we consider", "we recommend"
+  * Usually, the subject of an opinion is the author or the authors, and the main verb is "believe", "consider", "recommend", etc.
+  * If the Target Sentence contains both opinion and objective content, answer "Yes".
+
+  # Target Sentence
+  Sentence: {claim}
+
+  Does the Target Sentence express an opinion rather than a factual claim? Give the reasoning process first and then answer with Yes or No. The output should be in the format below.
+  Reasoning: <your reasoning>
+  Answer: Yes/No

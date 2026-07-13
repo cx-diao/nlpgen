@@ -1,0 +1,453 @@
+
+
+\documentclass[11pt]{article}
+\usepackage{coling2020}
+\usepackage{times}
+\usepackage{wrapfig}
+\usepackage{url}
+\usepackage{latexsym}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage{subfigure} 
+\usepackage{multirow}
+\usepackage{verbatim}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{comment}
+\usepackage{array}
+\usepackage{graphicx}  %
+\usepackage{amsmath}
+\usepackage{floatrow}
+\usepackage{blindtext}
+\usepackage{wrapfig}
+
+
+\title{Learning to Decouple Relations: Few-Shot Relation Classification with Entity-Guided Attention and Confusion-Aware Training 
+}
+\author{First Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  {\tt email@domain} \\\And
+  Second Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  {\tt email@domain} \\}
+
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+This paper aims to enhance the few-shot relation classification especially for sentences that jointly describe multiple relations.
+Due to the fact that some relations keep high co-occurrence in the same context,
+previous few-shot relation classifiers struggle to distinguish them with few annotated instances.
+To alleviate the above \textit{relation confusion problem}, we propose two novel mechanisms to learn to decouple these easily-confused relations.
+On the one hand, an \textbf{E}ntity-\textbf{G}uided \textbf{A}ttention (EGA) mechanism, which leverages the syntactic relations and relative positions between each word and the specified entity pair, is introduced to guide the attention to filter out information causing confusion.
+On the other hand, a \textbf{C}onfusion-\textbf{A}ware \textbf{T}raining (CAT) method is proposed to explicitly learn to distinguish relations by playing a pushing-away game between classifying a sentence into a true relation and its confusing relation.
+Extensive experiments are conducted on the FewRel dataset, and the results show that our proposed model achieves comparable and even much better results to strong baselines in terms of accuracy.
+Furthermore, ablation test and case study verify the effectiveness of our proposed EGA and CAT, especially in addressing the relation confusion problem.
+
+\blfootnote{
+    \hspace{-0.65cm}  %
+    This work is licensed under a Creative Commons Attribution 4.0 International Licence.  Licence details: \url{http://creativecommons.org/licenses/by/4.0/}
+}
+
+\end{abstract}
+
+\section{Introduction}
+
+
+Relation classification (RC) aims to identify the relation between two specified entities in a sentence. 
+Previous supervised approaches on this task heavily depend on human-annotated data, which limit their performance on classifying the relations with insufficient instances.
+Therefore, making the RC models capable of identifying relations with few training instances becomes a crucial challenge.
+Inspired by the success of few-shot learning methods in the computer vision community  \cite{Vinyals2016Matching,Sung1711,SantoroBBWL16}, \newcite{Han2018FewRel} first introduce the few-shot learning to RC task and propose the FewRel\footnote{\url{http://www.zhuhao.me/fewrel/}} dataset as the benchmark.
+Recently, many works focus on this task and achieve remarkable performance \cite{gao2019hybrid,snell2017prototypical,YeMulti}. 
+
+
+Previous few-shot relation classifiers perform well on sentences with only one relation of a single entity pair.
+However, in real natural language, a sentence usually jointly describes multiple relations of different entity pairs.
+Due to the fact that these relations keep high co-occurrence in the same context, previous few-shot RC models struggle to distinguish them with few annotated instances.
+For example, Table~\ref{sentence} shows three instances from the FewRel dataset, where each sentence describes multiple relations with corresponding keyphrases highlighted (colored) as evidence.
+When specified two entities (bold black) in the sentence, there is a great opportunity for the instance to be incorrectly categorized as a {\color{red}{confusing relation}} (red) instead of the {\color{blue}{true relation}} (blue).
+
+Specifically, 
+the first instance should be categorized as the true relation `\textit{parents-child}' based on the given entity pair and natural language (NL) expression `\textit{a daughter of}'.
+However, since it also includes the NL expression `\textit{his wife}', 
+it is probably misclassified into this confusing relation `\textit{husband-wife}'.
+In this paper, we name it as a \textbf{relation confusion problem}.
+
+
+
+
+\begin{table}[t]
+  \renewcommand\arraystretch{1}
+  \small
+  \centering
+  \begin{tabular}{c|c|p{9.2cm}}
+
+    \toprule
+      \color{blue}{\textbf{True Relation}} & \color{red}{\textbf{Confusing Relation}}  &\textbf{Instance} \\ 
+    \midrule
+    
+    \color{blue}{{parents-child}} & \color{red}{{husband-wife}}  &{She was {\color{blue}{a daughter of}} prince Wilhelm of Baden and {\color{red}{his wife}} \textbf{\emph{princess Maria of Lichtenberg}}, as well as an elder sister of \textbf{\emph{prince Maximilian}}.} \\ 
+    \midrule
+    
+    \color{blue}{{husband-wife}} & \color{red}{{uncle-nephew}} & He was the youngest son of \textbf{\emph{Prescott Sheldon Bush}} and {\color{blue}{his wife}} \textbf{\emph{Dorothy Walker Bush}}, and {\color{red}{the uncle of}} former president George W Bush. \\
+
+    \midrule
+    {\color{blue}{{uncle-nephew}}} & \color{red}{{parents-child}}  & \textbf{\emph{Snowdon}} is {\color{red}{the son of}} princess Margaret, countess of Snowdon, and the 1st earl of Snowdon, thus he is {\color{blue}{the nephew of}} \textbf{\emph{queen Elizabeth ii}}.\\
+    \bottomrule
+  \end{tabular}
+  \caption{Example sentences containing confusing relations.
+    Their specified entities are marked as italics in bold. 
+    The {\color{blue}{\textbf{blue}}} and {\color{red}{\textbf{red}}} words respectively correspond to positive and confusing relations.}
+  \label{sentence}
+    \vspace{-0.5cm}
+\end{table}
+To address the relation confusion problem, it is crucial for a model to
+be aware of which NL expressions cause confusion and learn to avoid mapping the instance into its easily-confused relation.
+From these perspectives, we propose two assumptions. 
+Firstly, \textit{in a sentence, words that keep high relevance to the given entities are more important in expressing the true relation}. Intuitively, the specified entity information is crucial to identify the true relations. 
+Secondly, \textit{explicitly learning of mapping an instance into its confusing relation with augmented data in turn boosts a few-shot RC model on identifying the true relation}.
+Based on these assumptions, we propose two mechanisms in this paper:
+(1) An \textbf{E}ntity-\textbf{G}uided \textbf{A}ttention (EGA) encoder, which leverages the syntactic relations and relative positions between each word and the specified entity pair to
+softly select important information of words expressing the true relation and filter out the information causing confusion.
+(2) A \textbf{C}onfusion-\textbf{A}ware \textbf{T}raining (CAT) method, which explicitly learns to distinguish relations by playing a pushing-away game between classifying a sentence into a true relation and its confusing relation.
+In addition, inspired by the succeed of pre-trained language models, our approaches are based on the typical BERT \cite{devlin2018bert} to introduce language knowledge, which has been proved effective especially for few-shot learning tasks.
+
+
+Specifically, the backbone of the encoder of our model is a transformer equipped with the proposed \textbf{EGA} which guides the calculation of self-attention distributions by weighting the attention logits with entity-aware gates.
+The gates are used to measure the relevance between each word and the given two entities.
+Two types of information for each word are used to calculate its gate.
+One is the \textit{relative position} \cite{Zeng2015DistantSF} information, which is the relative distance between a word and an entity in the input sequence.
+The other is \textit{syntactic relation} which is proposed in this paper, defined as the dependency relations between each word and the entities.
+Based on these information, the entity-aware gates in EGA are able to select those important words and control the contribution of each word in self-attention.
+
+
+We also propose \textbf{CAT} to explicitly force the model to asynchronously learn the classification from an instance to its true relation and its confusing relation.
+After each training step, the CAT first selects those misclassified sentences, and regards the relations they are misclassified into as the confusing relations.
+After that, The CAT uses these misclassified instances and their confusing relations as augmented data to conduct an additional training process, which aims to learn the mapping between these instances into the confusing relations. 
+Afterwards, the CAT adopts the KL divergence~\cite{10.2307/2236703} to teach the model to distinguish the difference between the true and the confusing relations, which benefits the true relation classification from the confusing relation identification.
+
+
+The contributions of this paper are summarized as follows: 
+(1) We propose an Entity-Aware Attention encoder, which can select crucial words and filter out NL expressions causing confusion based on their relevance to the specified entities.  
+(2) We propose a Confusion-Aware Training process to enhance the ability of the model to distinguish the true and confusing relations. 
+(3) We conduct extensive experiments on the widely used few-shot RC dataset FewRel, where the results show that our model achieves comparable and even much better results to strong baselines.
+Furthermore, ablation and case studies verify the effectiveness of our EGA and CAT, especially in addressing the relation confusion problem. 
+
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=15cm]{fig/modellll.pdf}
+  \caption{The framework of our model including  \textbf{E}ntity-\textbf{G}uided \textbf{A}ttention (EGA) and \textbf{C}onfusion \textbf{A}ware \textbf{T}raining (CAT).}
+  \label{model}
+\end{figure} 
+\section{Methodology}
+
+
+\subsection{EGA: Entity-Guided Attention Encoder}
+The inputs of our model include a sentence $S=w_{1},...,w_{n}$ with $n$ words, and two pairs of integers $s_1 =(l_1,r_1)$ and $s_2=(l_2,r_2)$ representing the start and end positions of the two specified entities. Firstly, we convert the words into a sequence of vectors $\bm e_{1}^{w},...,\bm e_{n}^{w}$, using an embedding layer initialized by BERT. After obtaining the word embedding, we prepare two types of relevance information between each word and the  specified 
+entity pair, and use them to construct entity-guided gates for the sentence.
+\paragraph{Relative Position.}
+The relative position information is widely used in the relation classification task, e.g., \cite{Zeng2015DistantSF}, which is defined as the relative distances $pos_1$ and $pos_2$ from the current word to the two specified entities in the sentence sequence. 
+The relative position information of the $i$-th word is represented as $\bm e^{pos}_i = [\bm e_{i}^{pos1}, \bm e_{i}^{pos2}]$, where $\bm e_{i}^{pos1},\bm e_{i}^{pos2} \in \mathbb{R}^{d_{pos}}$ are the embeddings of $pos_1$ and $pos_2$.
+
+\paragraph{Syntactic Relation.}
+Except for the relative position, we further introduce the syntactic relations to measure the relevance between each word and the specified entities.
+The syntactic relations are defined as the dependency relations extracted from the dependency parse trees, which are obtained using Standford Parser\footnote{\url{https://nlp.stanford.edu/software/lex-parser.shtml}}. 
+For example, Figure~\ref{dependency tree:a} shows the original dependency tree of the sentence \textit{``Chen-chun-chang is a mathematician who works in model-theory"}, where \textit{``Chen-chun-chang"} and \textit{``model-theory"} are entities. In Figure~\ref{dependency tree:b}, the paths directly connecting to the specified entities and their dependency relations are extracted.
+\begin{figure*}[t]
+  \centering
+  \subfigure[]{\label{dependency tree:a}\includegraphics[width=0.46\textwidth]{fig/before_pruning.pdf}}
+  \subfigure[]{\label{dependency tree:b}\includegraphics[width=0.46\textwidth]{fig/after_pruning.pdf}}
+  \caption{The dependency tree of the sentence and the paths we used as the syntactic relations. }
+  \label{dependency tree}
+  \vspace{-0.5cm}
+\end{figure*}
+Specifically, each word in the sentence is assigned two tags $t_i=(t_{i,1},t_{i,2})$.
+Taking the tag $t_{i,1}$ of word $w_i$ which corresponds to the first entity as an example, if $w_i$ is part of the first entity, the tag $t_{i,1}$ is assigned the value `\textit{self}', and if $w_i$ is directly connected to the first entity in the dependency tree, $t_{i,1}$ is assigned the dependency relation name on the path, e.g., `\textit{nmod}'.
+In addition, if $w_i$ is neither connected to nor part of the first entity, $t_{i,1}$ is assigned the value `\textit{other}'. 
+
+Based on the above strategy, the syntactic relations of the sentence in Figure~\ref{dependency tree} are shown in Table~\ref{syntactic pos}. Finally, the two dependency tags of each word  $t_i=(t_{i,1},t_{i,2})$ are converted into vectors based on an embedding lookup operation, and then concatenated into a vector $\bm e^{syn}_i = [\bm e_{i}^{syn1}, \bm e_{i}^{syn2}]$, where $\bm e_{i}^{syn1},\bm e_{i}^{syn2} \in \mathbb{R}^{d_{syn}}$. 
+\begin{table}[h]
+  \centering
+  \small
+  \begin{tabular}{c|cccccccc}
+    \toprule
+    \bf Words &\bf {chen chun chang} &  is & a & mathematician & who & works & in &\bf {model theory}  \\
+    \midrule
+    \bf $t_{i,1}$ &self & other &other &nsubj &other &other &other &other \\
+    \bf $t_{i,2}$ &other & other &other &other &other &nmod &case&self \\
+    \bottomrule
+  \end{tabular}
+  \caption{The syntactic relations corresponding to each word of the given sentence. }
+  \label{syntactic pos}
+    \vspace{-0.5cm}
+\end{table}
+\paragraph{Entity-Guided Gate}
+Our model learns entity-guided gates $\bm G = (g_1,...,g_n)$ for the given sentence based on the above two types of relevance information.
+Specifically, if a word $w_i$  is close to any of the specified entities in the sentence sequence, or directly connect the  specified entities in the dependency tree, its corresponding $g_i$ will be higher. In implementing, 
+after obtaining the the relative position embedding and the syntactic relation embedding, we first combine them into $\bm e_i^p=[\bm e_i^{pos}, \bm e_i^{syn}]$, where $\bm e_i^p \in \mathbb{R}^{2d_{pos}+2d_{syn}}$. Then we adopt a transformer encoder \cite{46201} and an activation function to calculate the entity-guided gates.
+\begin{equation}
+\bm (\bm h^p_{1},...,\bm h^p_{i},...,\bm h^p_{n}) = \mathtt{TransEnc}(\bm e^p_{1},...,\bm e^p_{i},...,\bm e^p_{n})
+\end{equation}
+\begin{equation}
+g_i = \mathtt{sigmoid}(\bm W_i^g \bm h_t^i + \bm b_i^g).
+\end{equation}
+After that, we expand the shape of $\bm G$ from $(1\times n)$ to $(n \times n)$, through repeating it $n$ times along the first dimension. The final gate will be multiplied on the attention logits in the self-attention layers.  That means the words with higher relevance scores make more contribution when calculating the semantic representation of the sentence. 
+
+\paragraph{Gated Self-Attention}
+The BERT encoder learns the representation for each sentence using $M$ transformer blocks. The core of each transformer is a self-attention layer, which calculates an attention score matrix for each sentence. We define the $t$-layer attention score matrix as $\bm{Att}^{t}$, and the corresponding hidden state of the sentence is represented as $\bm{H}^t$. 
+When calculating the $\bm{Att}^{t}$, it is multiplied by the entity-guided gate $\bm G$ before the softmax operation.  The gated self-attention and the calculation of $\bm{H}^t$ are formalized as follows, where the matrices $\bm W_k$,$\bm W_q$,$\bm W_v$ are trainable parameters.
+\begin{equation}
+(\bm Q^t,\bm K^t,\bm V^t) = (\bm {W_q},\bm {W_k},\bm {W_v})\bm H^{t-1}
+\end{equation}
+\begin{equation}
+\bm{Att^t} = \mathtt{softmax}(
+     \frac{\bm Q^t {\bm K^t}^\top \times \bm G}
+     {\sqrt{d_k}}) 
+\end{equation}
+\begin{equation}
+\bm{H}^t =\bm{Att}^{t}\bm{V}^{t}
+\end{equation} 
+Finally, the representation vector $\bm s$ of the sentence is obtained by the following operation, where $\bm H$ represents the final output of our encoder with the entity-guided attention.%
+\begin{equation}  
+\bm s = \mathtt{maxpooling}(\bm H )
+\end{equation}
+
+
+\subsection{Classification}
+Our classifier performs $N$-way-$K$-shot classification following few-shot learning paradigm and the prototypical network \cite{snell2017prototypical}. Specifically,
+for a relation $r_j$ where $j \in [1,N]$, $K$ sentences are sampled from its instances firstly, then these sentences are used to calculate the representation named prototype $\bm c_j$ of the relation. We define the representations of the $K$ sentences as ${\bm s_{j,1}^{c},...,\bm s_{j,K}}^{c}$, and the $\bm c_j$ is calculated as follows:
+\begin{equation}
+\bm c_j=\frac{1}{K}\sum_{k=1}^{K}\bm s_{j,k}^{c}
+\end{equation}
+Given a sentence $\bm s^{q}$ and the prototypes $(\bm c_1,...,\bm c_N)$ of the $N$ relations, our model aims to classify the $\bm s^{q}$ into one of $N$ candidate relations.
+We first obtain the distance distribution $\bm \delta=(\delta_{1},...,\delta_{N})$ by calculating the Euclidean Distance between $\bm s^q$ and each prototype. Then according to $\bm \delta$, the sentence will be classified into the nearest relation $\hat{r}$.
+\begin{equation}
+\bm{\delta} =({\left \|\bm s-\bm c_1 \right\|^2,...,\left \|\bm s-\bm c_N \right\|^2})
+\end{equation}
+\begin{equation}
+\hat{r}=\arg\min_j{(\bm{\delta})}
+\end{equation}
+To enable the classifier to learn confusing relations, we further project the distance distrubution $\bm \delta$ into $\bm {\Bar{\delta}}$ via a linear layer followed by a $\mathtt{tanh}(\cdot)$ activation function defined as follows. The $\bm {\Bar{\delta}}$ will be used to predict the confusing relation defined as $\Bar{r}$ during the training stage.
+\begin{equation}
+\bm {\Bar{\delta}} = \mathtt{tanh}(\bm W^{c} \bm \delta + \bm b^{c})
+\end{equation}
+
+
+\subsection{CAT: Confusion-Aware Training}
+The confusion-aware training is based on two asynchronous processes: \textit{true relation identification} and \textit{confusing relation identification}. During classifying a sentence, the former uses its true relation as the target, and the latter uses its confusing relation as the target. Specifically, given a sentence with its true relation as $r$, the training objective of the true relation identification is defined as:
+\begin{equation}
+\mathcal{L} = \mathtt{CrossEntropy}(\mathtt{OneHot}(r),\mathtt{Softmax}(\bm \delta))
+\end{equation}
+For the \textit{confusing relation identification},
+we first pick up those misclassified sentences after each training step of true relation identification, and use their prediction results as the targets. In formulation, assuming the sentence is misclassified into an incorrect $\Bar{r}$, the objective function of the confusing relation identification $\Bar{\mathcal{L}}$ is defined as:
+\begin{equation}
+\Bar{\mathcal{L}} = \mathtt{CrossEntropy}(\mathtt{OneHot}(\Bar{r}),\mathtt{Softmax}(\bm{ \Bar{\delta}}))
+\end{equation}
+Besides, the KL divergence is adopted as another objective function, which allows the model to learn to perform confusion decoupling. The KL divergence has the ability to push away the distance distribution $\bm \delta$ and $\bm {\Bar{\delta}}$, and the formula is defined as follows:
+\begin{equation}
+\mathcal{L}_{kl} =-\mathtt{KL}( \mathtt{Softmax}(\bm \delta),\mathtt{Softmax}(\bm {\Bar{\delta}}))
+\end{equation}
+By maximizing $\mathcal{L}_{kl}$, with the learning about the confusion relations of a sentence, the distance distribution corresponding to the true relation identification is allowed to be away from its confusion relations. In this way, our model learns to explicitly decouple $r$ and $\hat r$ for the sentences.
+It is worth noting that, only those misclassified sentences are used for updating the objective $\mathcal{L}_{kl}$.
+The finally objective function of our model $\mathcal{L}_{all}$ is defined as:
+\begin{equation}
+&\mathcal{L}_{all} = \mathcal{L}+\Bar{\mathcal{L}}+\mathcal{L}_{kl}
+\end{equation}
+\section{Experiments}
+In this section, we report our experiment results from the following four aspects: 
+(1) We first show the comparison results of our models and strong baselines on FewRel dataset.
+(2) We then demonstrate the effectiveness of the EGA and CAT through the ablation study.
+(3) In order to more intuitively and clearly show the role of EGA and CAT, we show their visualized examples in case study.
+(4) Furthermore, we verify that our model is capable of addressing the \textit{relation confusion problem} to some extent.
+
+
+\subsection{Implementation Details}
+\paragraph{Dataset.} 
+The FewRel dataset~\cite{Han2018FewRel} contains 100 relations, which are split up into $64$ for training, $16$ for validation and $20$ for testing. 
+Each relation has 700 instances generated by distant supervision \cite{mintz2009distant}. 
+All the instances are annotated with a  specified entity pair. In this paper, all results reported are on the validation set. \footnote{Evaluating on the test set is on-going, which cost some time to reproduce our model on the test environment.}
+\paragraph{Settings.}
+
+The dimension of word embedding is set to $768$ for consistency with BERT, the relative position and syntactic relation embedding dimensions are both set to $50$. 
+About the encoder, the number of the transformer block $M$ is $12$. We set the hidden state size as $230$, and the head number is set to $2$ to avoid overfitting. 
+In addition, the learning rate and the weight decay are set to $1\times 10^{-5}$ and $1\times 10^{-6}$.  %
+\subsection{Baselines}
+We implement {{three}} strong baselines on FewRel dataset: \textbf{Proto}, \textbf{Proto-HATT} \cite{gao2019hybrid} and \textbf{MLMAN} \cite{YeMulti}.
+All the baselines are based on the few-shot learning framework and the prototypical network \cite{snell2017prototypical}.
+Specifically, for each training step, $N$ relations are first sampled from the training set.
+For each of the above relation, $K$ out of 700 instances are sampled to construct a supporting set, based on which a relation representation named \textit{prototype} is calculated.
+Given an instance of the $N$ relations to be classified, the models classify it by calculating the distances from it to $N$ prototypes.
+Besides, we also show the results\footnote{We directly show their reported results in \url{https://github.com/thunlp/FewRel}. } of \textbf{BERT-Pair} reported by \newcite{gao-etal-2019-fewrel}.
+Inspire by them, our model also leverages BERT as a component.
+\paragraph{Proto \& Proto-HATT.} Both of the two models adopt the CNN network as their encoders.
+  {Proto} calculates the prototype by averaging the representations of the $K$-instances in the supporting set, and classify the query using the Euclidean Distance.
+    Differently, {Proto-HATT} further proposes a hybrid attention scheme which includes an instance-level attention and a feature-level attention, where the former is used to highlight the crucial support sentences in calculating the prototype, and the latter is to select more efficient features when calculating distances. 
+\paragraph{MLMAN.} Different from the Proto and Proto-HATT, {MLMAN} encodes each query and the supporting set in an interactive way by considering their matching information at multi levels.
+  At local level, the representations of an instance and a supporting set are matched following the sentence matching framework \cite{chen-etal-2017-enhanced} and aggregated by max and average pooling.
+  At instance level, the matching degree is first calculated via a multi-layer perception (MLP).
+  Then, taking the matching degrees as weights, the instances in a supporting set are aggregated to obtain the class prototype for final classification.
+\paragraph{BERT-PAIR.} This model is based on the sentence classification model in BERT. The sentence to be classified is first paired with all the supporting instances, then each pair is concatenate as a sequence. BERT receives this sequence and calculates a relevance score, which is used to measure the given sentence whether expresses the same relation with the supporting instances.  
+
+
+
+
+
+
+\begin{table}[t]
+  \centering
+   
+  \begin{tabular}{l|cccc}
+    \toprule
+    \bf Model & \bf 5-way-1-shot & \bf 5-way-5-shot & \bf 10-way-1-shot & \bf 10-way-5-shot \\
+    \midrule
+    \midrule
+    Proto \cite{Han2018FewRel} & $72.65\pm0.24$ & $86.15\pm0.37$ & $60.13\pm0.20$ & $76.20\pm0.09$ \\
+    Proto-HATT \cite{gao2019hybrid} & $75.01\pm0.24$ & $87.09\pm0.11$ & $62.48\pm0.19$ & $77.50\pm0.11$ \\
+    MLMAN \cite{YeMulti} & $78.85\pm0.10$ &$88.32\pm0.06$ &$67.54\pm0.33$ & $ 79.44\pm0.10$\\
+    BERT-PAIR \cite{gao-etal-2019-fewrel} & $\textbf{85.66}$ &$89.48$ &$\textbf{76.84}$ & ${81.76}$\\
+    \midrule
+    \textbf{Ours} & ${84.72}\pm0.14$ & $\textbf{92.52}\pm\textbf{0.31}$ & ${76.01}\pm0.53$ & $\textbf{84.89}\pm\textbf{0.28}$ \\
+     ~~w/o CAT &  $83.79\pm0.51$ & $91.71\pm0.33$ & $74.25\pm0.27$ & $84.46\pm0.38$ \\
+     ~~w/o EGA &  $72.94\pm0.18$ & $86.71\pm0.30$ & $61.88\pm0.40$ & $77.03\pm0.33$ \\
+     ~~~~w/ Pos &  $82.31\pm0.42$ & $91.44\pm0.25$ & $72.41\pm0.30$ & $83.98\pm0.19$ \\
+     ~~~~w/ Syn &  $83.61\pm0.23$ & $91.78\pm0.22$ & $73.94\pm0.21$ & $84.89\pm0.28$ \\
+
+    \bottomrule
+  \end{tabular}
+  \caption{The classification accuracy of baselines and our models.}
+  \label{all}
+  \vspace{-0.5cm}
+\end{table}
+
+\subsection{Comparison with Baselines}
+Same as \cite{gao2019hybrid}, we set $N=5,10$ and $K=1,5$ of $N$v$K$ few-shot learning.
+The average accuracy is used as our evaluation metric to evaluate the relation classification performance.
+
+The results in Table~\ref{all} shows that our full model outperforms the three strong baselines including Proto, Proto-HATT and MLMAN by a significant margin on all the settings.
+These improvements are mainly brought by our EGA and CAT, which can help the model to classify those easily-confused instances into correct relations.
+In addition, applying pre-trained BERT also contributes to improving the performance.
+Compared with BERT-Pair, our full model achieves better result on 5v5 and 10v5 settings and comparable results on 5v1 and 10v1 settings.
+We think the better results of BERT-pair on 5v1 and 10v1 own to the fact that it encodes two sentences together which benefits for information fusion, while models based on prototypical network rely more on more (larger $K$) supporting facts to get a better prototype.
+In future, we will extend our work to paired sentence encoding like BERT-Pair.
+
+
+
+
+
+
+\subsection{Ablation Study}
+We conduct ablation study and show the results in Table~\ref{all}.
+Firstly, we turn off the CAT of our full model, which is represented as ``\textbf{w/o CAT}''.
+In this case, the average results drops $0.43$-$1.76$ point on the four settings.
+These drops indicate that the CAT has the ability to improve the classification performance.
+We then report three groups of results to verify the effectiveness of EGA.
+Specially, our model without EGA which only adopts the BERT as the encoder is denoted as ``\textbf{w/o EGA}''.
+It is worth noting that in this case, the model can not identify which words in a given sentence are entities.
+When the EGA is removed, the performance decreases obviously by $5.81$-$14.13$ point.
+It is proved that the entity information is crucial for relation classification.
+Furthermore, ``\textbf{w/ Pos}'' means the entity-guided gates in EGA are only calculated using the relative position information, and ``\textbf{w/ Syn}'' represents that the gates are calculated without the relative position information but remaining the syntactic relation information. Compared with ``\textbf{w/o EGA}'', the results of these two groups are significantly improved.
+It shows that the syntactic relation information is more powerful than the relative position information, which means considering the dependency relations between each word and the  specified entity pair boosts the performance of simply adopting traditional relative position information.
+In addition, it can be seen that the smaller size of the supporting set (1-shot v.s. 5-shot), the more absolute gain our CAT and EGA modules achieve.
+This phenomenon shows that our methods perform well with fewer available supporting instances.
+\begin{table}[h]
+  \centering
+  \begin{tabular}{l|c|c|c|c}
+    \toprule
+         Model   & Ours w/ Syn & QGG & Ours & FHG\\
+        \midrule
+    \midrule
+        5-way-5-shot   & $91.78\pm0.22$ & $90.64 \pm 0.28$ & $92.52 \pm 0.31$ &  $90.57 \pm 0.11$\\
+        \bottomrule
+
+  \end{tabular}
+  \caption{Ablation Results on How, What, and When to Gate.}
+  \label{ablation}
+    \vspace{-0.5cm}
+\end{table}
+\paragraph{How to Gate.}
+The self-attention mechanism is used to update the representation of each \textit{query} word by fusing the information of all \textit{key} words in a given sentence.
+In this process, an attention score is calculated to leverage the contribution of each key word.
+In this paper, we propose to use gates to further adjust these attention scores.
+In our proposed EGA, each \textit{entity-guided gate} reflects the relation between the key word and the specified entity pair, which is different for all key words.
+We also implement a baseline \textbf{QGG} with \textit{query-guided gates}, where each gate reflects the relation between the key word and the query word.
+Specifically, the relation is modeled based on their syntactic relation if the key word is a specified entity, otherwise a `\textit{other}' relation.
+The results of using these two kinds of gates in Table~\ref{ablation} shows that our model \textbf{Ours w/ Syn} only modeling syntactic relations outperform the \textbf{QGG} baseline, which further verifies that our EGA with entity-guided gates has the ability of effectively leveraging specified entity information to select input information.
+
+\paragraph{What and When to Gate.}
+In our EGA, the entity-guided gates are used since the beginning of the encoding process by multiplying them with the self-attention scores in each transformer layer.
+It means that the information of the words is selected during learning the representation of them.
+Another baseline is to multiply gates with the \textbf{F}inal transformer \textbf{H}idden states of the words as \textbf{G}ating mechanism, which is defined as \textbf{FHG}.
+In this case, the information of all words has been fully fused before adopting gating mechanism for selection.
+As the results shown in Table~\ref{ablation}, compared with our model \textbf{Ours}, the accuracy of the \textbf{FHG} drops $1.95$ point.
+The results indicate that earlier to gate the attention score during encoding is more reasonable than only to adopt gating at the final hidden states, which verigy the effectiveness of the proposed EGA.
+
+
+
+
+\subsection{Case Study}
+\paragraph{EGA visualized example.} The entity-guided gates in EGA are expected to emphasize the words which are more related to the true relation. To verify the effectiveness of EGA intuitively, we show the entity-guided gates heat map of a given instance in Figure~\ref{fig:my_label}. This instance is sampled from  '\textit{parent-children}' relation in the validation set of FewRel. 
+As shown in the map, the words '\textit{his mother is}' are given higher scores. Obviously, the three words are important for expressing the '\textit{parent-children}' relation.  
+\begin{figure}[h]%
+  \centering
+  \includegraphics[width=0.6\textwidth]{fig/heat.png}
+  \caption{The entity-guided gates of the given sentence.}
+  \label{fig:my_label}
+    \vspace{-0.5cm}
+\end{figure}
+\paragraph{CAT visualized example.} In Figure~\ref{fig:distance}, we visualize the distance distributions between the given sentence and its candidate relations. The four subfigures respectively show the distance distributions calculated by different models including our \textit{true relation identification} and \textit{confusing relation identification}. Among the five candidate relations, $R2$ in green is the true relation of the sentence, and $R_1$ in red is the confusing relation which the sentence usually be misclassified into. 
+Each edge in the subfigures represents the distance from the sentence to the corresponding relation, and the solid edge indicates the nearest one. Specifically, (a) is the distances calculated by a randomly initialized network. (b) is the classification result of Proto, in this case, the query is misclassified into $R_1$. (c) and (d) are the final classification results of our CAT. The distance distribution calculated by our confusing relation training is shown as (d), it can be seen that the model succeeded in making the query closer to the confusing relation $R_2$ as we expected. After that, the distance distribution information is propagated to the true relation training by KL divergence, this operation is used to push the distance distribution of the true relation prediction from that of confusing relation training. As (c) shows, the sentence is pushed away from $R_1$ and get closer to the true relation $R_2$. This example validates our assumption that explicit learning of confusing relations facilitates the identification of true relations.
+\begin{figure}[h]
+    \centering
+  \includegraphics[width=13cm]{fig/dis3.pdf}
+  \caption{Distances between a given sentence and five candidate relations calculated by different models. where (a) is from a random initialized network, (b) is from the Proto network, (c) and (d) are respectively from our \textit{true relation training} and \textit{confusing relation training}.}
+  \label{fig:distance}
+  \vspace{-0.5cm}
+\end{figure}
+
+
+
+
+
+
+
+
+
+\subsection{Relation Confusion Problem}
+In this section, we discuss the effectiveness of our model on confusion decoupling. In order to intuitively show the classification performance on the confusing relations, we use the confusion matrices as our evaluation metric.
+
+\paragraph{Confusing Relations Selection.} 
+We first analyze the classification results of the baseline models Proto and Proto-HATT. Based on our statistics, we find three of the 16 relations in the FewRel validation set which are most easily confused with each other. Their relation indexes are \textit{P25}, \textit{P26} and \textit{P40}, and the corresponding true relations are ``\textit{Parents-Child}'',``\textit{Husband-Wife}'' and ``\textit{Uncle-Nephew}''. We test our model and the baseline models under the 5-way-5-shot configuration. For the three easily-confused relations, we respectively record the number of their sentences which are correctly classified and misclassified into the other two relations, and use the results to conduct the confusing matrices. 
+
+\paragraph{Improvement of Relation Confusion Problem.} 
+As shown in Figure~\ref{cm}, we report the classification results of different models on the three confusing relations \textit{P25}, \textit{P26} and \textit{P40}. In the confusion matrices, the horizontal axis represent the true relation of the sentences, and the vertical axis represent the classification results of these sentences by different models. For each matrix, supposing a given relation such as \textit{P25} has $X$ sentences to participate in the test, and the numbers of the sentences classified into \textit{P25}, \textit{P26} and \textit{P40} are respectively $a$,$b$ and $c$, the elements in the first row of the matrix are calculated as $(a,b,c/X)$.  Given a relation, we expect the models classify more its sentences into the true relation, and fewer its sentences into confusing relations. From this perspective, through comparing the confusion matrices of ``Ours'' and the baseline models, it can be seen that our full model achieves the best performance in identifying these easily confused relations. ``w/o EGA'' has the weakest ability to decouple the confusing relations, because it is not provided with any entity information to identify the true relation. Based on results of ``w/o EGA'', ``w/ Pos'' and ``w/ Syn'' we can see that both of the relative position and the syntax position bring significant improvements. In addition, compared with our full model, the performance of ``w/o CAT'' proves that the CAT help to decouple the confusing relations.
+
+\begin{figure*}[t]
+  \includegraphics[width=16cm]{fig/cf2.pdf}
+  \caption{Confusion matrices of the three easily confused relations, where different colors represent the classification results of different models.}
+  \label{cm}
+  \vspace{-0.5cm}
+\end{figure*}
+
+ \section{Related Work}
+\paragraph{Few-shot Relation Classification.} Relation classification (RC) aims to identify the semantic relation between two entities in a sentence. It is an important task in natural language processing community and has attracted more and more attention over past few years. \cite{jia-etal-2019-arnor,feng2018reinforcement,le2018large,adel2017global,yang2016position}.
+Previous supervised approaches on this task heavily rely on labeled data for training, that limits their ability to classify the relations with insufficient instances.
+To address this problem, Han et al.\shortcite{Han2018FewRel} first introduce few-shot learning to RC task. The few-shot learning paradigm has been proved effective in the computer vision community and has many applications \cite{Vinyals2016Matching,Sung1711,SantoroBBWL16}. Earlier works on few-shot RC are based on the widely used few-shot learning model prototypical network\cite{snell2017prototypical,YeMulti}. Recently, the pre-trained language models (LM) has shown significant power in many natural language processing tasks. To this end, Gao et al.\shortcite{gao2019fewrel} adopt the most representative pre-trained LM BERT \cite{devlin2018bert} to few-shot RC, their work show that the BERT brings significant improvement on the classification performance. Furthermore,  the approach proposed by Soares et al.\shortcite {Livio2019Matching} is also based on BERT  and achieves the state-of-art result on the few-shot RC task.
+
+\paragraph{Syntactic Relation.} Previous RC models usually use the relative position information to identify which words are the entities in a sentence e.g.,\cite{zeng2015distant}. In addition, the syntax information of the sentences is proved useful in many natural language processing tasks \cite{inproceedings,ma2020entity,Chen2017TranslationPW} . Inspired by \cite{yang-etal-2016-position}, which adopt the dependency parse tree for RC \cite{ma2020entity}, we also introduce the dependency relation as another type of position to emphasize the specific entities, and propose a novel application of the syntax position. 
+\section{Conclusions}
+In this paper, we propose the Entity-Guided Attention (EGA) and the Confusion-Aware Training (CAT) to address the relation confusion problem in few-shot relation classification.
+We conduct extensive experiments on the few-shot relation classification benchmark FewRel.
+Experiment results demonstrate that our model achieves significant improvements on relation classification.
+Ablation study verify the effectiveness of the proposed EGA and CAT mechanisms.
+Case study and further analysis demonstrate that our model has the ability of decoupling easily-confused relations.
+
+\bibliographystyle{acl}
+\bibliography{coling2020}
+\end{document}
