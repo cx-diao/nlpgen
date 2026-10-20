@@ -7,7 +7,7 @@ from nlpgens.merge import (
     majority_vote_merge_passes,
     recompute_final_labels,
 )
-from substantiator.annotate.taxonomy import FINAL_LABEL_INPUT_COLUMNS
+from nlpgena.annotate.taxonomy import FINAL_LABEL_INPUT_COLUMNS
 
 
 def test_majority_vote():

@@ -1,6 +1,6 @@
 import itertools
 
-from substantiator.annotate.taxonomy import ALL_FINAL_LABELS, FINAL_LABEL_INPUT_COLUMNS, get_final_label
+from nlpgena.annotate.taxonomy import ALL_FINAL_LABELS, FINAL_LABEL_INPUT_COLUMNS, get_final_label
 
 
 def algorithm_1(is_generalised, ref_study_population, ref_study, is_present_tense, is_reporting_clause,

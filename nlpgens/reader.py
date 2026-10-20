@@ -17,7 +17,7 @@ from loguru import logger
 from tqdm.auto import tqdm
 
 from nlpgens.merge import COMPANION_SUFFIXES, majority_vote_merge_passes, recompute_final_labels
-from substantiator.annotate.taxonomy import CODE_TO_PAPER_COLUMN
+from nlpgena.annotate.taxonomy import CODE_TO_PAPER_COLUMN
 
 PASS_FILE_PATTERN = re.compile(
     r"^(?P<model>.+)_(?P<pass_idx>\d+)_of_(?P<num_passes>\d+)_(?P<timestamp>\d{8}_\d{6})_annotation\.csv$"

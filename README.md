@@ -15,7 +15,7 @@ Code and data for the EMNLP 2026 paper
 ## Repository layout
 
 ```text
-substantiator/
+nlpgena/
   pipeline/annotate_at_scale/
     produce_path_txt.sh          1. collect paper.itg.json paths (lowest version of each paper)
     preproc_paper_batch.py       2. extract sentences from the selected sections, check coverage
@@ -81,7 +81,7 @@ The pipeline runs in three stages:
 Each sentence first goes through gating classifier `about_outcome`. Only sentences about the
 study's outcomes reach the other classifiers. The final label is then computed
 from their yes/no answers (Algorithm 1 in the paper,
-[`taxonomy.py`](substantiator/annotate/taxonomy.py)). Some classifiers have
+[`taxonomy.py`](nlpgena/annotate/taxonomy.py)). Some classifiers have
 different names in the code than in the paper:
 
 | Name in the code and CSVs | Name in the paper | Section |
@@ -127,13 +127,13 @@ the OpenAI API, the base URL:
 # The OpenAI API; the key is read from OPENAI_API_KEY
 export OPENAI_API_KEY=...
 MODEL=<model name> OUTPUT_DIR=output/example_openai \
-  bash substantiator/pipeline/annotate_at_scale/example_api.sh
+  bash nlpgena/pipeline/annotate_at_scale/example_api.sh
 
 # Any other OpenAI-compatible endpoint, e.g. Ollama on your own machine
 # (gpt-oss:20b is the smaller sibling of the model used in the paper)
 ollama pull gpt-oss:20b
 MODEL=gpt-oss:20b BASE_URL=http://localhost:11434/v1 OUTPUT_DIR=output/example_ollama \
-  bash substantiator/pipeline/annotate_at_scale/example_api.sh
+  bash nlpgena/pipeline/annotate_at_scale/example_api.sh
 ```
 
 This annotates the sample COLING '20 paper (83 selected sentences) with one
@@ -188,11 +188,11 @@ With the vLLM environment from [Installation](#installation):
 
 ```bash
 # One NLPeer subset, e.g. COLING 2020
-bash substantiator/pipeline/annotate_at_scale/produce_path_txt.sh \
+bash nlpgena/pipeline/annotate_at_scale/produce_path_txt.sh \
   /path/to/nlpeer_v0.1/COLING2020 output/coling2020/path.txt
-python -m substantiator.pipeline.annotate_at_scale.preproc_paper_batch \
+python -m nlpgena.pipeline.annotate_at_scale.preproc_paper_batch \
   --input-path-list-txt output/coling2020/path.txt
-python -m substantiator.pipeline.annotate_at_scale.annotate_paper_batch \
+python -m nlpgena.pipeline.annotate_at_scale.annotate_paper_batch \
   --log-csv output/coling2020/preproc_log.csv \
   --backend vllm --model openai/gpt-oss-120b --num-passes 3
 python -m nlpgens merge output/coling2020 --out output/coling2020/merged.csv
@@ -227,7 +227,7 @@ input_path,self_check_status,output_selected_csv
 and run the annotation stage and the merge:
 
 ```bash
-python -m substantiator.pipeline.annotate_at_scale.annotate_paper_batch \
+python -m nlpgena.pipeline.annotate_at_scale.annotate_paper_batch \
   --log-csv my_run/preproc_log.csv --backend openai --model <model> --base-url <url> --num-passes 3
 python -m nlpgens merge my_run --out my_run/merged.csv
 ```

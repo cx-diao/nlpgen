@@ -11,7 +11,7 @@ from nlpgens.reader import (
     load_run,
     to_paper_names,
 )
-from substantiator.annotate.taxonomy import ALL_FINAL_LABELS, CODE_TO_PAPER_COLUMN
+from nlpgena.annotate.taxonomy import ALL_FINAL_LABELS, CODE_TO_PAPER_COLUMN
 
 __all__ = [
     "ALL_FINAL_LABELS",

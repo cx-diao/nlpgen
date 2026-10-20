@@ -11,8 +11,8 @@ from typing import Any, List, Optional, Sequence, Tuple
 import numpy as np
 import pandas as pd
 
-from substantiator.annotate.taxonomy import FINAL_LABEL_INPUT_COLUMNS, get_final_label
-from substantiator.annotate.utils import ANNOTATION_COLUMNS
+from nlpgena.annotate.taxonomy import FINAL_LABEL_INPUT_COLUMNS, get_final_label
+from nlpgena.annotate.utils import ANNOTATION_COLUMNS
 
 # `notes` and `get_target_sent` are free text and are taken from pass 1;
 # `final_label` is recomputed from the voted labels.

@@ -7,7 +7,7 @@ from typing import List, Optional
 import pandas as pd
 
 from nlpgens.reader import load_run
-from substantiator.annotate.taxonomy import ALL_FINAL_LABELS
+from nlpgena.annotate.taxonomy import ALL_FINAL_LABELS
 
 # The ten yes/no classifiers counted in Appendix A of the paper. All but about_outcome only run on outcome sentences.
 REPORTED_CLASSIFIERS = [
