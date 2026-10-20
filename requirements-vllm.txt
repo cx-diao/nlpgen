@@ -1,0 +1,9 @@
+# The paper's configuration: in-process vLLM on CUDA GPUs (--backend vllm).
+-r requirements.txt
+
+torch
+# rag/llm/vllm.py relies on vLLM 0.10.2 internals.
+vllm==0.10.2
+transformers>=4.55.2,<5
+huggingface-hub
+openai-harmony

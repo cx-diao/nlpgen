@@ -1,16 +1,9 @@
-# Core dependencies
+# Core: preprocessing, the OpenAI-compatible backend (--backend openai) and the NLPGens reader.
 pandas>=2.0.0
 tqdm>=4.65.0
 loguru>=0.7.3
-
-# LLM runtime. vLLM 0.10.2 is required by rag/llm/vllm.py's internal APIs.
-torch
-vllm==0.10.2
-transformers>=4.55.2,<5
-huggingface-hub
-
-# Alternate backends imported by annotate_paper_batch.py
-ollama>=0.1.0
-
-# NLP processing
-spacy>=3.0.0
+PyYAML
+spacy>=3.8,<3.9
+# spaCy's small English pipeline, used to split papers into sentences.
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+openai>=1.60.0

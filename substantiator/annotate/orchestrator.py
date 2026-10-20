@@ -10,6 +10,7 @@ from rag.prompt_builder.core import prompt_builder_from_yaml
 from substantiator.annotate.classifier import *
 from substantiator.annotate.sent_level_annotate import *
 from substantiator.annotate.core import BaseAnnotator
+from substantiator.annotate.taxonomy import get_final_label
 from substantiator.annotate.utils import PROMPT_TEMPLATE_PATH
 
 EXAMPLE_NAME2CLASSIFIER_TEMPLATE_PATH_NAME = {
@@ -80,15 +81,6 @@ EXAMPLE_NAME2CLASSIFIER_TEMPLATE_PATH_NAME = {
     },
 }
 
-ALL_FINAL_LABELS = [
-    "generalised/framed/generic",
-    "generalised/framed/non-generic",
-    "generalised/generic",
-    "generalised/others",
-    "non-generalised",
-]
-
-
 class GeneralisationAnnotator:
     def __init__(self, llm: LLM, name2classifier_template_path_name: Dict[str, Dict[str, Any]], debug: bool = False):
         self.llm = llm
@@ -152,44 +144,7 @@ class GeneralisationAnnotator:
             }
         return skipped
 
-    @staticmethod
-    def get_final_label(buffer: Dict[str, Any]) -> str:
-        def _label(key: str) -> bool:
-            return bool(buffer[key]["label"])
-
-        final_label = ""
-        if _label("is_generalised"):
-            final_label += "generalised/"
-            if _label("ref_study_population"):
-                final_label += "framed/non-generic"
-            else:
-                if _label("ref_study"):
-                    if _label("is_present_tense_main_verb"):
-                        if _label("is_reporting_clause"):
-                            if _label("contains_embedded_sentence"):
-                                if _label("contains_quantification_in_main_clause"):
-                                    final_label += "framed/non-generic"
-                                else:
-                                    final_label += "framed/generic"
-                            else:
-                                final_label += "framed/non-generic"
-                        else:
-                            final_label += "framed/non-generic"
-                    else:
-                        final_label += "framed/non-generic"
-                else:
-                    if _label("is_present_tense_main_verb"):
-                        if _label("contains_quantification_in_main_clause"):
-                            final_label += "others"
-                        else:
-                            final_label += "generic"
-                    else:
-                        final_label += "others"
-        else:
-            final_label += "non-generalised"
-
-        assert final_label in ALL_FINAL_LABELS, f"Final label {final_label} is not in {ALL_FINAL_LABELS}"
-        return final_label
+    get_final_label = staticmethod(get_final_label)
 
     async def run_about_outcome_phase(
         self, sentence_placeholder: Dict[str, Any], paper_context: Dict[str, Any] = None

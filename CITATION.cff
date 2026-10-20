@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use NLPGenA or NLPGens, please cite the paper below."
+title: "NLPGen: code for NLPGenA and tools for the NLPGens dataset"
+repository-code: "https://github.com/cx-diao/nlpgen"
+license: Apache-2.0
+authors:
+  - family-names: Diao
+    given-names: Chenxin
+  - family-names: Stepanova
+    given-names: Nataliya
+  - family-names: Allaway
+    given-names: Emily
+preferred-citation:
+  type: conference-paper
+  title: "How broad is that claim? Mapping Generalisation in NLP Research"
+  authors:
+    - family-names: Diao
+      given-names: Chenxin
+    - family-names: Stepanova
+      given-names: Nataliya
+    - family-names: Allaway
+      given-names: Emily
+  collection-title: "Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing"
+  conference:
+    name: "EMNLP 2026"
+  year: 2026
+  identifiers:
+    - type: other
+      value: "arXiv:2609.14770"
+      description: arXiv preprint
+  url: "https://arxiv.org/abs/2609.14770"

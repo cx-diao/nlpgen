@@ -173,36 +173,12 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# My gitignore
+# Project
 .DS_Store
-playgrounds/
-.cursor/
 .vscode/
-temp/
-doc/
+.cursor/
 huggingface_api_key
-output/reviewer_demo/
-substantiator/pipeline/bidimentional_paper_demo/
-substantiator/pipeline/attention_paper_demo/
-substantiator/annotate/prompt_template/gen_v5_1_remove_hedging.yaml
-substantiator/annotate/prompt_template/gen_v5_2_causality.yaml
-substantiator/annotate/prompt_template/gen_v5_3_freq.yaml
-substantiator/annotate/prompt_template/gen_v5_4_modify.yaml
-substantiator/annotate/prompt_template/gen_v5_5_tell_diff.yaml
-substantiator/annotate/classifier/gen_sum.py
-substantiator/annotate/classifier/gen_v5_1_remove_hedging.py
-substantiator/annotate/classifier/gen_v5_2_causality.py
-substantiator/annotate/classifier/gen_v5_3_freq.py
-substantiator/annotate/classifier/gen_v5_4_modify.py
-substantiator/annotate/classifier/gen_v5_5_tell_diff.py
-substantiator/annotate/classifier/gen_v5_6_gen_sum.py
-substantiator/annotate/classifier/gen_essential_test.py
-substantiator/annotate/classifier/gen_habitual_test.py
-substantiator/annotate/classifier/gen_subject_test.py
-substantiator/annotate/prompt_template/gen_essential_test.yaml
-substantiator/annotate/prompt_template/gen_exception_test.yaml
-substantiator/annotate/prompt_template/gen_habitual_test.yaml
-substantiator/annotate/prompt_template/gen_multiple_events_test.yaml
-substantiator/annotate/prompt_template/gen_subject_test.yaml
-# hunkwise
-.vscode/hunkwise/
+# Outputs of the example scripts
+output/example_*/
+# Local links to the full NLPGens runs, for testing the nlpgens tools
+/nlpgens_full/

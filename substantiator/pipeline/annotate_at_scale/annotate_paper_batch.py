@@ -8,6 +8,15 @@ CSV similarly to the one-paper demo script. Results are written next to the
 source CSV as ``<model>_<timestamp>_annotation.csv`` using a per-run
 timestamp, and a companion ``<model>_<timestamp>_annotation_log.csv`` tracks
 progress so interrupted runs can resume without repeating completed work.
+
+Two LLM backends are available:
+
+* ``--backend vllm`` (default): the configuration used for the paper. Runs
+  ``openai/gpt-oss-*`` in-process with vLLM on CUDA GPUs (see requirements-vllm.txt).
+* ``--backend openai``: any OpenAI-compatible Chat Completions endpoint,
+  configured with ``--model`` and ``--base-url``. A proof of concept; it does
+  not reproduce the paper's annotations. It does not request logprobs, so the
+  ``*_logprobs`` columns of its output are empty.
 """
 import argparse
 import asyncio
@@ -22,12 +31,9 @@ import pandas as pd
 from tqdm.auto import tqdm
 from loguru import logger
 
-from rag.llm.ollama import OllamaModel
-from rag.llm.hf import HFModel
 from substantiator.annotate.orchestrator import GeneralisationAnnotator
 from substantiator.pipeline.one_paper_demo.annotate_one_paper import (
     NAME2CLASSIFIER_TEMPLATE_PATH_NAME,
-    get_sentence_info,
     initialise_annotation_columns,
     load_data,
     save_data,
@@ -35,10 +41,12 @@ from substantiator.pipeline.one_paper_demo.annotate_one_paper import (
 from substantiator.utils.general import get_timestamp
 
 try:
-    from rag.llm.vllm import VLLMModel  # NOTE: comment out if you don't use uv to manage vllm dependencies
-except ImportError:
+    from rag.llm.vllm import VLLMModel
+except ImportError as exc:  # vLLM is only needed for --backend vllm (requirements-vllm.txt)
     VLLMModel = None
-    logger.warning("switch your environment manager to uv to manage vllm dependencies")
+    VLLM_IMPORT_ERROR = exc
+
+DEFAULT_VLLM_MODEL = "openai/gpt-oss-120b"
 
 
 ANNOTATION_LOG_HEADERS = [
@@ -112,16 +120,52 @@ def parse_args() -> argparse.Namespace:
         help="Path to the preprocessing preproc_log.csv produced by preproc_paper_batch.py.",
     )
     parser.add_argument(
+        "--backend",
+        choices=["vllm", "openai"],
+        default="vllm",
+        help="LLM backend: in-process vLLM as in the paper, or an OpenAI-compatible endpoint (default: vllm).",
+    )
+    parser.add_argument(
         "--model",
         type=str,
-        default="deepseek-r1:32b",
-        help="Model name passed to the Ollama backend (default: deepseek-r1:32b).",
+        default=None,
+        help=(
+            f"Model name. Defaults to {DEFAULT_VLLM_MODEL} for --backend vllm; "
+            "required for --backend openai (the name the endpoint expects)."
+        ),
+    )
+    parser.add_argument(
+        "--base-url",
+        type=str,
+        default=None,
+        help=(
+            "--backend openai only: endpoint URL, e.g. http://localhost:11434/v1 for Ollama. "
+            "Defaults to OPENAI_BASE_URL, or the OpenAI API. The API key is read from OPENAI_API_KEY."
+        ),
+    )
+    parser.add_argument(
+        "--temperature",
+        type=_optional_float,
+        default=0.0,
+        help="--backend openai only: sampling temperature, or 'none' to omit it (default: 0).",
+    )
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=["low", "medium", "high"],
+        default=None,
+        help="--backend openai only: reasoning effort for reasoning models (not sent by default).",
+    )
+    parser.add_argument(
+        "--max-concurrent-requests",
+        type=int,
+        default=8,
+        help="--backend openai only: maximum number of requests in flight (default: 8).",
     )
     parser.add_argument(
         "--num-passes",
         type=int,
-        default=5,
-        help="Number of repeated passes per sentence (default: 5).",
+        default=3,
+        help="Number of repeated passes per sentence (default: 3, as in the paper).",
     )
     parser.add_argument(
         "--debug",
@@ -140,13 +184,44 @@ def parse_args() -> argparse.Namespace:
         default=8,
         help="Maximum number of papers to annotate concurrently (default: 8).",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.model is None:
+        if args.backend == "openai":
+            parser.error("--model is required with --backend openai")
+        args.model = DEFAULT_VLLM_MODEL
+    return args
+
+
+def _optional_float(value: str) -> Optional[float]:
+    return None if value.lower() == "none" else float(value)
+
+
+def build_llm(args: argparse.Namespace):
+    """Instantiate the LLM backend selected on the command line."""
+    if args.backend == "vllm":
+        if VLLMModel is None:
+            raise ImportError(
+                "--backend vllm needs the packages in requirements-vllm.txt "
+                f"(importing rag.llm.vllm failed: {VLLM_IMPORT_ERROR})"
+            )
+        return VLLMModel(model_name=args.model)
+
+    from rag.llm.openai_compat import OpenAICompatModel
+
+    return OpenAICompatModel(
+        model_name=args.model,
+        base_url=args.base_url,
+        temperature=args.temperature,
+        reasoning_effort=args.reasoning_effort,
+        max_concurrency=args.max_concurrent_requests,
+    )
 
 
 def read_preproc_log(log_path: Path) -> List[PreprocRecord]:
     if not log_path.exists():
         raise FileNotFoundError(f"Preprocessing log not found: {log_path}")
     records: List[PreprocRecord] = []
+    preproc_errors: List[str] = []
     with log_path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         if "output_selected_csv" not in reader.fieldnames or "self_check_status" not in reader.fieldnames:
@@ -154,6 +229,8 @@ def read_preproc_log(log_path: Path) -> List[PreprocRecord]:
         for row in reader:
             selected = row.get("output_selected_csv", "").strip()
             if not selected:
+                if (row.get("error") or "").strip():
+                    preproc_errors.append(f"{row.get('input_path', '')}: {row['error'].strip()}")
                 continue
             input_path = row.get("input_path", "").strip()
             records.append(
@@ -164,7 +241,8 @@ def read_preproc_log(log_path: Path) -> List[PreprocRecord]:
                 )
             )
     if not records:
-        raise ValueError(f"No rows with output_selected_csv found in {log_path}")
+        details = "; preprocessing errors: " + " | ".join(preproc_errors[:3]) if preproc_errors else ""
+        raise ValueError(f"No rows with output_selected_csv found in {log_path}{details}")
     return records
 
 
@@ -434,6 +512,24 @@ async def annotate_csv(
         all_errors.extend(sent_errors)
     # all_results[sentence_idx][pass_idx] -> annotation dict  (or None for failures)
 
+    # If about_outcome ran but no sentence got a label in any pass, the run is broken (e.g. a
+    # wrong API key or a setting the model rejects). Fail the paper instead of writing empty
+    # outputs, so that it is logged as an error and a rerun annotates it again.
+    if "about_outcome" in active_config and total_sentences > 0:
+        any_labelled = any(
+            annotation is not None and (annotation.get("about_outcome") or {}).get("label") is not None
+            for sent_passes in all_results
+            if sent_passes is not None
+            for annotation in sent_passes
+        )
+        if not any_labelled:
+            progress.close()
+            first_error = all_errors[0][1] if all_errors else "none recorded"
+            raise RuntimeError(
+                "No sentence received an about_outcome label: every LLM call failed or gave no Yes/No answer. "
+                f"First error: {first_error}"
+            )
+
     # Transpose from sentence-major to pass-major for DataFrame output
     annotations_by_pass: List[List[Optional[Dict[str, Any]]]] = []
     for pass_idx in range(num_passes):
@@ -657,7 +753,7 @@ async def main() -> int:
             annotation_log_path,
         )
 
-    llm = VLLMModel(model_name=args.model)
+    llm = build_llm(args)
     log_lock = asyncio.Lock()
     paper_progress = tqdm(total=len(records), desc="Annotating CSVs", unit="file")
 

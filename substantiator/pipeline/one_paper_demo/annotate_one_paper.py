@@ -1,13 +1,9 @@
-import argparse
-import asyncio
+"""Classifier configuration and CSV helpers used by annotate_at_scale/annotate_paper_batch.py."""
+
 from pathlib import Path
 
 import pandas as pd
-from tqdm import tqdm
 
-from rag.llm.ollama import OllamaModel
-
-from substantiator.annotate.orchestrator import GeneralisationAnnotator
 from substantiator.annotate.classifier import *
 from substantiator.annotate.paper_level_annotate import *
 from substantiator.annotate.sent_level_annotate import *
@@ -17,7 +13,6 @@ from substantiator.annotate.utils import (
     PROMPT_TEMPLATE_PATH,
     RAW_RESPONSE_COLUMNS,
 )
-from substantiator.utils.general import get_timestamp
 
 
 # NOTE: annotators are executed in the order they appear in the config dict.
@@ -167,98 +162,3 @@ def save_data(df, output_path):
     except Exception as e:
         print(f"Error saving data: {e}")
 
-
-def get_sentence_info(row):
-    """
-    Warning: deprecated function, use annotate_paper_batch.py instead.
-    Extract sentence information including role and section content.
-
-    Args:
-        row: A pandas Series representing a row from the dataset
-
-    Returns:
-        dict: Dictionary containing sentence role and section content information
-    """
-    return {
-        "section": row["section"],
-        "section_content": row["section_content"],
-        "two_sent_context": row["two_sent_context"],
-        "sentence": row["sentence"],
-        "sentence_role": {
-            "about_outcome": row["about_outcome"],
-            "contains_embedded_sentence": row["contains_embedded_sentence"],
-            "is_reporting_clause": row["is_reporting_clause"],
-            "get_target_sent": row["get_target_sent"],
-            "is_generalised": row["is_generalised"],
-            "contains_quantification_in_main_clause": row["contains_quantification_in_main_clause"],
-            "ref_study_population": row["ref_study_population"],
-            "ref_study": row["ref_study"],
-            "is_present_tense_main_verb": row["is_present_tense_main_verb"],
-        },
-        "final_label": row["final_label"],
-        "notes": row["notes"] if pd.notna(row["notes"]) else "",
-    }
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Auto-annotate paper sentences with generalisation classifiers")
-    parser.add_argument(
-        "--input",
-        type=Path,
-        required=True,
-        help="Path to input CSV file (from produce_annotation_form.py)",
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        required=True,
-        help="Path to output directory for annotated CSV file",
-    )
-    parser.add_argument(
-        "--model",
-        type=str,
-        default="deepseek-r1:32b",
-        help="Model name to use for annotation (default: deepseek-r1:32b)",
-    )
-    args = parser.parse_args()
-
-    # Load the original data
-    data = load_data(args.input)
-    assert data is not None, "Failed to load data"
-
-    print(f"\nProcessing {len(data)} sentences...")
-    modified_data = initialise_annotation_columns(data)
-
-    llm = OllamaModel(model_name=args.model)
-    annotator = GeneralisationAnnotator(llm, NAME2CLASSIFIER_TEMPLATE_PATH_NAME, debug=False)
-
-    for idx, (_, row) in tqdm(enumerate(modified_data.iterrows()), total=len(modified_data)):
-        sentence_info = get_sentence_info(row)
-
-        # Build sentence placeholder
-        sentence_placeholder = {
-            "claim": sentence_info["sentence"],
-            "section": sentence_info["section"],
-            "section_content": sentence_info["section_content"],
-            "two_sent_context": sentence_info["two_sent_context"],
-        }
-
-        # Build paper context (empty for now, can be extended with abstract, etc.)
-        paper_context = {}
-
-        annotation_result = asyncio.run(annotator.annotate_one(sentence_placeholder, paper_context=paper_context))
-        for role, value in annotation_result.items():
-            modified_data.loc[idx, role] = value["label"]
-            modified_data.loc[idx, f"{role}_raw_response"] = value["raw_response"]
-
-    # Create output filename
-    model_name_safe = llm.model_name.replace(":", "_")
-    output_filename = f"annotated_{get_timestamp()}_{model_name_safe}.csv"
-    output_path = args.output / output_filename
-
-    # Save the modified data
-    save_data(modified_data, output_path)
-
-
-if __name__ == "__main__":
-    main()
